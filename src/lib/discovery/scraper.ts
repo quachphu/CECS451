@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { renderPage } from "@/lib/discovery/render";
+import type { RenderedPage } from "@/lib/discovery/render";
 
 export type ScrapedSignals = {
   privateDiningPageFound: boolean;
@@ -17,7 +17,47 @@ export type ScrapedSignals = {
   /** Combined page text, retained so a later LLM pass can re-read the same
    *  source without re-fetching it. Not persisted. */
   combinedText: string;
+  /**
+   * Text of the matched private-dining page(s) only — plus the rendered text
+   * when the rendered page is itself a private-dining page. Not persisted.
+   *
+   * combinedText leads with the homepage, so on a long homepage the page that
+   * actually describes the private rooms can start past the LLM tier's input
+   * cut-off; this lets that tier read it first (see buildLlmInput in
+   * llm-extract.ts).
+   *
+   * The fields below are always set by scrapeVenueForPrivateDining; they're
+   * optional only so hand-built signals (unit tests, eval baselines) stay valid.
+   */
+  privateDiningText?: string;
+  /**
+   * The URL the JS-rendering tier should try when the static pass found no
+   * capacity figure (the private-dining link if one was seen, else the
+   * homepage), or null when no render is needed. Rendering itself is the
+   * pipeline's decision so it can be budgeted per run.
+   */
+  renderTarget?: string | null;
+  /** Every page read, in order — kept so applyRenderedPage can recompute. Not persisted. */
+  pages?: ScrapedPage[];
+  /** Every link seen across those pages. Not persisted. */
+  links?: ScrapedLink[];
 };
+
+export type ScrapedLink = { href: string; text: string };
+
+export type ScrapedPage = {
+  url: string;
+  text: string;
+  /** True when this page is itself a private-dining/events page. */
+  privateDining: boolean;
+};
+
+/**
+ * Joins page texts in combinedText/privateDiningText. Page text has all
+ * whitespace collapsed to single spaces, so this sequence never occurs inside
+ * a page and splitting on it recovers the pages exactly.
+ */
+export const CHUNK_SEPARATOR = " \n ";
 
 const PRIVATE_DINING_KEYWORDS =
   /private\s*(dining|event)s?|group\s*(dining|event|booking)s?|banquet|meetings?\s*(&|and)?\s*events|weddings?|celebrations|book\s*(an\s*)?event|buyouts?/i;
@@ -126,22 +166,8 @@ function textFromHtml(html: string): { text: string; links: Array<{ href: string
   return { text, links };
 }
 
-/**
- * Fetches a venue's homepage, follows links that look like a private
- * dining / events / banquet page (up to MAX_SUBPAGES of them), and
- * extracts capacity numbers, minimum-spend figures, menu links, dietary
- * accommodations, and contact details via pattern matching over the visible
- * text. This is the automated replacement for manually reading a venue's
- * website.
- *
- * When the static pass finds no capacity figure — either because the site
- * renders that content client-side, or because it blocked a plain fetch
- * outright — a JS-rendering pass retries the most relevant URL (see
- * src/lib/discovery/render.ts). If that also finds nothing, the venue still
- * degrades honestly to "unverified — needs a call" rather than guessing.
- */
-export async function scrapeVenueForPrivateDining(website: string): Promise<ScrapedSignals> {
-  const empty: ScrapedSignals = {
+function emptySignals(renderTarget: string | null): ScrapedSignals {
+  return {
     privateDiningPageFound: false,
     scrapedUrls: [],
     capacityNumbers: [],
@@ -153,13 +179,81 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
     dietaryNotes: null,
     renderedWithJs: false,
     combinedText: "",
+    privateDiningText: "",
+    renderTarget,
+    pages: [],
+    links: [],
   };
+}
 
+/**
+ * Derives every signal from the pages read so far. The static pass and the
+ * post-render pass both go through here, so a rendered page is read with
+ * exactly the same rules as a fetched one.
+ */
+function finalizeSignals(
+  pages: ScrapedPage[],
+  links: ScrapedLink[],
+  website: string,
+  extra: { renderedWithJs: boolean; renderTarget: string | null }
+): ScrapedSignals {
+  if (pages.length === 0) return emptySignals(extra.renderTarget);
+
+  const textChunks = pages.map((p) => p.text);
+  const combinedText = textChunks.join(CHUNK_SEPARATOR);
+  const capacityNumbers = extractNumbers(combinedText, CAPACITY_PATTERN).sort((a, b) => a - b);
+  const minSpendUsd = extractNumbers(combinedText, MIN_SPEND_PATTERN);
+  const email = combinedText.match(EMAIL_PATTERN)?.[0] ?? null;
+  const phone = combinedText.match(PHONE_PATTERN)?.[0] ?? null;
+
+  // Prefer an excerpt from the private-dining page itself (chunk index 1+)
+  // over the homepage for the venue description.
+  const descriptionSource = textChunks[1] ?? textChunks[0] ?? "";
+  const descriptionExcerpt = descriptionSource ? descriptionSource.slice(0, 320).trim() : null;
+
+  return {
+    privateDiningPageFound: pages.some((p) => p.privateDining),
+    scrapedUrls: Array.from(new Set(pages.map((p) => p.url))),
+    capacityNumbers,
+    minSpendUsd,
+    email,
+    phone,
+    descriptionExcerpt,
+    menuUrl: pickMenuUrl(links, website),
+    dietaryNotes: extractDietaryNotes(combinedText),
+    renderedWithJs: extra.renderedWithJs,
+    combinedText,
+    privateDiningText: pages
+      .filter((p) => p.privateDining)
+      .map((p) => p.text)
+      .join(CHUNK_SEPARATOR),
+    renderTarget: extra.renderTarget,
+    pages,
+    links,
+  };
+}
+
+/**
+ * Fetches a venue's homepage, follows links that look like a private
+ * dining / events / banquet page (up to MAX_SUBPAGES of them), and
+ * extracts capacity numbers, minimum-spend figures, menu links, dietary
+ * accommodations, and contact details via pattern matching over the visible
+ * text. This is the automated replacement for manually reading a venue's
+ * website.
+ *
+ * This is the static pass only. When it finds no capacity figure — because
+ * the site renders that content client-side, or blocked a plain fetch
+ * outright — it reports a `renderTarget`, and the pipeline decides whether the
+ * run's render budget allows a JS-rendering pass (see applyRenderedPage and
+ * src/lib/discovery/pipeline.ts). If nothing finds a figure, the venue still
+ * degrades honestly to "unverified — needs a call" rather than guessing.
+ */
+export async function scrapeVenueForPrivateDining(website: string): Promise<ScrapedSignals> {
   let base: URL;
   try {
     base = new URL(website);
   } catch {
-    return empty;
+    return emptySignals(null);
   }
 
   // Deliberately not scraping og:image / twitter:image as a photo source:
@@ -172,15 +266,13 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
 
   const homepageHtml = await fetchText(website);
 
-  const scrapedUrls: string[] = [];
-  const textChunks: string[] = [];
-  const allLinks: Array<{ href: string; text: string }> = [];
-  let privateDiningPageFound = false;
+  const pages: ScrapedPage[] = [];
+  const links: ScrapedLink[] = [];
   let privateDiningUrl: string | null = null;
 
   if (homepageHtml) {
     const homepage = textFromHtml(homepageHtml);
-    allLinks.push(...homepage.links);
+    links.push(...homepage.links);
 
     const candidateLinks = new Set<string>();
     for (const { href, text } of homepage.links) {
@@ -193,20 +285,18 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
       }
     }
 
-    scrapedUrls.push(website);
-    textChunks.push(homepage.text);
+    // The homepage never counts as the private-dining page itself, even if it
+    // mentions the phrase — same rule as before.
+    pages.push({ url: website, text: homepage.text, privateDining: false });
 
     for (const url of Array.from(candidateLinks).slice(0, MAX_SUBPAGES)) {
       const html = await fetchText(url);
       if (!html) continue;
       const page = textFromHtml(html);
-      scrapedUrls.push(url);
-      textChunks.push(page.text);
-      allLinks.push(...page.links);
-      if (PRIVATE_DINING_KEYWORDS.test(page.text)) {
-        privateDiningPageFound = true;
-        privateDiningUrl ??= url;
-      }
+      const isPrivateDining = PRIVATE_DINING_KEYWORDS.test(page.text);
+      pages.push({ url, text: page.text, privateDining: isPrivateDining });
+      links.push(...page.links);
+      if (isPrivateDining) privateDiningUrl ??= url;
     }
 
     // Recorded even when the static pass can't reach the page itself: a
@@ -214,54 +304,35 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
     if (!privateDiningUrl) privateDiningUrl = Array.from(candidateLinks)[0] ?? null;
   }
 
-  let renderedWithJs = false;
-  let capacityNumbers = extractNumbers(textChunks.join(" \n "), CAPACITY_PATTERN).sort((a, b) => a - b);
+  const staticCapacityFound = extractNumbers(pages.map((p) => p.text).join(CHUNK_SEPARATOR), CAPACITY_PATTERN).length > 0;
+  const renderTarget = staticCapacityFound ? null : (privateDiningUrl ?? website);
 
-  // Gated on the static pass having produced no capacity figure, so rendering
-  // spend goes only to pages the cheap path genuinely couldn't read.
-  if (capacityNumbers.length === 0) {
-    const rendered = await renderPage(privateDiningUrl ?? website);
-    if (rendered?.text) {
-      // Kept whatever it contains, not only when it mentions private dining:
-      // sites that block a plain fetch outright leave rendering as the only
-      // read available, and discarding it would also discard the contact
-      // details, menu link, and the page text the LLM tier needs.
-      renderedWithJs = true;
-      capacityNumbers = extractNumbers(rendered.text, CAPACITY_PATTERN).sort((a, b) => a - b);
-      textChunks.push(rendered.text);
-      if (!scrapedUrls.includes(rendered.url)) scrapedUrls.push(rendered.url);
-      allLinks.push(...rendered.links.map((href) => ({ href, text: href })));
+  return finalizeSignals(pages, links, website, { renderedWithJs: false, renderTarget });
+}
 
-      // The trust-relevant claim stays gated on evidence: only a rendered page
-      // that is itself a private-dining page counts, not a homepage that
-      // merely mentions the phrase.
-      if (PRIVATE_DINING_KEYWORDS.test(rendered.text) && rendered.url !== website) privateDiningPageFound = true;
-    }
-  }
+/**
+ * Folds a JS-rendered read of `signals.renderTarget` into the static signals,
+ * re-running the same extraction over the combined text.
+ *
+ * The rendered text is kept whatever it contains, not only when it mentions
+ * private dining: sites that block a plain fetch outright leave rendering as
+ * the only read available, and discarding it would also discard the contact
+ * details, menu link, and the page text the LLM tier needs. The trust-relevant
+ * claim stays gated on evidence: only a rendered page that is itself a
+ * private-dining page counts, not a homepage that merely mentions the phrase.
+ */
+export function applyRenderedPage(signals: ScrapedSignals, rendered: RenderedPage, website: string): ScrapedSignals {
+  if (!rendered.text) return signals;
 
-  if (scrapedUrls.length === 0) return empty;
+  const pages: ScrapedPage[] = [
+    ...(signals.pages ?? []),
+    {
+      url: rendered.url,
+      text: rendered.text,
+      privateDining: PRIVATE_DINING_KEYWORDS.test(rendered.text) && rendered.url !== website,
+    },
+  ];
+  const links: ScrapedLink[] = [...(signals.links ?? []), ...rendered.links.map((href) => ({ href, text: href }))];
 
-  const combinedText = textChunks.join(" \n ");
-  const minSpendUsd = extractNumbers(combinedText, MIN_SPEND_PATTERN);
-  const email = combinedText.match(EMAIL_PATTERN)?.[0] ?? null;
-  const phone = combinedText.match(PHONE_PATTERN)?.[0] ?? null;
-
-  // Prefer an excerpt from the private-dining page itself (chunk index 1+)
-  // over the homepage for the venue description.
-  const descriptionSource = textChunks[1] ?? textChunks[0] ?? "";
-  const descriptionExcerpt = descriptionSource ? descriptionSource.slice(0, 320).trim() : null;
-
-  return {
-    privateDiningPageFound,
-    scrapedUrls,
-    capacityNumbers,
-    minSpendUsd,
-    email,
-    phone,
-    descriptionExcerpt,
-    menuUrl: pickMenuUrl(allLinks, website),
-    dietaryNotes: extractDietaryNotes(combinedText),
-    renderedWithJs,
-    combinedText,
-  };
+  return finalizeSignals(pages, links, website, { renderedWithJs: true, renderTarget: null });
 }

@@ -204,7 +204,18 @@ export function buildVenueDraft(
 
   const regexMinSpend = signals.minSpendUsd.length > 0 ? Math.min(...signals.minSpendUsd) : null;
   const minSpendUsd = regexMinSpend ?? llm?.minSpendUsd ?? null;
-  const minSpendTrust: TrustLevel = regexMinSpend != null ? "verified" : llm?.minSpendUsd != null ? "ai_extracted" : "unverified";
+  // A "minimum spend" phrase only counts as the venue's published private-event
+  // terms when it was read on a private-dining page; the same phrase elsewhere
+  // on a site (a bar's happy-hour promo, a gift-card page) is a real phrase
+  // but not evidence about private events.
+  const minSpendTrust: TrustLevel =
+    regexMinSpend != null
+      ? signals.privateDiningPageFound
+        ? "verified"
+        : "likely"
+      : llm?.minSpendUsd != null
+        ? "ai_extracted"
+        : "unverified";
 
   // Regex-matched phrases come straight off the venue's page, so they're
   // `likely` — the phrase is real, but "vegan" appearing near private-dining

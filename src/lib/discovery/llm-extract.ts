@@ -14,13 +14,15 @@
  * request shape.
  */
 
+import { CHUNK_SEPARATOR } from "@/lib/discovery/scraper";
+
 const XAI_ENDPOINT = "https://api.x.ai/v1/chat/completions";
 const XAI_MODEL = "grok-4.5";
 const XAI_TIMEOUT_MS = 45_000;
 
-// Only the leading slice of page text is sent: the private-dining details
-// live near the top of a private-events page, and this bounds token spend.
-const MAX_TEXT_CHARS = 12_000;
+// Only the leading slice of page text is sent, to bound token spend. Because
+// it is a leading slice, what comes first matters: see buildLlmInput.
+export const MAX_TEXT_CHARS = 12_000;
 
 export type LlmExtractedRoom = {
   roomName: string;
@@ -77,13 +79,43 @@ const SYSTEM_PROMPT = [
   "A number written for a different purpose (street address, price, year, seat count of the whole restaurant) is not a private room capacity.",
 ].join(" ");
 
+/**
+ * Orders the model's input so the private-dining page is read first, then the
+ * rest of the site (homepage etc.), and truncates the result.
+ *
+ * combinedText leads with the homepage. On a long homepage the slice used to
+ * end before the private-events page even started, so the one page that
+ * states room capacities was never sent — the model then either found nothing
+ * or read the main dining room's seat count instead.
+ */
+export function buildLlmInput(privateDiningText: string, combinedText: string, maxChars = MAX_TEXT_CHARS): string {
+  const lead = privateDiningText.trim();
+  if (!lead) return combinedText.slice(0, maxChars);
+
+  // Page texts never contain the separator (whitespace is collapsed), so this
+  // removes exactly the private-dining pages rather than fuzzy-matching text.
+  const leadPages = new Set(lead.split(CHUNK_SEPARATOR));
+  const rest = combinedText
+    .split(CHUNK_SEPARATOR)
+    .filter((page) => page && !leadPages.has(page))
+    .join(CHUNK_SEPARATOR);
+
+  return (rest ? `${lead}${CHUNK_SEPARATOR}${rest}` : lead).slice(0, maxChars);
+}
+
 export function isLlmExtractionConfigured(): boolean {
   return Boolean(process.env.XAI_API_KEY);
 }
 
-export async function extractPrivateDiningWithLlm(venueName: string, pageText: string): Promise<LlmExtraction | null> {
+export async function extractPrivateDiningWithLlm(
+  venueName: string,
+  pageText: string,
+  privateDiningText = ""
+): Promise<LlmExtraction | null> {
   const apiKey = process.env.XAI_API_KEY;
   if (!apiKey || !pageText.trim()) return null;
+
+  const input = buildLlmInput(privateDiningText, pageText);
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), XAI_TIMEOUT_MS);
@@ -99,7 +131,7 @@ export async function extractPrivateDiningWithLlm(venueName: string, pageText: s
           { role: "system", content: SYSTEM_PROMPT },
           {
             role: "user",
-            content: `Venue: ${venueName}\n\nPage text:\n${pageText.slice(0, MAX_TEXT_CHARS)}`,
+            content: `Venue: ${venueName}\n\nPage text:\n${input}`,
           },
         ],
         response_format: {

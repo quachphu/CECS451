@@ -10,7 +10,7 @@ config({ path: [".env.local", ".env"] });
 
 import { extractPrivateDiningWithLlm, isLlmExtractionConfigured } from "../src/lib/discovery/llm-extract";
 import { isRenderFallbackConfigured, renderPage } from "../src/lib/discovery/render";
-import { scrapeVenueForPrivateDining } from "../src/lib/discovery/scraper";
+import { applyRenderedPage, scrapeVenueForPrivateDining } from "../src/lib/discovery/scraper";
 
 const SITES = process.argv.slice(2).length
   ? process.argv.slice(2)
@@ -30,7 +30,13 @@ async function main() {
 
   for (const site of SITES) {
     console.log(`\n=== ${site} ===`);
-    const signals = await scrapeVenueForPrivateDining(site);
+    let signals = await scrapeVenueForPrivateDining(site);
+    // Rendering is the pipeline's (budgeted) decision now, not the scraper's;
+    // mirror it here so this script still exercises the render tier.
+    if (signals.renderTarget) {
+      const renderedPage = await renderPage(signals.renderTarget);
+      if (renderedPage) signals = applyRenderedPage(signals, renderedPage, site);
+    }
     console.log(`  pages scraped:        ${signals.scrapedUrls.length}`);
     console.log(`  private dining page:  ${signals.privateDiningPageFound}`);
     console.log(`  rendered with JS:     ${signals.renderedWithJs}`);
@@ -42,7 +48,7 @@ async function main() {
 
     if (!signals.combinedText) continue;
 
-    const llm = await extractPrivateDiningWithLlm("Test Venue", signals.combinedText);
+    const llm = await extractPrivateDiningWithLlm("Test Venue", signals.combinedText, signals.privateDiningText);
     if (!llm) {
       console.log("  LLM extraction:       FAILED / returned nothing");
       continue;
