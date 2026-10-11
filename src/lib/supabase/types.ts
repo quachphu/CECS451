@@ -4,6 +4,12 @@
 
 export type TrustLevel = "confirmed_by_planner" | "verified" | "likely" | "ai_extracted" | "unverified";
 
+/** Migration 0011: a confirmation that contradicts strong evidence waits for review. */
+export type ConfirmationStatus = "accepted" | "pending";
+
+/** The feature vector capacity_confidence was computed from (src/lib/discovery/confidence.ts). */
+export type ConfidenceFeaturesJson = Record<string, string | number | boolean | null>;
+
 export type VenueConfirmationRow = {
   id: string;
   venue_id: string;
@@ -13,6 +19,7 @@ export type VenueConfirmationRow = {
   confirmed_max_capacity: number | null;
   confirmed_min_spend_usd: number | null;
   note: string | null;
+  status: ConfirmationStatus;
   created_at: string;
 };
 export type CommuteMode = "walk" | "drive";
@@ -90,6 +97,14 @@ export type VenueRoomRow = {
   style: RoomStyle;
   capacity_trust: TrustLevel;
   notes: string | null;
+  // Migration 0011. Optional rather than required so rows that predate the
+  // migration — and hand-built fixtures — still type-check; every read path
+  // falls back when they're absent (see rankVenues).
+  capacity_confidence?: number | null;
+  is_estimate?: boolean;
+  evidence_quote?: string | null;
+  evidence_url?: string | null;
+  confidence_features?: ConfidenceFeaturesJson | null;
 }
 
 export type VenuePhotoRow = {
@@ -304,7 +319,10 @@ export type Database = {
       >;
       venue_confirmations: TableDef<
         VenueConfirmationRow,
-        OptionalNullable<Omit<VenueConfirmationRow, "id" | "created_at">> & { id?: string },
+        OptionalNullable<Omit<VenueConfirmationRow, "id" | "created_at" | "status">> & {
+          id?: string;
+          status?: ConfirmationStatus;
+        },
         [
           {
             foreignKeyName: "venue_confirmations_venue_id_fkey";

@@ -183,6 +183,9 @@ async function upsertVenueDraft(draft: VenueDraft) {
         style: room.style,
         capacity_trust: room.capacityTrust,
         notes: room.notes ?? null,
+        is_estimate: room.isEstimate,
+        evidence_quote: room.evidenceQuote,
+        evidence_url: room.evidenceUrl,
       }))
     );
   }
