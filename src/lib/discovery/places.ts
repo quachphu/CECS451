@@ -25,6 +25,10 @@ export type CandidateVenue = {
    * low-quality — better to show no photo than a wrong one.
    */
   photoUrl?: string;
+  /** Google Places `types` (e.g. "steak_house", "banquet_hall"); runtime only, for the discovery prior. */
+  types?: string[];
+  /** OSM `cuisine` tag (e.g. "pizza", "steak_house"); runtime only, for the discovery prior. */
+  cuisine?: string;
 };
 
 const GOOGLE_TYPES = ["restaurant", "bar", "banquet_hall", "night_club"] as const;
@@ -42,6 +46,8 @@ const GOOGLE_FIELD_MASK = [
   "places.nationalPhoneNumber",
   "places.priceLevel",
   "places.photos",
+  // For the discovery prior only (src/lib/discovery/discovery-prior.ts).
+  "places.types",
 ].join(",");
 
 // searchNearby caps a single response at 20 places, so each venue type is
@@ -66,6 +72,7 @@ type GooglePlace = {
   nationalPhoneNumber?: string;
   priceLevel?: string;
   photos?: Array<{ name?: string }>;
+  types?: string[];
 };
 
 /**
@@ -127,6 +134,7 @@ async function discoverViaGooglePlaces(origin: LatLng, radiusMeters: number, api
             phone: place.nationalPhoneNumber,
             priceLevelGoogle: place.priceLevel ? PRICE_LEVEL_TO_NUMBER[place.priceLevel] : undefined,
             photoUrl: photoName ? `/api/place-photo?name=${encodeURIComponent(photoName)}` : undefined,
+            types: place.types,
           });
         }
       } catch (err) {
@@ -220,6 +228,7 @@ async function discoverViaOverpass(origin: LatLng, radiusMeters: number): Promis
       category: tags.amenity ?? "venue",
       website: tags.website ?? tags["contact:website"],
       phone: tags.phone ?? tags["contact:phone"],
+      cuisine: tags.cuisine,
     });
   }
 

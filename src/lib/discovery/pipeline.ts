@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase/server";
+import { orderByPrior } from "@/lib/discovery/discovery-prior";
 import { discoverNearbyVenues, type CandidateVenue } from "@/lib/discovery/places";
 import { extractPrivateDiningWithLlm, isLlmExtractionConfigured, type LlmExtraction } from "@/lib/discovery/llm-extract";
 import { renderPage, type RenderedPage } from "@/lib/discovery/render";
@@ -44,8 +45,9 @@ const SCRAPE_CONCURRENCY = 8;
  * Caps LLM extraction calls per run. The LLM now reads every candidate with a
  * private-dining page — not only those where the regex found nothing — because
  * a second, independent read is what can upgrade a regex figure to `verified`
- * (or expose a disagreement). Budget is claimed in candidate order, so it goes
- * to the candidates ranked first.
+ * (or expose a disagreement). Budget is claimed in candidate order — highest
+ * discovery prior first (see discovery-prior.ts) — so it goes to the likeliest
+ * venues.
  */
 export const MAX_LLM_BUDGET = 12;
 
@@ -297,7 +299,10 @@ export async function enrichCandidates(
  */
 export async function runDiscoveryPipeline(origin: LatLng, radiusMeters: number): Promise<{ discovered: number }> {
   const candidates = await discoverNearbyVenues(origin, radiusMeters);
-  const toScrape = candidates.slice(0, candidateCap(candidates.length));
+  // Likeliest private-event hosts first, so the cap and the render/LLM
+  // budgets (claimed in this order) go to them rather than to whatever is
+  // nearest.
+  const toScrape = orderByPrior(candidates).slice(0, candidateCap(candidates.length));
 
   const { drafts } = await enrichCandidates(toScrape);
 

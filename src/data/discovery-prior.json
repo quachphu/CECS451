@@ -1,0 +1,27 @@
+{
+  "version": "placeholder-0",
+  "description": "Hand-set logistic weights for P(candidate hosts private events), used only to order candidates before the per-run caps and budgets. Refit with: python3 scripts/train_confidence.py --target prior (labels: hosts_private_events).",
+  "intercept": -1.2,
+  "weights": {
+    "kind=banquet": 3.0,
+    "kind=hotel": 1.4,
+    "kind=steakhouse": 1.1,
+    "kind=restaurant": 0.5,
+    "kind=bar": 0.3,
+    "kind=night_club": 0.4,
+    "kind=cafe": -0.8,
+    "kind=fast_food": -2.0,
+    "priceLevel": 0.3,
+    "priceLevelMissing": -0.1,
+    "hasWebsite": 0.8,
+    "name=steakhouse": 0.4,
+    "name=grill": 0.2,
+    "name=tavern": 0.3,
+    "name=hall": 0.5,
+    "name=club": 0.2,
+    "name=hotel": 0.6,
+    "name=pizza": -0.6,
+    "name=express": -0.9,
+    "name=cafe": -0.5
+  }
+}

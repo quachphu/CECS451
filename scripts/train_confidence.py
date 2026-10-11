@@ -23,10 +23,16 @@ computed both in-sample and on 5-fold cross-validated predictions, plus a
 reliability table (sklearn calibration_curve [D8]). The current model's ECE on
 the same rows is printed for comparison.
 
+--target prior refits the discovery prior (src/data/discovery-prior.json)
+instead: P(hosts_private_events) from candidate metadata in
+eval/candidates.jsonl (written by scripts/eval-snapshot.ts), joined to the
+labels' hosts_private_events column by venue_key.
+
 Usage:
   pip install -r requirements-dev.txt
   python3 scripts/train_confidence.py --labels eval/labels.csv --features eval/features.jsonl
   python3 scripts/train_confidence.py ... --dry-run      # report only, write nothing
+  python3 scripts/train_confidence.py --target prior --candidates eval/candidates.jsonl
 """
 from __future__ import annotations
 
@@ -79,6 +85,71 @@ def encode(features: dict) -> list[float]:
     x["competingCandidates"] = float(features.get("competingCandidates") or 0)
     x[f"category={category_bucket(features.get('category'))}"] = 1.0
     return [x[n] for n in FEATURE_NAMES]
+
+
+PRIOR_KINDS = ["banquet", "hotel", "steakhouse", "restaurant", "bar", "night_club", "cafe", "fast_food"]
+PRIOR_NAME_KEYWORDS = ["steakhouse", "grill", "tavern", "hall", "club", "hotel", "pizza", "express", "cafe"]
+PRIOR_FEATURES = ["priceLevel", "priceLevelMissing", "hasWebsite"] + [f"kind={k}" for k in PRIOR_KINDS] + [
+    f"name={w}" for w in PRIOR_NAME_KEYWORDS
+]
+PRIOR_KIND_PATTERNS = {
+    "banquet": r"banquet|event[_\s-]*(venue|hall|space)|events_venue|wedding_venue|convention|conference",
+    "hotel": r"hotel|resort|lodging|motel",
+    "steakhouse": r"steak",
+    "restaurant": r"restaurant|dining",
+    "bar": r"\bbar\b|(^|[_\s])bar([_\s]|$)|\bpub\b|wine_bar|cocktail|brewery",
+    "night_club": r"night[_\s-]*club|nightclub",
+    "cafe": r"cafe|coffee|bakery|tea_house",
+    "fast_food": r"fast[_\s-]*food|meal_takeaway|sandwich|hamburger|pizza_delivery|food_court",
+}
+DEFAULT_PRIOR = ROOT / "src" / "data" / "discovery-prior.json"
+
+
+def encode_prior(c: dict) -> list[float]:
+    """Port of encodePriorFeatures in src/lib/discovery/discovery-prior.ts."""
+    kind_text = " ".join(str(v) for v in [c.get("category"), c.get("cuisine"), *(c.get("types") or [])] if v).lower()
+    name = str(c.get("name") or "").lower()
+    price = c.get("priceLevelGoogle")
+    x = dict.fromkeys(PRIOR_FEATURES, 0.0)
+    x["priceLevel"] = float(price or 0)
+    x["priceLevelMissing"] = 1.0 if price is None else 0.0
+    x["hasWebsite"] = 1.0 if c.get("website") else 0.0
+    for kind, pattern in PRIOR_KIND_PATTERNS.items():
+        if re.search(pattern, kind_text):
+            x[f"kind={kind}"] = 1.0
+    for word in PRIOR_NAME_KEYWORDS:
+        if re.search(rf"\b{word}", name):
+            x[f"name={word}"] = 1.0
+    return [x[n] for n in PRIOR_FEATURES]
+
+
+def train_prior(args: argparse.Namespace) -> int:
+    labels = pd.read_csv(args.labels)
+    hosts = labels.groupby(labels["venue_key"].astype(str))["hosts_private_events"].max().astype(int).to_dict()
+    rows = [json.loads(l) for l in args.candidates.read_text().splitlines() if l.strip()]
+    rows = [r for r in rows if str(r.get("venue_key")) in hosts]
+    X = np.array([encode_prior(r) for r in rows], dtype=float)
+    y = np.array([hosts[str(r["venue_key"])] for r in rows], dtype=int)
+    print(f"candidates joined: {len(y)}  (hosts {int(y.sum())}, not {int(len(y) - y.sum())})")
+    if len(y) < args.min_rows or len(set(y.tolist())) < 2:
+        print(f"Need at least {args.min_rows} rows with both outcomes to fit; not writing a model.", file=sys.stderr)
+        return 1
+    clf = LogisticRegression(C=1.0, max_iter=2000).fit(X, y)
+    p = clf.predict_proba(X)[:, 1]
+    print(f"in-sample ECE = {expected_calibration_error(p, y):.4f}")
+    model = {
+        "version": f"lr-{dt.date.today().isoformat()}",
+        "description": f"LogisticRegression refit on {len(y)} labelled candidates (hosts_private_events).",
+        "intercept": round(float(clf.intercept_[0]), 4),
+        "weights": {n: round(float(w), 4) for n, w in zip(PRIOR_FEATURES, clf.coef_[0])},
+    }
+    if args.dry_run:
+        print(json.dumps(model, indent=2))
+        return 0
+    out = args.out if args.out != DEFAULT_MODEL else DEFAULT_PRIOR
+    out.write_text(json.dumps(model, indent=2) + "\n")
+    print(f"wrote {out}")
+    return 0
 
 
 def normalize_room(name: str) -> str:
@@ -159,7 +230,11 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=DEFAULT_MODEL)
     ap.add_argument("--min-rows", type=int, default=30)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--target", choices=["confidence", "prior"], default="confidence")
+    ap.add_argument("--candidates", type=Path, default=ROOT / "eval" / "candidates.jsonl")
     args = ap.parse_args()
+    if args.target == "prior":
+        return train_prior(args)
 
     labels = pd.read_csv(args.labels)
     features = [json.loads(line) for line in args.features.read_text().splitlines() if line.strip()]
