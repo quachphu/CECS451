@@ -80,6 +80,9 @@ export type VenueDraft = {
  */
 const AGREEMENT_TOLERANCE = 0.2;
 
+/** Source note for a venue whose robots.txt disallows its homepage (Step 7). */
+export const ROBOTS_BLOCKED_NOTE = "Site asks crawlers not to read it — call the venue.";
+
 function inferStyle(category: string): RoomStyle {
   const c = category.toLowerCase();
   if (c.includes("bar") || c.includes("night") || c.includes("club")) return "reception";
@@ -327,7 +330,8 @@ export function buildVenueDraft(
   const style = inferStyle(candidate.category);
   const priceTier = priceLevelToTier(candidate.priceLevelGoogle);
 
-  if (!signals) {
+  if (!signals || signals.robotsBlocked) {
+    const robotsBlocked = Boolean(signals?.robotsBlocked);
     return {
       placeSourceId: candidate.placeSourceId,
       name: candidate.name,
@@ -335,7 +339,8 @@ export function buildVenueDraft(
       lat: candidate.lat,
       lng: candidate.lng,
       category: candidate.category,
-      website: null,
+      // Kept when robots.txt is what stopped us — the planner can still visit it.
+      website: robotsBlocked ? (candidate.website ?? null) : null,
       phone: candidate.phone ?? null,
       email: null,
       priceTier,
@@ -343,8 +348,9 @@ export function buildVenueDraft(
       minSpendUsd: null,
       minSpendTrust: "unverified",
       description: `${candidate.name} — discovered near your search location.`,
-      sourceNote:
-        "No website found for this venue during discovery, so private-dining availability and capacity are unconfirmed. Call the venue directly.",
+      sourceNote: robotsBlocked
+        ? ROBOTS_BLOCKED_NOTE
+        : "No website found for this venue during discovery, so private-dining availability and capacity are unconfirmed. Call the venue directly.",
       rooms: [
         scored(
           {

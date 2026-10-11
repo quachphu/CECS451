@@ -3,6 +3,7 @@ import { orderByPrior } from "@/lib/discovery/discovery-prior";
 import { discoverNearbyVenues, type CandidateVenue } from "@/lib/discovery/places";
 import { extractPrivateDiningWithLlm, isLlmExtractionConfigured, type LlmExtraction } from "@/lib/discovery/llm-extract";
 import { renderPage, type RenderedPage } from "@/lib/discovery/render";
+import { createRobotsChecker, type RobotsChecker } from "@/lib/discovery/robots";
 import { featureLog } from "@/lib/discovery/confidence";
 import { applyRenderedPage, scrapeVenueForPrivateDining, type ScrapedSignals } from "@/lib/discovery/scraper";
 import { buildVenueDraft, type VenueDraft } from "@/lib/discovery/trust";
@@ -219,20 +220,27 @@ async function upsertVenueDraft(draft: VenueDraft) {
 
 /** The I/O the enrichment stage depends on, injectable so tests can stub it. */
 export type EnrichmentDeps = {
-  scrape: (website: string) => Promise<ScrapedSignals>;
+  scrape: (website: string, robots?: RobotsChecker) => Promise<ScrapedSignals>;
   render: (url: string) => Promise<RenderedPage | null>;
   extract: (venueName: string, pageText: string, privateDiningText: string) => Promise<LlmExtraction | null>;
   isLlmConfigured: () => boolean;
 };
 
 const defaultDeps: EnrichmentDeps = {
-  scrape: scrapeVenueForPrivateDining,
+  scrape: (website, robots) => scrapeVenueForPrivateDining(website, { robots }),
   render: renderPage,
   extract: extractPrivateDiningWithLlm,
   isLlmConfigured: isLlmExtractionConfigured,
 };
 
-export type EnrichmentStats = { renders: number; llmCalls: number };
+export type EnrichmentStats = {
+  renders: number;
+  llmCalls: number;
+  /** Hosts with at least one page skipped because robots.txt disallowed it. */
+  robotsSkippedHosts: number;
+  /** Venues drafted without reading their site because the homepage was disallowed. */
+  robotsBlockedVenues: number;
+};
 
 function needsLlmRead(signals: ScrapedSignals | null, deps: EnrichmentDeps): signals is ScrapedSignals {
   return signals != null && signals.privateDiningPageFound && signals.combinedText.length > 0 && deps.isLlmConfigured();
@@ -253,7 +261,9 @@ export async function enrichCandidates(
   candidates: CandidateVenue[],
   deps: EnrichmentDeps = defaultDeps
 ): Promise<{ drafts: VenueDraft[]; stats: EnrichmentStats }> {
-  const stats: EnrichmentStats = { renders: 0, llmCalls: 0 };
+  const stats: EnrichmentStats = { renders: 0, llmCalls: 0, robotsSkippedHosts: 0, robotsBlockedVenues: 0 };
+  // One robots.txt fetch per host per run.
+  const robots = createRobotsChecker();
   const scrapeLimit = createLimiter(SCRAPE_CONCURRENCY);
   const llmLimit = createLimiter(LLM_CONCURRENCY);
   const llmReads: Array<Promise<LlmExtraction | null>> = candidates.map(() => Promise.resolve(null));
@@ -261,7 +271,8 @@ export async function enrichCandidates(
   const signalsList = await Promise.all(
     candidates.map((candidate, index) =>
       scrapeLimit(async () => {
-        let signals = candidate.website ? await deps.scrape(candidate.website) : null;
+        let signals = candidate.website ? await deps.scrape(candidate.website, robots) : null;
+        if (signals?.robotsBlocked) stats.robotsBlockedVenues += 1;
 
         // Budgets are claimed synchronously, before any await, so concurrent
         // workers can never overshoot them.
@@ -286,6 +297,7 @@ export async function enrichCandidates(
   );
 
   const llmResults = await Promise.all(llmReads);
+  stats.robotsSkippedHosts = robots.skippedHosts.size;
   const drafts = candidates.map((candidate, index) => buildVenueDraft(candidate, signalsList[index], llmResults[index]));
 
   return { drafts, stats };
@@ -297,16 +309,23 @@ export async function enrichCandidates(
  * Supabase. Called by the search flow when there isn't fresh cached
  * coverage for the area already (see src/lib/discovery/ensure-coverage.ts).
  */
-export async function runDiscoveryPipeline(origin: LatLng, radiusMeters: number): Promise<{ discovered: number }> {
+export async function runDiscoveryPipeline(
+  origin: LatLng,
+  radiusMeters: number
+): Promise<{ discovered: number; robotsSkippedHosts: number; robotsBlockedVenues: number }> {
   const candidates = await discoverNearbyVenues(origin, radiusMeters);
   // Likeliest private-event hosts first, so the cap and the render/LLM
   // budgets (claimed in this order) go to them rather than to whatever is
   // nearest.
   const toScrape = orderByPrior(candidates).slice(0, candidateCap(candidates.length));
 
-  const { drafts } = await enrichCandidates(toScrape);
+  const { drafts, stats } = await enrichCandidates(toScrape);
 
   await Promise.all(drafts.map(upsertVenueDraft));
 
-  return { discovered: drafts.length };
+  return {
+    discovered: drafts.length,
+    robotsSkippedHosts: stats.robotsSkippedHosts,
+    robotsBlockedVenues: stats.robotsBlockedVenues,
+  };
 }

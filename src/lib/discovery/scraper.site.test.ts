@@ -40,14 +40,32 @@ describe("scraping the Garden Room site", () => {
     expect(signals.renderTarget).toBeNull();
   });
 
-  it("points the render tier at the homepage when the site can't be fetched at all", async () => {
+  it("points the render tier at the homepage when a plain fetch of the site is blocked", async () => {
+    // robots.txt answers 404 (everything allowed, RFC 9309 §2.3.1.3) but the
+    // homepage refuses a plain fetch — rendering is the only read left.
     vi.stubGlobal(
       "fetch",
-      vi.fn(() => Promise.reject(new Error("blocked")))
+      vi.fn((input: RequestInfo | URL) =>
+        String(input).endsWith("/robots.txt")
+          ? Promise.resolve(new Response("", { status: 404 }))
+          : Promise.reject(new Error("blocked"))
+      )
     );
     const signals = await scrapeVenueForPrivateDining(GARDEN_SITE);
 
     expect(signals.scrapedUrls).toEqual([]);
     expect(signals.renderTarget).toBe(GARDEN_SITE);
+  });
+
+  it("reads nothing, and renders nothing, when robots.txt is unreachable", async () => {
+    // RFC 9309 §2.3.1.4: unreachable robots.txt means complete disallow.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.reject(new Error("unreachable")))
+    );
+    const signals = await scrapeVenueForPrivateDining(GARDEN_SITE);
+
+    expect(signals.robotsBlocked).toBe(true);
+    expect(signals.renderTarget).toBeNull();
   });
 });

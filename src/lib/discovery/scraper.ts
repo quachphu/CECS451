@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import type { RenderedPage } from "@/lib/discovery/render";
+import { createRobotsChecker, CRAWLER_USER_AGENT, type RobotsChecker } from "@/lib/discovery/robots";
 
 export type ScrapedSignals = {
   privateDiningPageFound: boolean;
@@ -43,6 +44,8 @@ export type ScrapedSignals = {
   links?: ScrapedLink[];
   /** Filtered capacity candidates, per page. capacityNumbers is derived from these. */
   capacityCandidates?: CapacityCandidate[];
+  /** The site's robots.txt disallows its homepage for us, so nothing was read (Step 7). */
+  robotsBlocked?: boolean;
 };
 
 export type ScrapedLink = { href: string; text: string };
@@ -121,7 +124,7 @@ async function fetchText(url: string): Promise<string | null> {
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { "User-Agent": "private-dining-finder/0.1 (event-planning research tool)" },
+      headers: { "User-Agent": CRAWLER_USER_AGENT },
     });
     clearTimeout(timeout);
     if (!res.ok) return null;
@@ -344,13 +347,17 @@ function finalizeSignals(
  * src/lib/discovery/pipeline.ts). If nothing finds a figure, the venue still
  * degrades honestly to "unverified — needs a call" rather than guessing.
  */
-export async function scrapeVenueForPrivateDining(website: string): Promise<ScrapedSignals> {
+export async function scrapeVenueForPrivateDining(
+  website: string,
+  options: { robots?: RobotsChecker } = {}
+): Promise<ScrapedSignals> {
   let base: URL;
   try {
     base = new URL(website);
   } catch {
     return emptySignals(null);
   }
+  const robots = options.robots ?? createRobotsChecker();
 
   // Deliberately not scraping og:image / twitter:image as a photo source:
   // for chains and franchises (common among discovered venues) that meta
@@ -360,7 +367,11 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
   // Photos (a photo actually submitted for this exact location), wired in
   // at the discovery step (see src/lib/discovery/places.ts).
 
-  const homepageHtml = await fetchText(website);
+  // robots.txt is fetched in parallel with the homepage so honouring it costs
+  // no extra latency; a disallowed homepage's response is discarded unread.
+  const [homepageResponse, homepageAllowed] = await Promise.all([fetchText(website), robots.isAllowed(website)]);
+  if (!homepageAllowed) return { ...emptySignals(null), robotsBlocked: true };
+  const homepageHtml = homepageResponse;
 
   const pages: ScrapedPage[] = [];
   const links: ScrapedLink[] = [];
@@ -385,7 +396,10 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
     // mentions the phrase — same rule as before.
     pages.push({ url: website, text: homepage.text, privateDining: false });
 
-    for (const url of Array.from(candidateLinks).slice(0, MAX_SUBPAGES)) {
+    const allowedLinks: string[] = [];
+    for (const url of candidateLinks) if (await robots.isAllowed(url)) allowedLinks.push(url);
+
+    for (const url of allowedLinks.slice(0, MAX_SUBPAGES)) {
       const html = await fetchText(url);
       if (!html) continue;
       const page = textFromHtml(html);
@@ -397,11 +411,13 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
 
     // Recorded even when the static pass can't reach the page itself: a
     // homepage link labeled "Private Events" is the best URL to render.
-    if (!privateDiningUrl) privateDiningUrl = Array.from(candidateLinks)[0] ?? null;
+    if (!privateDiningUrl) privateDiningUrl = allowedLinks[0] ?? null;
   }
 
   const staticCapacityFound = pages.some((p) => extractCapacityCandidates(p.text).length > 0);
-  const renderTarget = staticCapacityFound ? null : (privateDiningUrl ?? website);
+  // Never ask the render tier for a page robots.txt disallows (Firecrawl would fetch it for us).
+  const target = privateDiningUrl ?? website;
+  const renderTarget = staticCapacityFound || !(await robots.isAllowed(target)) ? null : target;
 
   return finalizeSignals(pages, links, website, { renderedWithJs: false, renderTarget });
 }
