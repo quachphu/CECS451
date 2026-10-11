@@ -70,6 +70,13 @@ export function VenueConfirmationCard({
     ? `mailto:${venueEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(draft)}`
     : null;
 
+  async function saveConfirmation(formData: FormData) {
+    const { status } = await confirmVenueDetailAction(formData);
+    if (status === "pending") {
+      toast.info("Saved for review — that differs a lot from the figure on file, so it won't replace it until it's corroborated.");
+    }
+  }
+
   async function copyDraft() {
     try {
       await navigator.clipboard.writeText(draft);
@@ -149,7 +156,7 @@ export function VenueConfirmationCard({
 
         <Separator />
 
-        <form action={confirmVenueDetailAction} className="flex flex-col gap-3">
+        <form action={saveConfirmation} className="flex flex-col gap-3">
           <input type="hidden" name="venueId" value={venueId} />
           <input type="hidden" name="roomId" value={roomId} />
 
@@ -205,6 +212,7 @@ export function VenueConfirmationCard({
                       {c.confirmed_min_spend_usd != null && (
                         <Badge variant="secondary">${c.confirmed_min_spend_usd.toLocaleString()} min spend</Badge>
                       )}
+                      {c.status === "pending" && <Badge variant="outline">Saved for review</Badge>}
                     </div>
                     {c.note && <p className="mt-1 text-muted-foreground">{c.note}</p>}
                   </li>

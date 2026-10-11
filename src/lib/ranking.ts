@@ -82,7 +82,7 @@ export function priorFit(category: string, headcount: number): number {
 }
 
 /** How much a room's capacity figure is believed; old rows fall back to the tier weight. */
-function capacityBelief(room: VenueRoomRow): number {
+export function capacityBelief(room: Pick<VenueRoomRow, "capacity_confidence" | "capacity_trust">): number {
   return room.capacity_confidence ?? TRUST_WEIGHT[room.capacity_trust];
 }
 
