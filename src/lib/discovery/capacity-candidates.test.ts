@@ -3,9 +3,9 @@ import { extractCapacityCandidates } from "@/lib/discovery/scraper";
 
 describe("extractCapacityCandidates", () => {
   it("drops reservation phrasing like 'table for 2 people'", () => {
-    const values = extractCapacityCandidates("Book a table for 2 people tonight. Reservation for 8 guests available.").map(
-      (c) => c.value
-    );
+    const values = extractCapacityCandidates(
+      "Book a table for 2 people tonight. Reservation for 8 guests available."
+    ).map((c) => c.value);
     expect(values).toEqual([]);
   });
 

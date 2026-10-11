@@ -1,4 +1,5 @@
 import type { CandidateVenue } from "@/lib/discovery/places";
+import { scoreConfidence, type ConfidenceFeatures } from "@/lib/discovery/confidence";
 import { findEvidenceUrl } from "@/lib/discovery/grounding";
 import type { LlmExtractedRoom, LlmExtraction } from "@/lib/discovery/llm-extract";
 import { MIN_PLAUSIBLE_CAPACITY, type CapacityCandidate, type ScrapedSignals } from "@/lib/discovery/scraper";
@@ -17,6 +18,33 @@ export type DraftRoom = {
   evidenceQuote: string | null;
   /** The page that sentence was read on. */
   evidenceUrl: string | null;
+  /** P(capacity is right), scored at write time — see confidence.ts. */
+  confidence: number;
+  /** What `confidence` was computed from; persisted for offline refitting. */
+  confidenceFeatures: ConfidenceFeatures;
+};
+
+type RoomEvidence = Pick<
+  ConfidenceFeatures,
+  "source" | "agreementSpread" | "grounded" | "competingCandidates" | "hasRoomHint"
+>;
+type PageContext = Pick<ConfidenceFeatures, "privateDiningPageFound" | "renderedWithJs" | "category">;
+
+function scored(
+  room: Omit<DraftRoom, "confidence" | "confidenceFeatures">,
+  evidence: RoomEvidence,
+  page: PageContext
+): DraftRoom {
+  const confidenceFeatures: ConfidenceFeatures = { ...evidence, ...page };
+  return { ...room, confidence: scoreConfidence(confidenceFeatures), confidenceFeatures };
+}
+
+const ESTIMATE_EVIDENCE: RoomEvidence = {
+  source: "estimate",
+  agreementSpread: null,
+  grounded: false,
+  competingCandidates: 0,
+  hasRoomHint: false,
 };
 
 export type VenueDraft = {
@@ -158,7 +186,8 @@ function candidatesOf(signals: ScrapedSignals): CapacityCandidate[] {
 function roomsFromEvidence(
   signals: ScrapedSignals,
   llmRooms: LlmExtractedRoom[],
-  style: RoomStyle
+  style: RoomStyle,
+  page: PageContext
 ): DraftRoom[] | null {
   const candidates = candidatesOf(signals);
   const pages = signals.pages ?? [];
@@ -175,17 +204,27 @@ function roomsFromEvidence(
         )[0];
 
       if (agreeing) {
-        return {
-          roomName: room.roomName,
-          minCapacity: room.minCapacity != null && room.minCapacity <= agreeing.value ? room.minCapacity : undefined,
-          maxCapacity: agreeing.value,
-          style,
-          capacityTrust: "verified",
-          notes: agreementNote(agreeing.value, room.maxCapacity),
-          isEstimate: false,
-          evidenceQuote: room.evidenceQuote ?? (agreeing.sentence || null),
-          evidenceUrl: evidenceUrl ?? agreeing.url ?? null,
-        };
+        return scored(
+          {
+            roomName: room.roomName,
+            minCapacity: room.minCapacity != null && room.minCapacity <= agreeing.value ? room.minCapacity : undefined,
+            maxCapacity: agreeing.value,
+            style,
+            capacityTrust: "verified",
+            notes: agreementNote(agreeing.value, room.maxCapacity),
+            isEstimate: false,
+            evidenceQuote: room.evidenceQuote ?? (agreeing.sentence || null),
+            evidenceUrl: evidenceUrl ?? agreeing.url ?? null,
+          },
+          {
+            source: "both",
+            agreementSpread: capacitySpread(agreeing.value, room.maxCapacity),
+            grounded: true,
+            competingCandidates: Math.max(0, candidates.length - 1),
+            hasRoomHint: true,
+          },
+          page
+        );
       }
 
       // The same room read two ways: matched by name, or — when the page has a
@@ -195,46 +234,79 @@ function roomsFromEvidence(
         (llmRooms.length === 1 && candidates.length > 0 ? pickRegexCandidates(candidates)[0] : undefined);
 
       if (conflicting) {
-        return {
-          roomName: room.roomName,
-          maxCapacity: conflicting.value,
-          style,
-          capacityTrust: "likely",
-          notes: disagreementNote(conflicting.value, room.maxCapacity),
-          isEstimate: false,
-          evidenceQuote: conflicting.sentence || null,
-          evidenceUrl: conflicting.url ?? null,
-        };
+        return scored(
+          {
+            roomName: room.roomName,
+            maxCapacity: conflicting.value,
+            style,
+            capacityTrust: "likely",
+            notes: disagreementNote(conflicting.value, room.maxCapacity),
+            isEstimate: false,
+            evidenceQuote: conflicting.sentence || null,
+            evidenceUrl: conflicting.url ?? null,
+          },
+          {
+            source: "both",
+            agreementSpread: capacitySpread(conflicting.value, room.maxCapacity),
+            grounded: true,
+            competingCandidates: Math.max(0, candidates.length - 1),
+            hasRoomHint: Boolean(conflicting.roomHint),
+          },
+          page
+        );
       }
 
-      return {
-        roomName: room.roomName,
-        minCapacity: room.minCapacity ?? undefined,
-        maxCapacity: room.maxCapacity,
-        style,
-        capacityTrust: "ai_extracted",
-        notes: "Read from the venue's own page by AI because the page states capacity in prose rather than a standard format. Confirm before booking.",
-        isEstimate: false,
-        evidenceQuote: room.evidenceQuote ?? null,
-        evidenceUrl,
-      };
+      return scored(
+        {
+          roomName: room.roomName,
+          minCapacity: room.minCapacity ?? undefined,
+          maxCapacity: room.maxCapacity,
+          style,
+          capacityTrust: "ai_extracted",
+          notes:
+            "Read from the venue's own page by AI because the page states capacity in prose rather than a standard format. Confirm before booking.",
+          isEstimate: false,
+          evidenceQuote: room.evidenceQuote ?? null,
+          evidenceUrl,
+        },
+        {
+          source: "llm",
+          agreementSpread: null,
+          grounded: Boolean(room.evidenceQuote),
+          competingCandidates: candidates.length,
+          hasRoomHint: true,
+        },
+        page
+      );
     });
   }
 
   if (candidates.length > 0) {
-    return pickRegexCandidates(candidates).map(
-      (c): DraftRoom => ({
-        roomName: c.roomHint ?? "Private Dining / Event Space",
-        maxCapacity: c.value,
-        style,
-        capacityTrust: signals.privateDiningPageFound ? "likely" : "unverified",
-        notes: signals.privateDiningPageFound
-          ? "Capacity figure read from the venue's own private-dining/events page by pattern match, not confirmed by a second independent read — confirm before booking."
-          : "Capacity figure appears on the venue's site but not on a private-dining page, so it may not describe a private room — call to confirm.",
-        isEstimate: false,
-        evidenceQuote: c.sentence || null,
-        evidenceUrl: c.url ?? null,
-      })
+    const picked = pickRegexCandidates(candidates);
+    return picked.map(
+      (c): DraftRoom =>
+        scored(
+          {
+            roomName: c.roomHint ?? "Private Dining / Event Space",
+            maxCapacity: c.value,
+            style,
+            capacityTrust: signals.privateDiningPageFound ? "likely" : "unverified",
+            notes: signals.privateDiningPageFound
+              ? "Capacity figure read from the venue's own private-dining/events page by pattern match, not confirmed by a second independent read — confirm before booking."
+              : "Capacity figure appears on the venue's site but not on a private-dining page, so it may not describe a private room — call to confirm.",
+            isEstimate: false,
+            evidenceQuote: c.sentence || null,
+            evidenceUrl: c.url ?? null,
+          },
+          {
+            source: "regex",
+            agreementSpread: null,
+            grounded: true,
+            competingCandidates: candidates.length - picked.length,
+            hasRoomHint: Boolean(c.roomHint),
+          },
+          page
+        )
     );
   }
 
@@ -274,16 +346,20 @@ export function buildVenueDraft(
       sourceNote:
         "No website found for this venue during discovery, so private-dining availability and capacity are unconfirmed. Call the venue directly.",
       rooms: [
-        {
-          roomName: "Capacity unconfirmed",
-          maxCapacity: estimateCapacityByCategory(candidate.category),
-          style,
-          capacityTrust: "unverified",
-          notes: "Estimated from venue category only — no source to confirm against.",
-          isEstimate: true,
-          evidenceQuote: null,
-          evidenceUrl: null,
-        },
+        scored(
+          {
+            roomName: "Capacity unconfirmed",
+            maxCapacity: estimateCapacityByCategory(candidate.category),
+            style,
+            capacityTrust: "unverified",
+            notes: "Estimated from venue category only — no source to confirm against.",
+            isEstimate: true,
+            evidenceQuote: null,
+            evidenceUrl: null,
+          },
+          ESTIMATE_EVIDENCE,
+          { privateDiningPageFound: false, renderedWithJs: false, category: candidate.category }
+        ),
       ],
       // Google Places can have a photo for a venue even with no website
       // on file — only Overpass-sourced candidates (no Google key) truly
@@ -298,19 +374,31 @@ export function buildVenueDraft(
 
   const hasCapacityNumbers = candidatesOf(signals).length > 0;
 
-  const rooms: DraftRoom[] = roomsFromEvidence(signals, llm?.rooms ?? [], style) ?? [
-    {
-      roomName: signals.privateDiningPageFound ? "Private events available (capacity unpublished)" : "Capacity unconfirmed",
-      maxCapacity: estimateCapacityByCategory(candidate.category),
-      style,
-      capacityTrust: signals.privateDiningPageFound ? "likely" : "unverified",
-      notes: signals.privateDiningPageFound
-        ? "Venue confirms private events but does not publish a specific capacity number — call to confirm fit."
-        : "Estimated from venue category only — no private-dining page found to confirm against.",
-      isEstimate: true,
-      evidenceQuote: null,
-      evidenceUrl: null,
-    },
+  const page: PageContext = {
+    privateDiningPageFound: signals.privateDiningPageFound,
+    renderedWithJs: signals.renderedWithJs,
+    category: candidate.category,
+  };
+
+  const rooms: DraftRoom[] = roomsFromEvidence(signals, llm?.rooms ?? [], style, page) ?? [
+    scored(
+      {
+        roomName: signals.privateDiningPageFound
+          ? "Private events available (capacity unpublished)"
+          : "Capacity unconfirmed",
+        maxCapacity: estimateCapacityByCategory(candidate.category),
+        style,
+        capacityTrust: signals.privateDiningPageFound ? "likely" : "unverified",
+        notes: signals.privateDiningPageFound
+          ? "Venue confirms private events but does not publish a specific capacity number — call to confirm fit."
+          : "Estimated from venue category only — no private-dining page found to confirm against.",
+        isEstimate: true,
+        evidenceQuote: null,
+        evidenceUrl: null,
+      },
+      ESTIMATE_EVIDENCE,
+      page
+    ),
   ];
 
   const regexMinSpend = signals.minSpendUsd.length > 0 ? Math.min(...signals.minSpendUsd) : null;

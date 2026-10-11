@@ -46,7 +46,10 @@ describe("render budget", () => {
       isLlmConfigured: () => false,
     };
 
-    const { drafts, stats } = await enrichCandidates(Array.from({ length: 20 }, (_, i) => candidate(i)), deps);
+    const { drafts, stats } = await enrichCandidates(
+      Array.from({ length: 20 }, (_, i) => candidate(i)),
+      deps
+    );
 
     expect(render).toHaveBeenCalledTimes(MAX_RENDER_BUDGET);
     expect(stats.renders).toBe(MAX_RENDER_BUDGET);

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
+import { featureLog, PLANNER_CONFIDENCE } from "@/lib/discovery/confidence";
 import { geocodeAddress } from "@/lib/geo/geocode";
 import { isEmptyParse, isNaturalLanguageSearchConfigured, parseNaturalLanguageQuery } from "@/lib/nl-query";
 import { isDietarySummaryConfigured, summarizeDietaryNeeds } from "@/lib/dietary-summary";
@@ -372,6 +373,19 @@ export async function confirmVenueDetailAction(formData: FormData) {
         max_capacity: confirmedMaxCapacity,
         capacity_trust: "confirmed_by_planner",
         notes: note ? `${attribution} "${note}"` : attribution,
+        // A human phoned the venue: set, not scored (see confidence.ts).
+        capacity_confidence: PLANNER_CONFIDENCE,
+        is_estimate: false,
+        confidence_features: featureLog({
+          source: "planner",
+          agreementSpread: null,
+          privateDiningPageFound: false,
+          grounded: false,
+          competingCandidates: 0,
+          hasRoomHint: false,
+          renderedWithJs: false,
+          category: "",
+        }),
       })
       .eq("id", roomId)
       .eq("venue_id", venueId);

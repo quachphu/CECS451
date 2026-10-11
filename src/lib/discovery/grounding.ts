@@ -16,8 +16,26 @@
  */
 
 const ONES = [
-  "", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
-  "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen",
+  "",
+  "one",
+  "two",
+  "three",
+  "four",
+  "five",
+  "six",
+  "seven",
+  "eight",
+  "nine",
+  "ten",
+  "eleven",
+  "twelve",
+  "thirteen",
+  "fourteen",
+  "fifteen",
+  "sixteen",
+  "seventeen",
+  "eighteen",
+  "nineteen",
 ];
 const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
 
@@ -100,7 +118,10 @@ export function isGrounded(quote: string | null | undefined, pageText: string, v
 }
 
 /** The first page whose text contains the quote — where a planner can go check it. */
-export function findEvidenceUrl(quote: string | null | undefined, pages: Array<{ url: string; text: string }>): string | null {
+export function findEvidenceUrl(
+  quote: string | null | undefined,
+  pages: Array<{ url: string; text: string }>
+): string | null {
   if (!quote) return null;
   const q = normalizeForGrounding(quote).replace(/[.!?;:,]+$/, "");
   return pages.find((p) => normalizeForGrounding(p.text).includes(q))?.url ?? null;

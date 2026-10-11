@@ -1,10 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  enrichCandidates,
-  MAX_LLM_BUDGET,
-  MAX_RENDER_BUDGET,
-  type EnrichmentDeps,
-} from "@/lib/discovery/pipeline";
+import { enrichCandidates, MAX_LLM_BUDGET, MAX_RENDER_BUDGET, type EnrichmentDeps } from "@/lib/discovery/pipeline";
 import type { CandidateVenue } from "@/lib/discovery/places";
 import type { ScrapedSignals } from "@/lib/discovery/scraper";
 import { buildVenueDraft } from "@/lib/discovery/trust";
@@ -50,7 +45,9 @@ function pdNoCapacity(website: string): ScrapedSignals {
   };
 }
 
-function timedDeps(scrapeStarts: number[] = []): EnrichmentDeps & { renderCalls: () => number; llmCalls: () => number } {
+function timedDeps(
+  scrapeStarts: number[] = []
+): EnrichmentDeps & { renderCalls: () => number; llmCalls: () => number } {
   let renders = 0;
   let llms = 0;
   return {
@@ -122,7 +119,10 @@ describe("pipelined enrichment (fake timers)", () => {
     deps.render = async () => null;
 
     const t0 = Date.now();
-    const run = enrichCandidates(Array.from({ length: 9 }, (_, i) => candidate(i)), deps);
+    const run = enrichCandidates(
+      Array.from({ length: 9 }, (_, i) => candidate(i)),
+      deps
+    );
     await vi.runAllTimersAsync();
     await run;
 

@@ -41,7 +41,10 @@ describe("scraping the Garden Room site", () => {
   });
 
   it("points the render tier at the homepage when the site can't be fetched at all", async () => {
-    vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("blocked"))));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.reject(new Error("blocked")))
+    );
     const signals = await scrapeVenueForPrivateDining(GARDEN_SITE);
 
     expect(signals.scrapedUrls).toEqual([]);

@@ -2,6 +2,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { discoverNearbyVenues, type CandidateVenue } from "@/lib/discovery/places";
 import { extractPrivateDiningWithLlm, isLlmExtractionConfigured, type LlmExtraction } from "@/lib/discovery/llm-extract";
 import { renderPage, type RenderedPage } from "@/lib/discovery/render";
+import { featureLog } from "@/lib/discovery/confidence";
 import { applyRenderedPage, scrapeVenueForPrivateDining, type ScrapedSignals } from "@/lib/discovery/scraper";
 import { buildVenueDraft, type VenueDraft } from "@/lib/discovery/trust";
 import { haversineMeters, type LatLng } from "@/lib/geo/commute";
@@ -186,6 +187,8 @@ async function upsertVenueDraft(draft: VenueDraft) {
         is_estimate: room.isEstimate,
         evidence_quote: room.evidenceQuote,
         evidence_url: room.evidenceUrl,
+        capacity_confidence: room.confidence,
+        confidence_features: featureLog(room.confidenceFeatures),
       }))
     );
   }

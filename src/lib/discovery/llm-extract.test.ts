@@ -33,7 +33,13 @@ describe("extractPrivateDiningWithLlm request", () => {
     vi.stubEnv("XAI_API_KEY", "test-key");
     const fetchMock = vi.fn<(url: RequestInfo | URL, init?: RequestInit) => Promise<Response>>(async () =>
       Response.json({
-        choices: [{ message: { content: JSON.stringify({ hostsPrivateEvents: true, rooms: [], minSpendUsd: null, dietaryNotes: null }) } }],
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({ hostsPrivateEvents: true, rooms: [], minSpendUsd: null, dietaryNotes: null }),
+            },
+          },
+        ],
       })
     );
     vi.stubGlobal("fetch", fetchMock);

@@ -58,7 +58,14 @@ describe("Step 2f trust table", () => {
     const draft = buildVenueDraft(
       venue,
       signals([cand(40, "Garden Room", GARDEN_SENTENCE)]),
-      llm([{ roomName: "Garden Room", maxCapacity: 42, minCapacity: null, evidenceQuote: "The Garden Room holds 40 guests" }])
+      llm([
+        {
+          roomName: "Garden Room",
+          maxCapacity: 42,
+          minCapacity: null,
+          evidenceQuote: "The Garden Room holds 40 guests",
+        },
+      ])
     );
 
     expect(draft.rooms).toHaveLength(1);
@@ -78,7 +85,12 @@ describe("Step 2f trust table", () => {
       signals([cand(40, "Garden Room", GARDEN_SENTENCE)]),
       llm([
         { roomName: "Garden Room", maxCapacity: 40, minCapacity: null, evidenceQuote: GARDEN_SENTENCE },
-        { roomName: "Chef's Table", maxCapacity: 12, minCapacity: null, evidenceQuote: "The Chef's Table seats 12 guests." },
+        {
+          roomName: "Chef's Table",
+          maxCapacity: 12,
+          minCapacity: null,
+          evidenceQuote: "The Chef's Table seats 12 guests.",
+        },
       ])
     );
 
@@ -121,7 +133,14 @@ describe("Step 2f trust table", () => {
     const draft = buildVenueDraft(
       venue,
       signals([cand(40, "Garden Room", GARDEN_SENTENCE)]),
-      llm([{ roomName: "Garden Room", maxCapacity: 90, minCapacity: null, evidenceQuote: "seats 90 guests in the Garden Room" }])
+      llm([
+        {
+          roomName: "Garden Room",
+          maxCapacity: 90,
+          minCapacity: null,
+          evidenceQuote: "seats 90 guests in the Garden Room",
+        },
+      ])
     );
 
     expect(draft.rooms[0].capacityTrust).toBe("likely");
@@ -188,7 +207,14 @@ describe("the reproduced Garden Room defect", () => {
     const llmRead = groundExtraction(
       {
         hostsPrivateEvents: true,
-        rooms: [{ roomName: "The Garden Room", maxCapacity: 40, minCapacity: null, evidenceQuote: "The Garden Room holds 40 guests for private dinners." }],
+        rooms: [
+          {
+            roomName: "The Garden Room",
+            maxCapacity: 40,
+            minCapacity: null,
+            evidenceQuote: "The Garden Room holds 40 guests for private dinners.",
+          },
+        ],
         minSpendUsd: null,
         minSpendEvidence: null,
         dietaryNotes: null,
