@@ -333,6 +333,19 @@ function finalizeSignals(
 }
 
 /**
+ * Rebuilds signals from stored page texts — the offline evaluation harness
+ * replays snapshots through exactly the extraction the live scraper uses.
+ */
+export function signalsFromPages(
+  pages: ScrapedPage[],
+  links: ScrapedLink[],
+  website: string,
+  extra: { renderedWithJs: boolean; renderTarget: string | null } = { renderedWithJs: false, renderTarget: null }
+): ScrapedSignals {
+  return finalizeSignals(pages, links, website, extra);
+}
+
+/**
  * Fetches a venue's homepage, follows links that look like a private
  * dining / events / banquet page (up to MAX_SUBPAGES of them), and
  * extracts capacity numbers, minimum-spend figures, menu links, dietary

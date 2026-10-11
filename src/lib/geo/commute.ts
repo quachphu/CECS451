@@ -31,7 +31,7 @@ const AVERAGE_SPEED_MPS: Record<CommuteMode, number> = {
   drive: 8.9, // ~20 mph average urban driving incl. lights/traffic
 };
 
-function haversineEstimate(origin: LatLng, destination: LatLng, mode: CommuteMode): CommuteResult {
+export function haversineEstimate(origin: LatLng, destination: LatLng, mode: CommuteMode): CommuteResult {
   const straightLineMeters = haversineMeters(origin, destination);
   const distanceMeters = straightLineMeters * ROUTE_FACTOR[mode];
   const durationSeconds = distanceMeters / AVERAGE_SPEED_MPS[mode];

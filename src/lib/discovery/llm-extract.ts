@@ -117,7 +117,7 @@ function sleep(ms: number): Promise<void> {
  * a verbatim sentence of the text the model was given and must state the
  * room's capacity (see grounding.ts [P3]); the same for minimum spend.
  */
-export function groundExtraction(parsed: LlmExtraction & { minSpendEvidence?: string | null }, inputText: string): LlmExtraction {
+export function groundExtraction(parsed: RawLlmExtraction, inputText: string): LlmExtraction {
   // `strict` guarantees the shape, not the semantics — a hallucinated
   // 900-person "private room" for a 40-seat restaurant is still shaped
   // correctly, so implausible figures are dropped here.
@@ -168,15 +168,16 @@ export function isLlmExtractionConfigured(): boolean {
   return Boolean(process.env.XAI_API_KEY);
 }
 
-export async function extractPrivateDiningWithLlm(
-  venueName: string,
-  pageText: string,
-  privateDiningText = ""
-): Promise<LlmExtraction | null> {
-  const apiKey = process.env.XAI_API_KEY;
-  if (!apiKey || !pageText.trim()) return null;
+/** The model's answer as returned, before grounding — cached by the eval harness. */
+export type RawLlmExtraction = LlmExtraction & { minSpendEvidence?: string | null };
 
-  const input = buildLlmInput(privateDiningText, pageText);
+/**
+ * Sends `input` to the model and returns its parsed, schema-shaped answer
+ * without grounding it. One retry after 1 s for 429/5xx; null otherwise.
+ */
+export async function requestLlmExtraction(venueName: string, input: string): Promise<RawLlmExtraction | null> {
+  const apiKey = process.env.XAI_API_KEY;
+  if (!apiKey || !input.trim()) return null;
 
   const body = JSON.stringify({
     model: XAI_MODEL,
@@ -222,7 +223,7 @@ export async function extractPrivateDiningWithLlm(
       const content = payload.choices?.[0]?.message?.content;
       if (!content) return null;
 
-      return groundExtraction(JSON.parse(content) as LlmExtraction, input);
+      return JSON.parse(content) as RawLlmExtraction;
     } catch (err) {
       console.error(`xAI extraction threw for ${venueName}:`, err);
       return null;
@@ -232,4 +233,15 @@ export async function extractPrivateDiningWithLlm(
   }
 
   return null;
+}
+
+export async function extractPrivateDiningWithLlm(
+  venueName: string,
+  pageText: string,
+  privateDiningText = ""
+): Promise<LlmExtraction | null> {
+  if (!pageText.trim()) return null;
+  const input = buildLlmInput(privateDiningText, pageText);
+  const raw = await requestLlmExtraction(venueName, input);
+  return raw ? groundExtraction(raw, input) : null;
 }
