@@ -1,0 +1,14 @@
+{
+  "version": "placeholder-0",
+  "description": "Base rate q(h): probability a venue of this category has a private space holding h guests, used when a room's capacity is a guess or unbelieved. Logistic in headcount: q(h) = 1 / (1 + exp((h - h50) / scale)), clamped to [floor, ceil]. Placeholder constants pending labelled data.",
+  "floor": 0.02,
+  "ceil": 0.95,
+  "buckets": {
+    "banquet": { "h50": 300, "scale": 120 },
+    "hotel": { "h50": 150, "scale": 60 },
+    "club": { "h50": 120, "scale": 50 },
+    "bar": { "h50": 60, "scale": 25 },
+    "restaurant": { "h50": 40, "scale": 20 },
+    "other": { "h50": 40, "scale": 20 }
+  }
+}

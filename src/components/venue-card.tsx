@@ -86,8 +86,16 @@ export function VenueCard({
           <Badge variant="secondary">{Math.round(commuteMinutes)} min</Badge>
           <span className="inline-flex items-center gap-1">
             <Badge variant="secondary">
-              Fits {bestRoom.max_capacity}
-              {bestRoom.min_capacity ? `–${bestRoom.min_capacity}` : ""}
+              {/* An estimate room's number is a category guess the ranking
+                  ignores, so it isn't shown as a capacity either. */}
+              {bestRoom.is_estimate ? (
+                "Capacity unpublished"
+              ) : (
+                <>
+                  Fits {bestRoom.max_capacity}
+                  {bestRoom.min_capacity ? `–${bestRoom.min_capacity}` : ""}
+                </>
+              )}
             </Badge>
             <TrustBadge level={bestRoom.capacity_trust} subject="Capacity" />
           </span>
@@ -102,7 +110,8 @@ export function VenueCard({
         </div>
 
         <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground">
-          {reasons.slice(0, 2).map((reason) => (
+          {/* Commute, room fit, and how likely the venue is to fit the group. */}
+          {reasons.slice(0, 3).map((reason) => (
             <li key={reason}>• {reason}</li>
           ))}
         </ul>
