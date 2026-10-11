@@ -41,9 +41,29 @@ export type ScrapedSignals = {
   pages?: ScrapedPage[];
   /** Every link seen across those pages. Not persisted. */
   links?: ScrapedLink[];
+  /** Filtered capacity candidates, per page. capacityNumbers is derived from these. */
+  capacityCandidates?: CapacityCandidate[];
 };
 
 export type ScrapedLink = { href: string; text: string };
+
+/**
+ * One regex hit for a capacity phrase. The regex is a *candidate generator*
+ * now, not the final answer: which candidate (if any) becomes a room's
+ * capacity is decided in buildVenueDraft (src/lib/discovery/trust.ts).
+ */
+export type CapacityCandidate = {
+  value: number;
+  /** ±150 characters around the match. */
+  context: string;
+  /** The sentence containing the match — used as the evidence quote. */
+  sentence: string;
+  /** Nearest preceding capitalised room name in the same sentence ("Garden Room"), or null. */
+  roomHint: string | null;
+  /** The page it was read on, and whether that page is a private-dining page. */
+  url?: string;
+  onPrivateDiningPage?: boolean;
+};
 
 export type ScrapedPage = {
   url: string;
@@ -63,6 +83,23 @@ const PRIVATE_DINING_KEYWORDS =
   /private\s*(dining|event)s?|group\s*(dining|event|booking)s?|banquet|meetings?\s*(&|and)?\s*events|weddings?|celebrations|book\s*(an\s*)?event|buyouts?/i;
 
 const CAPACITY_PATTERN = /(?:up\s*to|seats?|accommodat(?:es|ing)|hold[s]?|for)\s*(\d{1,4})\s*(?:guests?|people|persons?|pax)/gi;
+
+/** A party this small is a table booking, not a private room. */
+export const MIN_PLAUSIBLE_CAPACITY = 6;
+const CONTEXT_CHARS = 150;
+/**
+ * Reservation phrasing ("table for 2 people", "reservation for 8 guests").
+ * Checked against the match plus the RESERVATION_LOOKBEHIND characters before
+ * it rather than the full ±150 context: almost every restaurant homepage
+ * carries a "Book a table for 2" widget, and a context-wide check would throw
+ * away real room capacities that merely sit near it. See NOTES-ai-core.md.
+ */
+const RESERVATION_PATTERN = /(table|reservation|book)\s+(for|of)\s+\d/i;
+const RESERVATION_LOOKBEHIND = 30;
+const ROOM_HINT_PATTERN =
+  /((?:[A-Z][\w'’&-]*\s+){0,4}(?:Room|Hall|Lounge|Terrace|Space|Suite|Mezzanine|Patio|Bar))\b/g;
+const LEADING_DETERMINER = /^(?:The|Our|A|An|This|Each|Every|Its)\s+/;
+const DETERMINER_BOUNDARY = /\b(?:The|Our|A|An|This|Each|Every|Its)\s+/;
 const MIN_SPEND_PATTERN = /(?:minimum\s*spend|f&b\s*minimum|food\s*(?:and|&)\s*beverage\s*minimum)[^\d$]{0,20}\$?\s?([\d,]{3,7})/gi;
 const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 const PHONE_PATTERN = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/;
@@ -104,6 +141,58 @@ function extractNumbers(text: string, pattern: RegExp): number[] {
     if (!Number.isNaN(value) && value > 0) numbers.push(value);
   }
   return numbers;
+}
+
+function sentenceAround(text: string, start: number, end: number): string {
+  const before = text.slice(Math.max(0, start - CONTEXT_CHARS), start);
+  const after = text.slice(end, end + CONTEXT_CHARS);
+  const sentenceStart = Math.max(before.search(/[.!?]\s[^.!?]*$/) + 2, 0);
+  const sentenceEndMatch = after.search(/[.!?](\s|$)/);
+  const tail = sentenceEndMatch === -1 ? after : after.slice(0, sentenceEndMatch + 1);
+  const head = before.search(/[.!?]\s[^.!?]*$/) === -1 ? before : before.slice(sentenceStart);
+  return `${head}${text.slice(start, end)}${tail}`.trim();
+}
+
+function roomHintBefore(text: string, start: number): string | null {
+  const window = text.slice(Math.max(0, start - CONTEXT_CHARS), start);
+  // Only look inside the current sentence, so "The Garden Room holds 40. Our
+  // patio seats 60" doesn't hand the patio's number to the Garden Room.
+  const lastBoundary = window.search(/[.!?]\s[^.!?]*$/);
+  const sentence = lastBoundary === -1 ? window : window.slice(lastBoundary + 2);
+  const hints = Array.from(sentence.matchAll(ROOM_HINT_PATTERN), (m) => m[1].trim());
+  const nearest = hints.at(-1);
+  if (!nearest) return null;
+  // Headings have no sentence punctuation, so "Private Events" + "The Garden
+  // Room holds 40" arrive as one run of capitalised words. A determiner marks
+  // where the room's own name starts; keep what follows the last one.
+  const name = nearest.split(DETERMINER_BOUNDARY).at(-1)!.replace(LEADING_DETERMINER, "").trim();
+  return name || null;
+}
+
+/**
+ * Finds every capacity phrase in `text` as a candidate with its surrounding
+ * context and nearest room name. Drops values below MIN_PLAUSIBLE_CAPACITY and
+ * reservation phrasing ("table for 2 people").
+ */
+export function extractCapacityCandidates(text: string): CapacityCandidate[] {
+  const candidates: CapacityCandidate[] = [];
+  for (const match of text.matchAll(CAPACITY_PATTERN)) {
+    const value = parseInt(match[1] ?? "", 10);
+    if (Number.isNaN(value) || value < MIN_PLAUSIBLE_CAPACITY) continue;
+
+    const start = match.index ?? 0;
+    const end = start + match[0].length;
+    const local = text.slice(Math.max(0, start - RESERVATION_LOOKBEHIND), end);
+    if (RESERVATION_PATTERN.test(local)) continue;
+
+    candidates.push({
+      value,
+      context: text.slice(Math.max(0, start - CONTEXT_CHARS), Math.min(text.length, end + CONTEXT_CHARS)),
+      sentence: sentenceAround(text, start, end),
+      roomHint: roomHintBefore(text, start),
+    });
+  }
+  return candidates;
 }
 
 /** Normalizes matched dietary phrases into a stable, de-duplicated list. */
@@ -183,6 +272,7 @@ function emptySignals(renderTarget: string | null): ScrapedSignals {
     renderTarget,
     pages: [],
     links: [],
+    capacityCandidates: [],
   };
 }
 
@@ -201,7 +291,12 @@ function finalizeSignals(
 
   const textChunks = pages.map((p) => p.text);
   const combinedText = textChunks.join(CHUNK_SEPARATOR);
-  const capacityNumbers = extractNumbers(combinedText, CAPACITY_PATTERN).sort((a, b) => a - b);
+  const capacityCandidates = pages.flatMap((page) =>
+    extractCapacityCandidates(page.text).map((c) => ({ ...c, url: page.url, onPrivateDiningPage: page.privateDining }))
+  );
+  // Kept for backward compatibility; now derived from the filtered candidates,
+  // so "table for 2 people" no longer turns into a minimum capacity of 2.
+  const capacityNumbers = capacityCandidates.map((c) => c.value).sort((a, b) => a - b);
   const minSpendUsd = extractNumbers(combinedText, MIN_SPEND_PATTERN);
   const email = combinedText.match(EMAIL_PATTERN)?.[0] ?? null;
   const phone = combinedText.match(PHONE_PATTERN)?.[0] ?? null;
@@ -230,6 +325,7 @@ function finalizeSignals(
     renderTarget: extra.renderTarget,
     pages,
     links,
+    capacityCandidates,
   };
 }
 
@@ -304,7 +400,7 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
     if (!privateDiningUrl) privateDiningUrl = Array.from(candidateLinks)[0] ?? null;
   }
 
-  const staticCapacityFound = extractNumbers(pages.map((p) => p.text).join(CHUNK_SEPARATOR), CAPACITY_PATTERN).length > 0;
+  const staticCapacityFound = pages.some((p) => extractCapacityCandidates(p.text).length > 0);
   const renderTarget = staticCapacityFound ? null : (privateDiningUrl ?? website);
 
   return finalizeSignals(pages, links, website, { renderedWithJs: false, renderTarget });

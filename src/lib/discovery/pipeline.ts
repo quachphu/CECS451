@@ -6,6 +6,7 @@ import { applyRenderedPage, scrapeVenueForPrivateDining, type ScrapedSignals } f
 import { buildVenueDraft, type VenueDraft } from "@/lib/discovery/trust";
 import { haversineMeters, type LatLng } from "@/lib/geo/commute";
 import { boundingBox } from "@/lib/geo/bounding-box";
+import { createLimiter } from "@/lib/limiter";
 
 /**
  * A dense downtown core (Times Square, the Financial District) returns far
@@ -20,7 +21,7 @@ import { boundingBox } from "@/lib/geo/bounding-box";
  * half the area and finding only 7 venues with a site-confirmed capacity. The
  * ceilings below cover essentially all of them. Raising them costs nothing in
  * API spend — this tier is a plain HTTP GET plus an HTML parse, and the paid
- * rendering/LLM tiers stay bounded by MAX_ENRICHMENT_BUDGET regardless.
+ * tiers stay bounded by MAX_RENDER_BUDGET and MAX_LLM_BUDGET regardless.
  */
 function candidateCap(candidateCount: number): number {
   if (candidateCount >= 60) return 45;
@@ -39,13 +40,20 @@ function candidateCap(candidateCount: number): number {
 const SCRAPE_CONCURRENCY = 8;
 
 /**
- * Caps how many venues per run may fall through to the paid LLM tier. It is
- * gated on the free static pass finding nothing, and in a dense area that can
- * be most candidates — without a ceiling, one search in Manhattan could
- * consume an entire credit balance. Candidates are processed in discovery
- * order, so the budget goes to the closest venues.
+ * Caps LLM extraction calls per run. The LLM now reads every candidate with a
+ * private-dining page — not only those where the regex found nothing — because
+ * a second, independent read is what can upgrade a regex figure to `verified`
+ * (or expose a disagreement). Budget is claimed in candidate order, so it goes
+ * to the candidates ranked first.
  */
-const MAX_ENRICHMENT_BUDGET = 8;
+export const MAX_LLM_BUDGET = 12;
+
+/**
+ * LLM calls run on their own queue, not inside a scrape worker. Each call can
+ * take tens of seconds (45 s timeout); inline, it held one of the 8 scrape
+ * slots for that whole time and stalled every scrape queued behind it.
+ */
+const LLM_CONCURRENCY = 8;
 
 /**
  * Caps Firecrawl renders per run (1 credit per page, per the Firecrawl v2
@@ -55,19 +63,6 @@ const MAX_ENRICHMENT_BUDGET = 8;
  * concurrent workers; claimed before the request is sent.
  */
 export const MAX_RENDER_BUDGET = 10;
-
-async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let cursor = 0;
-  async function worker() {
-    while (cursor < items.length) {
-      const index = cursor++;
-      results[index] = await fn(items[index]);
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
-}
 
 function citySlugForOrigin(): string {
   // Auto-discovered venues aren't tied to one of the 3 demo city buckets —
@@ -231,47 +226,59 @@ const defaultDeps: EnrichmentDeps = {
 
 export type EnrichmentStats = { renders: number; llmCalls: number };
 
+function needsLlmRead(signals: ScrapedSignals | null, deps: EnrichmentDeps): signals is ScrapedSignals {
+  return signals != null && signals.privateDiningPageFound && signals.combinedText.length > 0 && deps.isLlmConfigured();
+}
+
 /**
  * Scrapes each candidate, renders where the static pass found no capacity and
  * the run's render budget allows, runs the LLM tier where warranted, and
  * derives trust labels. Pure apart from the injected I/O — nothing here
  * touches the database.
+ *
+ * Two queues, pipelined: scrapes (and their renders) run 8 at a time; each
+ * finished scrape that warrants an LLM read is handed to a separate 8-wide LLM
+ * queue that starts immediately, so a slow model call never holds a scrape
+ * slot. Drafts are built once both queues drain.
  */
 export async function enrichCandidates(
   candidates: CandidateVenue[],
   deps: EnrichmentDeps = defaultDeps
 ): Promise<{ drafts: VenueDraft[]; stats: EnrichmentStats }> {
   const stats: EnrichmentStats = { renders: 0, llmCalls: 0 };
+  const scrapeLimit = createLimiter(SCRAPE_CONCURRENCY);
+  const llmLimit = createLimiter(LLM_CONCURRENCY);
+  const llmReads: Array<Promise<LlmExtraction | null>> = candidates.map(() => Promise.resolve(null));
 
-  const drafts = await mapWithConcurrency(candidates, SCRAPE_CONCURRENCY, async (candidate) => {
-    let signals = candidate.website ? await deps.scrape(candidate.website) : null;
+  const signalsList = await Promise.all(
+    candidates.map((candidate, index) =>
+      scrapeLimit(async () => {
+        let signals = candidate.website ? await deps.scrape(candidate.website) : null;
 
-    // Budget is claimed synchronously before the await, so concurrent workers
-    // can never overshoot it.
-    if (signals?.renderTarget && stats.renders < MAX_RENDER_BUDGET) {
-      stats.renders += 1;
-      const rendered = await deps.render(signals.renderTarget);
-      if (rendered?.text) signals = applyRenderedPage(signals, rendered, candidate.website!);
-    }
+        // Budgets are claimed synchronously, before any await, so concurrent
+        // workers can never overshoot them.
+        if (signals?.renderTarget && stats.renders < MAX_RENDER_BUDGET) {
+          stats.renders += 1;
+          const rendered = await deps.render(signals.renderTarget);
+          if (rendered?.text) signals = applyRenderedPage(signals, rendered, candidate.website!);
+        }
 
-    // The LLM tier exists for pages that clearly host private events but state
-    // capacity in prose. Running it where a figure was already matched
-    // verbatim would spend tokens to second-guess better evidence.
-    const needsLlmRead =
-      signals != null &&
-      signals.combinedText.length > 0 &&
-      signals.capacityNumbers.length === 0 &&
-      signals.privateDiningPageFound &&
-      deps.isLlmConfigured();
+        if (needsLlmRead(signals, deps) && stats.llmCalls < MAX_LLM_BUDGET) {
+          stats.llmCalls += 1;
+          const read = signals;
+          // Not awaited here — the scrape slot is released immediately.
+          llmReads[index] = llmLimit(() => deps.extract(candidate.name, read.combinedText, read.privateDiningText ?? "")).catch(
+            () => null
+          );
+        }
 
-    if (!needsLlmRead || stats.llmCalls >= MAX_ENRICHMENT_BUDGET) {
-      return buildVenueDraft(candidate, signals);
-    }
+        return signals;
+      })
+    )
+  );
 
-    stats.llmCalls += 1;
-    const llm = await deps.extract(candidate.name, signals!.combinedText, signals!.privateDiningText ?? "");
-    return buildVenueDraft(candidate, signals, llm);
-  });
+  const llmResults = await Promise.all(llmReads);
+  const drafts = candidates.map((candidate, index) => buildVenueDraft(candidate, signalsList[index], llmResults[index]));
 
   return { drafts, stats };
 }

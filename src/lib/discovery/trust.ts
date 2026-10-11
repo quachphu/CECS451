@@ -1,6 +1,7 @@
 import type { CandidateVenue } from "@/lib/discovery/places";
-import type { LlmExtraction } from "@/lib/discovery/llm-extract";
-import type { ScrapedSignals } from "@/lib/discovery/scraper";
+import { findEvidenceUrl } from "@/lib/discovery/grounding";
+import type { LlmExtractedRoom, LlmExtraction } from "@/lib/discovery/llm-extract";
+import { MIN_PLAUSIBLE_CAPACITY, type CapacityCandidate, type ScrapedSignals } from "@/lib/discovery/scraper";
 import type { RoomStyle, TrustLevel } from "@/lib/supabase/types";
 
 export type DraftRoom = {
@@ -10,6 +11,12 @@ export type DraftRoom = {
   style: RoomStyle;
   capacityTrust: TrustLevel;
   notes?: string;
+  /** True when maxCapacity is a category guess, not a figure read anywhere. */
+  isEstimate: boolean;
+  /** The page sentence that states this capacity, when there is one. */
+  evidenceQuote: string | null;
+  /** The page that sentence was read on. */
+  evidenceUrl: string | null;
 };
 
 export type VenueDraft = {
@@ -76,24 +83,162 @@ function priceLevelToTier(level: number | undefined): string | null {
  * resolved by picking a winner. Both figures are surfaced and the label drops
  * to `likely` so the planner knows to check.
  */
-function reconcileCapacity(
-  regexMax: number | null,
-  llmMax: number | null
-): { trust: TrustLevel; note: string } | null {
-  if (regexMax == null || llmMax == null) return null;
+export function capacitySpread(a: number, b: number): number {
+  return Math.abs(a - b) / Math.max(a, b, 1);
+}
 
-  const spread = Math.abs(regexMax - llmMax) / Math.max(regexMax, llmMax);
-  if (spread <= AGREEMENT_TOLERANCE) {
-    return {
-      trust: "verified",
-      note: `Two independent reads of the venue's page agree on capacity (page text: ${regexMax}, AI extraction: ${llmMax}).`,
-    };
+function agreementNote(regexValue: number, llmValue: number): string {
+  return `Two independent reads of the venue's page agree on capacity (page text: ${regexValue}, AI extraction: ${llmValue}).`;
+}
+
+function disagreementNote(regexValue: number, llmValue: number): string {
+  return `Sources disagree — the page text reads as up to ${regexValue} guests, while AI extraction of the same page reads ${llmValue}. Confirm the real figure with the venue.`;
+}
+
+function normalizeRoomName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[’'".,()]/g, "")
+    .replace(/\b(the|our|private)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function sameRoom(hint: string | null, roomName: string): boolean {
+  if (!hint) return false;
+  const a = normalizeRoomName(hint);
+  const b = normalizeRoomName(roomName);
+  return a.length > 0 && b.length > 0 && (a === b || a.includes(b) || b.includes(a));
+}
+
+/** Prefer candidates read on a private-dining page, then the smaller figure. */
+function byEvidenceThenSize(a: CapacityCandidate, b: CapacityCandidate): number {
+  const pd = Number(Boolean(b.onPrivateDiningPage)) - Number(Boolean(a.onPrivateDiningPage));
+  return pd !== 0 ? pd : a.value - b.value;
+}
+
+/**
+ * Picks which regex candidate(s) become rooms when no grounded LLM read is
+ * available: one room per distinct room name the page attached to a figure,
+ * else the single smallest plausible figure.
+ *
+ * Never the largest: a homepage's "main dining room seats 180" next to a
+ * private room's "holds 40" used to become a 180-guest private room.
+ */
+function pickRegexCandidates(candidates: CapacityCandidate[]): CapacityCandidate[] {
+  const hinted = candidates.filter((c) => c.roomHint);
+  if (hinted.length === 0) return [[...candidates].sort(byEvidenceThenSize)[0]];
+
+  const byRoom = new Map<string, CapacityCandidate>();
+  for (const c of [...hinted].sort(byEvidenceThenSize)) {
+    const key = normalizeRoomName(c.roomHint!);
+    if (!byRoom.has(key)) byRoom.set(key, c);
+  }
+  return Array.from(byRoom.values());
+}
+
+/** Candidates from hand-built signals (tests, eval baselines) that only carry capacityNumbers. */
+function candidatesOf(signals: ScrapedSignals): CapacityCandidate[] {
+  const raw =
+    signals.capacityCandidates ??
+    signals.capacityNumbers.map((value) => ({ value, context: "", sentence: "", roomHint: null }));
+  return raw.filter((c) => c.value >= MIN_PLAUSIBLE_CAPACITY);
+}
+
+/**
+ * The trust table (NOTES-ai-core.md, Step 2f):
+ *  - a regex candidate and a grounded LLM room agree within 20% → verified,
+ *    capacity = the regex figure, evidence = the LLM's quote;
+ *  - they describe the same room but disagree by more → likely, both figures
+ *    in the note, the verbatim regex figure displayed;
+ *  - a grounded LLM room with no regex counterpart → ai_extracted;
+ *  - regex candidates only, on a private-dining page → likely (a pattern match
+ *    alone no longer earns verified); without a private-dining page → unverified.
+ */
+function roomsFromEvidence(
+  signals: ScrapedSignals,
+  llmRooms: LlmExtractedRoom[],
+  style: RoomStyle
+): DraftRoom[] | null {
+  const candidates = candidatesOf(signals);
+  const pages = signals.pages ?? [];
+
+  if (llmRooms.length > 0) {
+    return llmRooms.map((room): DraftRoom => {
+      const evidenceUrl = findEvidenceUrl(room.evidenceQuote, pages);
+      const agreeing = candidates
+        .filter((c) => capacitySpread(c.value, room.maxCapacity) <= AGREEMENT_TOLERANCE)
+        .sort(
+          (a, b) =>
+            Number(sameRoom(b.roomHint, room.roomName)) - Number(sameRoom(a.roomHint, room.roomName)) ||
+            capacitySpread(a.value, room.maxCapacity) - capacitySpread(b.value, room.maxCapacity)
+        )[0];
+
+      if (agreeing) {
+        return {
+          roomName: room.roomName,
+          minCapacity: room.minCapacity != null && room.minCapacity <= agreeing.value ? room.minCapacity : undefined,
+          maxCapacity: agreeing.value,
+          style,
+          capacityTrust: "verified",
+          notes: agreementNote(agreeing.value, room.maxCapacity),
+          isEstimate: false,
+          evidenceQuote: room.evidenceQuote ?? (agreeing.sentence || null),
+          evidenceUrl: evidenceUrl ?? agreeing.url ?? null,
+        };
+      }
+
+      // The same room read two ways: matched by name, or — when the page has a
+      // single room — the regex's own pick for that room.
+      const conflicting =
+        candidates.find((c) => sameRoom(c.roomHint, room.roomName)) ??
+        (llmRooms.length === 1 && candidates.length > 0 ? pickRegexCandidates(candidates)[0] : undefined);
+
+      if (conflicting) {
+        return {
+          roomName: room.roomName,
+          maxCapacity: conflicting.value,
+          style,
+          capacityTrust: "likely",
+          notes: disagreementNote(conflicting.value, room.maxCapacity),
+          isEstimate: false,
+          evidenceQuote: conflicting.sentence || null,
+          evidenceUrl: conflicting.url ?? null,
+        };
+      }
+
+      return {
+        roomName: room.roomName,
+        minCapacity: room.minCapacity ?? undefined,
+        maxCapacity: room.maxCapacity,
+        style,
+        capacityTrust: "ai_extracted",
+        notes: "Read from the venue's own page by AI because the page states capacity in prose rather than a standard format. Confirm before booking.",
+        isEstimate: false,
+        evidenceQuote: room.evidenceQuote ?? null,
+        evidenceUrl,
+      };
+    });
   }
 
-  return {
-    trust: "likely",
-    note: `Sources disagree — the page text reads as up to ${regexMax} guests, while AI extraction of the same page reads ${llmMax}. Confirm the real figure with the venue.`,
-  };
+  if (candidates.length > 0) {
+    return pickRegexCandidates(candidates).map(
+      (c): DraftRoom => ({
+        roomName: c.roomHint ?? "Private Dining / Event Space",
+        maxCapacity: c.value,
+        style,
+        capacityTrust: signals.privateDiningPageFound ? "likely" : "unverified",
+        notes: signals.privateDiningPageFound
+          ? "Capacity figure read from the venue's own private-dining/events page by pattern match, not confirmed by a second independent read — confirm before booking."
+          : "Capacity figure appears on the venue's site but not on a private-dining page, so it may not describe a private room — call to confirm.",
+        isEstimate: false,
+        evidenceQuote: c.sentence || null,
+        evidenceUrl: c.url ?? null,
+      })
+    );
+  }
+
+  return null;
 }
 
 /**
@@ -135,6 +280,9 @@ export function buildVenueDraft(
           style,
           capacityTrust: "unverified",
           notes: "Estimated from venue category only — no source to confirm against.",
+          isEstimate: true,
+          evidenceQuote: null,
+          evidenceUrl: null,
         },
       ],
       // Google Places can have a photo for a venue even with no website
@@ -148,59 +296,22 @@ export function buildVenueDraft(
     };
   }
 
-  const hasCapacityNumbers = signals.capacityNumbers.length > 0;
-  const regexMax = hasCapacityNumbers ? signals.capacityNumbers.at(-1)! : null;
-  const llmRooms = llm?.rooms ?? [];
-  const llmMax = llmRooms.length > 0 ? Math.max(...llmRooms.map((r) => r.maxCapacity)) : null;
-  const reconciled = reconcileCapacity(regexMax, llmMax);
+  const hasCapacityNumbers = candidatesOf(signals).length > 0;
 
-  const capacityTrust: TrustLevel = signals.privateDiningPageFound
-    ? hasCapacityNumbers
-      ? "verified"
-      : "likely"
-    : "unverified";
-
-  let rooms: DraftRoom[];
-
-  if (hasCapacityNumbers) {
-    rooms = [
-      {
-        roomName: "Private Dining / Event Space",
-        minCapacity: signals.capacityNumbers[0] !== regexMax ? signals.capacityNumbers[0] : undefined,
-        maxCapacity: regexMax!,
-        style,
-        // Agreement between two independent reads can raise an otherwise
-        // `likely` figure; disagreement can lower an otherwise `verified` one.
-        capacityTrust: reconciled?.trust ?? capacityTrust,
-        notes: reconciled
-          ? reconciled.note
-          : "Capacity figure(s) extracted from the venue's own private-dining/events page.",
-      },
-    ];
-  } else if (llmRooms.length > 0) {
-    // The regex pass found no figure but the model read named rooms out of the
-    // page's prose. Each becomes a real room, labeled by how it was obtained.
-    rooms = llmRooms.map((room) => ({
-      roomName: room.roomName,
-      minCapacity: room.minCapacity ?? undefined,
-      maxCapacity: room.maxCapacity,
+  const rooms: DraftRoom[] = roomsFromEvidence(signals, llm?.rooms ?? [], style) ?? [
+    {
+      roomName: signals.privateDiningPageFound ? "Private events available (capacity unpublished)" : "Capacity unconfirmed",
+      maxCapacity: estimateCapacityByCategory(candidate.category),
       style,
-      capacityTrust: "ai_extracted",
-      notes: "Read from the venue's own page by AI because the page states capacity in prose rather than a standard format. Confirm before booking.",
-    }));
-  } else {
-    rooms = [
-      {
-        roomName: signals.privateDiningPageFound ? "Private events available (capacity unpublished)" : "Capacity unconfirmed",
-        maxCapacity: estimateCapacityByCategory(candidate.category),
-        style,
-        capacityTrust,
-        notes: signals.privateDiningPageFound
-          ? "Venue confirms private events but does not publish a specific capacity number — call to confirm fit."
-          : "Estimated from venue category only — no private-dining page found to confirm against.",
-      },
-    ];
-  }
+      capacityTrust: signals.privateDiningPageFound ? "likely" : "unverified",
+      notes: signals.privateDiningPageFound
+        ? "Venue confirms private events but does not publish a specific capacity number — call to confirm fit."
+        : "Estimated from venue category only — no private-dining page found to confirm against.",
+      isEstimate: true,
+      evidenceQuote: null,
+      evidenceUrl: null,
+    },
+  ];
 
   const regexMinSpend = signals.minSpendUsd.length > 0 ? Math.min(...signals.minSpendUsd) : null;
   const minSpendUsd = regexMinSpend ?? llm?.minSpendUsd ?? null;

@@ -14,6 +14,7 @@
  * request shape.
  */
 
+import { isGrounded } from "@/lib/discovery/grounding";
 import { CHUNK_SEPARATOR } from "@/lib/discovery/scraper";
 
 const XAI_ENDPOINT = "https://api.x.ai/v1/chat/completions";
@@ -28,19 +29,31 @@ export type LlmExtractedRoom = {
   roomName: string;
   maxCapacity: number;
   minCapacity: number | null;
+  /**
+   * The page sentence the model cited for this capacity. Always present on
+   * rooms returned by extractPrivateDiningWithLlm (rooms whose quote fails the
+   * grounding check are dropped); optional only for hand-built extractions.
+   */
+  evidenceQuote?: string;
 };
 
 export type LlmExtraction = {
   rooms: LlmExtractedRoom[];
   minSpendUsd: number | null;
+  /** The sentence cited for minSpendUsd; null when no minimum spend was kept. */
+  minSpendEvidence?: string | null;
   dietaryNotes: string | null;
   hostsPrivateEvents: boolean;
+  /** Rooms the model returned whose evidence failed the grounding check — a hallucination proxy for evaluation. */
+  rejectedCount?: number;
+  /** True when a minimum spend was returned but its evidence failed the grounding check. */
+  minSpendRejected?: boolean;
 };
 
 const EXTRACTION_SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["hostsPrivateEvents", "rooms", "minSpendUsd", "dietaryNotes"],
+  required: ["hostsPrivateEvents", "rooms", "minSpendUsd", "minSpendEvidence", "dietaryNotes"],
   properties: {
     hostsPrivateEvents: {
       type: "boolean",
@@ -53,17 +66,25 @@ const EXTRACTION_SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["roomName", "maxCapacity", "minCapacity"],
+        required: ["roomName", "maxCapacity", "minCapacity", "evidenceQuote"],
         properties: {
           roomName: { type: "string", description: "The room's name as written on the page." },
           maxCapacity: { type: "integer", description: "Maximum guests this room holds." },
           minCapacity: { type: ["integer", "null"], description: "Minimum guests, or null if not stated." },
+          evidenceQuote: {
+            type: "string",
+            description: "The exact sentence from the page that states this room's capacity, copied verbatim.",
+          },
         },
       },
     },
     minSpendUsd: {
       type: ["integer", "null"],
       description: "Minimum spend or food-and-beverage minimum in USD, or null if not stated.",
+    },
+    minSpendEvidence: {
+      type: ["string", "null"],
+      description: "The exact sentence from the page that states the minimum spend, copied verbatim, or null.",
     },
     dietaryNotes: {
       type: ["string", "null"],
@@ -77,7 +98,47 @@ const SYSTEM_PROMPT = [
   "Report only what the page actually states. Never estimate, infer from venue size, or fill gaps with typical values.",
   "If the page does not state a capacity, return an empty rooms array rather than guessing a number.",
   "A number written for a different purpose (street address, price, year, seat count of the whole restaurant) is not a private room capacity.",
+  "For each room, copy the exact sentence from the page that states its capacity into evidenceQuote.",
+  "Likewise copy the exact sentence stating the minimum spend into minSpendEvidence, or null if there is none.",
 ].join(" ");
+
+const RETRY_BACKOFF_MS = 1_000;
+
+function isRetryableStatus(status: number): boolean {
+  return status === 429 || status >= 500;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Keeps only what the page itself supports: each room's evidenceQuote must be
+ * a verbatim sentence of the text the model was given and must state the
+ * room's capacity (see grounding.ts [P3]); the same for minimum spend.
+ */
+export function groundExtraction(parsed: LlmExtraction & { minSpendEvidence?: string | null }, inputText: string): LlmExtraction {
+  // `strict` guarantees the shape, not the semantics — a hallucinated
+  // 900-person "private room" for a 40-seat restaurant is still shaped
+  // correctly, so implausible figures are dropped here.
+  const plausible = (parsed.rooms ?? []).filter(
+    (room) => Number.isInteger(room.maxCapacity) && room.maxCapacity > 0 && room.maxCapacity <= 5000 && room.roomName?.trim()
+  );
+  const rooms = plausible.filter((room) => isGrounded(room.evidenceQuote, inputText, room.maxCapacity));
+
+  const rawMinSpend = Number.isInteger(parsed.minSpendUsd) && (parsed.minSpendUsd ?? 0) > 0 ? parsed.minSpendUsd : null;
+  const minSpendGrounded = rawMinSpend != null && isGrounded(parsed.minSpendEvidence, inputText, rawMinSpend);
+
+  return {
+    rooms,
+    minSpendUsd: minSpendGrounded ? rawMinSpend : null,
+    minSpendEvidence: minSpendGrounded ? (parsed.minSpendEvidence ?? null) : null,
+    dietaryNotes: parsed.dietaryNotes?.trim() || null,
+    hostsPrivateEvents: Boolean(parsed.hostsPrivateEvents),
+    rejectedCount: plausible.length - rooms.length,
+    minSpendRejected: rawMinSpend != null && !minSpendGrounded,
+  };
+}
 
 /**
  * Orders the model's input so the private-dining page is read first, then the
@@ -117,59 +178,58 @@ export async function extractPrivateDiningWithLlm(
 
   const input = buildLlmInput(privateDiningText, pageText);
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), XAI_TIMEOUT_MS);
+  const body = JSON.stringify({
+    model: XAI_MODEL,
+    temperature: 0,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: `Venue: ${venueName}\n\nPage text:\n${input}`,
+      },
+    ],
+    response_format: {
+      type: "json_schema",
+      json_schema: { name: "private_dining_extraction", strict: true, schema: EXTRACTION_SCHEMA },
+    },
+  });
 
-  try {
-    const res = await fetch(XAI_ENDPOINT, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: XAI_MODEL,
-        temperature: 0,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          {
-            role: "user",
-            content: `Venue: ${venueName}\n\nPage text:\n${input}`,
-          },
-        ],
-        response_format: {
-          type: "json_schema",
-          json_schema: { name: "private_dining_extraction", strict: true, schema: EXTRACTION_SCHEMA },
-        },
-      }),
-      signal: controller.signal,
-    });
+  // One retry, after a 1 s backoff, for rate limiting and server errors only;
+  // anything else (4xx, timeout, network failure) returns null as before.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), XAI_TIMEOUT_MS);
 
-    if (!res.ok) {
-      console.error(`xAI extraction failed for ${venueName}: ${res.status}`);
+    try {
+      const res = await fetch(XAI_ENDPOINT, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body,
+        signal: controller.signal,
+      });
+
+      if (!res.ok) {
+        if (attempt === 1 && isRetryableStatus(res.status)) {
+          clearTimeout(timeout);
+          await sleep(RETRY_BACKOFF_MS);
+          continue;
+        }
+        console.error(`xAI extraction failed for ${venueName}: ${res.status}`);
+        return null;
+      }
+
+      const payload = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+      const content = payload.choices?.[0]?.message?.content;
+      if (!content) return null;
+
+      return groundExtraction(JSON.parse(content) as LlmExtraction, input);
+    } catch (err) {
+      console.error(`xAI extraction threw for ${venueName}:`, err);
       return null;
+    } finally {
+      clearTimeout(timeout);
     }
-
-    const payload = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
-    const content = payload.choices?.[0]?.message?.content;
-    if (!content) return null;
-
-    const parsed = JSON.parse(content) as LlmExtraction;
-
-    // `strict` guarantees the shape, not the semantics — a hallucinated
-    // 900-person "private room" for a 40-seat restaurant is still shaped
-    // correctly, so implausible figures are dropped here.
-    const rooms = (parsed.rooms ?? []).filter(
-      (room) => Number.isInteger(room.maxCapacity) && room.maxCapacity > 0 && room.maxCapacity <= 5000 && room.roomName?.trim()
-    );
-
-    return {
-      rooms,
-      minSpendUsd: Number.isInteger(parsed.minSpendUsd) && (parsed.minSpendUsd ?? 0) > 0 ? parsed.minSpendUsd : null,
-      dietaryNotes: parsed.dietaryNotes?.trim() || null,
-      hostsPrivateEvents: Boolean(parsed.hostsPrivateEvents),
-    };
-  } catch (err) {
-    console.error(`xAI extraction threw for ${venueName}:`, err);
-    return null;
-  } finally {
-    clearTimeout(timeout);
   }
+
+  return null;
 }

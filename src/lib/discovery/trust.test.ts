@@ -34,13 +34,17 @@ function signals(overrides: Partial<ScrapedSignals> = {}): ScrapedSignals {
 }
 
 describe("capacity trust derivation", () => {
-  it("marks capacity verified when a private-dining page publishes explicit numbers", () => {
+  it("marks a regex-only figure on a private-dining page likely, and never takes the largest number", () => {
+    // Step 2f: a pattern match alone no longer earns `verified` (that now
+    // needs a second, independent read to agree), and with no room name to go
+    // on the smallest plausible figure is used — the largest was how a main
+    // dining room's "seats 180" became a 180-guest private room.
     const draft = buildVenueDraft(candidate(), signals({ privateDiningPageFound: true, capacityNumbers: [20, 60] }));
 
     expect(draft.rooms).toHaveLength(1);
-    expect(draft.rooms[0].capacityTrust).toBe("verified");
-    expect(draft.rooms[0].maxCapacity).toBe(60);
-    expect(draft.rooms[0].minCapacity).toBe(20);
+    expect(draft.rooms[0].capacityTrust).toBe("likely");
+    expect(draft.rooms[0].maxCapacity).toBe(20);
+    expect(draft.rooms[0].minCapacity).toBeUndefined();
   });
 
   it("marks capacity likely when a private-dining page exists but publishes no number", () => {
@@ -83,13 +87,15 @@ describe("capacity trust derivation", () => {
 });
 
 describe("price trust derivation is independent of capacity trust", () => {
-  it("keeps price unverified even when capacity is verified", () => {
+  it("keeps price unverified even when capacity has a published figure", () => {
     const draft = buildVenueDraft(
       candidate({ priceLevelGoogle: undefined }),
       signals({ privateDiningPageFound: true, capacityNumbers: [50], minSpendUsd: [] })
     );
 
-    expect(draft.rooms[0].capacityTrust).toBe("verified");
+    // Regex-only capacity is `likely` since Step 2f; the point of this test is
+    // that price does not inherit it either way.
+    expect(draft.rooms[0].capacityTrust).toBe("likely");
     expect(draft.minSpendUsd).toBeNull();
     expect(draft.minSpendTrust).toBe("unverified");
     expect(draft.priceTierTrust).toBe("unverified");
@@ -268,7 +274,8 @@ describe("cross-referencing two independent reads", () => {
       hostsPrivateEvents: true,
     });
 
-    expect(draft.rooms[0].capacityTrust).toBe("verified");
+    // Without a second read the regex figure stays `likely` (Step 2f).
+    expect(draft.rooms[0].capacityTrust).toBe("likely");
     expect(draft.rooms[0].notes).not.toMatch(/agree|disagree/i);
   });
 });
