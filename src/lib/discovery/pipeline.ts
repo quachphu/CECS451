@@ -1,10 +1,15 @@
 import { createServiceClient } from "@/lib/supabase/server";
-import { discoverNearbyVenues } from "@/lib/discovery/places";
-import { extractPrivateDiningWithLlm, isLlmExtractionConfigured } from "@/lib/discovery/llm-extract";
-import { scrapeVenueForPrivateDining } from "@/lib/discovery/scraper";
+import { orderByPrior } from "@/lib/discovery/discovery-prior";
+import { discoverNearbyVenues, type CandidateVenue } from "@/lib/discovery/places";
+import { extractPrivateDiningWithLlm, isLlmExtractionConfigured, type LlmExtraction } from "@/lib/discovery/llm-extract";
+import { renderPage, type RenderedPage } from "@/lib/discovery/render";
+import { createRobotsChecker, type RobotsChecker } from "@/lib/discovery/robots";
+import { featureLog } from "@/lib/discovery/confidence";
+import { applyRenderedPage, scrapeVenueForPrivateDining, type ScrapedSignals } from "@/lib/discovery/scraper";
 import { buildVenueDraft, type VenueDraft } from "@/lib/discovery/trust";
 import { haversineMeters, type LatLng } from "@/lib/geo/commute";
 import { boundingBox } from "@/lib/geo/bounding-box";
+import { createLimiter } from "@/lib/limiter";
 
 /**
  * A dense downtown core (Times Square, the Financial District) returns far
@@ -19,7 +24,7 @@ import { boundingBox } from "@/lib/geo/bounding-box";
  * half the area and finding only 7 venues with a site-confirmed capacity. The
  * ceilings below cover essentially all of them. Raising them costs nothing in
  * API spend — this tier is a plain HTTP GET plus an HTML parse, and the paid
- * rendering/LLM tiers stay bounded by MAX_ENRICHMENT_BUDGET regardless.
+ * tiers stay bounded by MAX_RENDER_BUDGET and MAX_LLM_BUDGET regardless.
  */
 function candidateCap(candidateCount: number): number {
   if (candidateCount >= 60) return 45;
@@ -38,26 +43,30 @@ function candidateCap(candidateCount: number): number {
 const SCRAPE_CONCURRENCY = 8;
 
 /**
- * Caps how many venues per run may fall through to the paid rendering + LLM
- * tiers. Both are gated on the free static pass finding nothing, and in a
- * dense area that can be most candidates — without a ceiling, one search in
- * Manhattan could consume an entire credit balance. Candidates are processed
- * in discovery order, so the budget goes to the closest venues.
+ * Caps LLM extraction calls per run. The LLM now reads every candidate with a
+ * private-dining page — not only those where the regex found nothing — because
+ * a second, independent read is what can upgrade a regex figure to `verified`
+ * (or expose a disagreement). Budget is claimed in candidate order — highest
+ * discovery prior first (see discovery-prior.ts) — so it goes to the likeliest
+ * venues.
  */
-const MAX_ENRICHMENT_BUDGET = 8;
+export const MAX_LLM_BUDGET = 12;
 
-async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let cursor = 0;
-  async function worker() {
-    while (cursor < items.length) {
-      const index = cursor++;
-      results[index] = await fn(items[index]);
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
-}
+/**
+ * LLM calls run on their own queue, not inside a scrape worker. Each call can
+ * take tens of seconds (45 s timeout); inline, it held one of the 8 scrape
+ * slots for that whole time and stalled every scrape queued behind it.
+ */
+const LLM_CONCURRENCY = 8;
+
+/**
+ * Caps Firecrawl renders per run (1 credit per page, per the Firecrawl v2
+ * scrape docs [D1]). Rendering used to be called from inside the scraper for
+ * every candidate without a static capacity figure, outside any budget, so a
+ * dense-area run could render all 45 candidates. Shared across the run's
+ * concurrent workers; claimed before the request is sent.
+ */
+export const MAX_RENDER_BUDGET = 10;
 
 function citySlugForOrigin(): string {
   // Auto-discovered venues aren't tied to one of the 3 demo city buckets —
@@ -178,6 +187,11 @@ async function upsertVenueDraft(draft: VenueDraft) {
         style: room.style,
         capacity_trust: room.capacityTrust,
         notes: room.notes ?? null,
+        is_estimate: room.isEstimate,
+        evidence_quote: room.evidenceQuote,
+        evidence_url: room.evidenceUrl,
+        capacity_confidence: room.confidence,
+        confidence_features: featureLog(room.confidenceFeatures),
       }))
     );
   }
@@ -204,43 +218,114 @@ async function upsertVenueDraft(draft: VenueDraft) {
   }
 }
 
+/** The I/O the enrichment stage depends on, injectable so tests can stub it. */
+export type EnrichmentDeps = {
+  scrape: (website: string, robots?: RobotsChecker) => Promise<ScrapedSignals>;
+  render: (url: string) => Promise<RenderedPage | null>;
+  extract: (venueName: string, pageText: string, privateDiningText: string) => Promise<LlmExtraction | null>;
+  isLlmConfigured: () => boolean;
+};
+
+const defaultDeps: EnrichmentDeps = {
+  scrape: (website, robots) => scrapeVenueForPrivateDining(website, { robots }),
+  render: renderPage,
+  extract: extractPrivateDiningWithLlm,
+  isLlmConfigured: isLlmExtractionConfigured,
+};
+
+export type EnrichmentStats = {
+  renders: number;
+  llmCalls: number;
+  /** Hosts with at least one page skipped because robots.txt disallowed it. */
+  robotsSkippedHosts: number;
+  /** Venues drafted without reading their site because the homepage was disallowed. */
+  robotsBlockedVenues: number;
+};
+
+function needsLlmRead(signals: ScrapedSignals | null, deps: EnrichmentDeps): signals is ScrapedSignals {
+  return signals != null && signals.privateDiningPageFound && signals.combinedText.length > 0 && deps.isLlmConfigured();
+}
+
+/**
+ * Scrapes each candidate, renders where the static pass found no capacity and
+ * the run's render budget allows, runs the LLM tier where warranted, and
+ * derives trust labels. Pure apart from the injected I/O — nothing here
+ * touches the database.
+ *
+ * Two queues, pipelined: scrapes (and their renders) run 8 at a time; each
+ * finished scrape that warrants an LLM read is handed to a separate 8-wide LLM
+ * queue that starts immediately, so a slow model call never holds a scrape
+ * slot. Drafts are built once both queues drain.
+ */
+export async function enrichCandidates(
+  candidates: CandidateVenue[],
+  deps: EnrichmentDeps = defaultDeps
+): Promise<{ drafts: VenueDraft[]; stats: EnrichmentStats }> {
+  const stats: EnrichmentStats = { renders: 0, llmCalls: 0, robotsSkippedHosts: 0, robotsBlockedVenues: 0 };
+  // One robots.txt fetch per host per run.
+  const robots = createRobotsChecker();
+  const scrapeLimit = createLimiter(SCRAPE_CONCURRENCY);
+  const llmLimit = createLimiter(LLM_CONCURRENCY);
+  const llmReads: Array<Promise<LlmExtraction | null>> = candidates.map(() => Promise.resolve(null));
+
+  const signalsList = await Promise.all(
+    candidates.map((candidate, index) =>
+      scrapeLimit(async () => {
+        let signals = candidate.website ? await deps.scrape(candidate.website, robots) : null;
+        if (signals?.robotsBlocked) stats.robotsBlockedVenues += 1;
+
+        // Budgets are claimed synchronously, before any await, so concurrent
+        // workers can never overshoot them.
+        if (signals?.renderTarget && stats.renders < MAX_RENDER_BUDGET) {
+          stats.renders += 1;
+          const rendered = await deps.render(signals.renderTarget);
+          if (rendered?.text) signals = applyRenderedPage(signals, rendered, candidate.website!);
+        }
+
+        if (needsLlmRead(signals, deps) && stats.llmCalls < MAX_LLM_BUDGET) {
+          stats.llmCalls += 1;
+          const read = signals;
+          // Not awaited here — the scrape slot is released immediately.
+          llmReads[index] = llmLimit(() => deps.extract(candidate.name, read.combinedText, read.privateDiningText ?? "")).catch(
+            () => null
+          );
+        }
+
+        return signals;
+      })
+    )
+  );
+
+  const llmResults = await Promise.all(llmReads);
+  stats.robotsSkippedHosts = robots.skippedHosts.size;
+  const drafts = candidates.map((candidate, index) => buildVenueDraft(candidate, signalsList[index], llmResults[index]));
+
+  return { drafts, stats };
+}
+
 /**
  * Runs live discovery for an area: find candidate venues, scrape each for
  * private-dining signals, derive trust labels, and upsert everything into
  * Supabase. Called by the search flow when there isn't fresh cached
  * coverage for the area already (see src/lib/discovery/ensure-coverage.ts).
  */
-export async function runDiscoveryPipeline(origin: LatLng, radiusMeters: number): Promise<{ discovered: number }> {
+export async function runDiscoveryPipeline(
+  origin: LatLng,
+  radiusMeters: number
+): Promise<{ discovered: number; robotsSkippedHosts: number; robotsBlockedVenues: number }> {
   const candidates = await discoverNearbyVenues(origin, radiusMeters);
-  const toScrape = candidates.slice(0, candidateCap(candidates.length));
+  // Likeliest private-event hosts first, so the cap and the render/LLM
+  // budgets (claimed in this order) go to them rather than to whatever is
+  // nearest.
+  const toScrape = orderByPrior(candidates).slice(0, candidateCap(candidates.length));
 
-  let enrichmentSpent = 0;
-
-  const drafts = await mapWithConcurrency(toScrape, SCRAPE_CONCURRENCY, async (candidate) => {
-    const signals = candidate.website ? await scrapeVenueForPrivateDining(candidate.website) : null;
-
-    // The LLM tier exists for pages that clearly host private events but state
-    // capacity in prose. Running it where a figure was already matched
-    // verbatim would spend tokens to second-guess better evidence — except
-    // when a second opinion is what we want, which is what the enrichment
-    // budget below funds.
-    const needsLlmRead =
-      signals != null &&
-      signals.combinedText.length > 0 &&
-      signals.capacityNumbers.length === 0 &&
-      signals.privateDiningPageFound &&
-      isLlmExtractionConfigured();
-
-    if (!needsLlmRead || enrichmentSpent >= MAX_ENRICHMENT_BUDGET) {
-      return buildVenueDraft(candidate, signals);
-    }
-
-    enrichmentSpent += 1;
-    const llm = await extractPrivateDiningWithLlm(candidate.name, signals!.combinedText);
-    return buildVenueDraft(candidate, signals, llm);
-  });
+  const { drafts, stats } = await enrichCandidates(toScrape);
 
   await Promise.all(drafts.map(upsertVenueDraft));
 
-  return { discovered: drafts.length };
+  return {
+    discovered: drafts.length,
+    robotsSkippedHosts: stats.robotsSkippedHosts,
+    robotsBlockedVenues: stats.robotsBlockedVenues,
+  };
 }

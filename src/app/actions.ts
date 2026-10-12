@@ -3,6 +3,9 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "@/lib/supabase/server";
+import { featureLog, PLANNER_CONFIDENCE } from "@/lib/discovery/confidence";
+import { confirmationStatus } from "@/lib/corroboration";
+import type { ConfirmationStatus } from "@/lib/supabase/types";
 import { geocodeAddress } from "@/lib/geo/geocode";
 import { isEmptyParse, isNaturalLanguageSearchConfigured, parseNaturalLanguageQuery } from "@/lib/nl-query";
 import { isDietarySummaryConfigured, summarizeDietaryNeeds } from "@/lib/dietary-summary";
@@ -317,8 +320,15 @@ export async function generateDietarySummaryAction(formData: FormData) {
  * venue's room capacity is a fact about the venue, not about the company that
  * asked, and scoping it privately would throw away the entire compounding
  * benefit.
+ *
+ * Corroboration: when the room's capacity is already strongly believed
+ * (confidence >= 0.85) and the reported figure differs from it by more than
+ * 50%, the confirmation is recorded with status 'pending' and nothing in the
+ * catalog is overwritten — not the capacity, and not a minimum spend sent in
+ * the same report (see NOTES-ai-core.md). Returns the status so the form can
+ * say "Saved for review".
  */
-export async function confirmVenueDetailAction(formData: FormData) {
+export async function confirmVenueDetailAction(formData: FormData): Promise<{ status: ConfirmationStatus }> {
   const company = await getCurrentCompany();
   if (!company) throw new Error("No active workspace.");
 
@@ -352,6 +362,17 @@ export async function confirmVenueDetailAction(formData: FormData) {
   const confirmedBy = (await getDisplayName()) ?? `Someone at ${company.name}`;
   const supabase = createServiceClient();
 
+  const { data: currentRoom } =
+    confirmedMaxCapacity != null && roomId
+      ? await supabase
+          .from("venue_rooms")
+          .select("max_capacity, capacity_confidence, capacity_trust")
+          .eq("id", roomId)
+          .eq("venue_id", venueId)
+          .maybeSingle()
+      : { data: null };
+  const status = confirmationStatus(currentRoom, confirmedMaxCapacity);
+
   const { error: insertError } = await supabase.from("venue_confirmations").insert({
     venue_id: venueId,
     room_id: roomId,
@@ -360,8 +381,14 @@ export async function confirmVenueDetailAction(formData: FormData) {
     confirmed_max_capacity: confirmedMaxCapacity,
     confirmed_min_spend_usd: confirmedMinSpendUsd,
     note,
+    status,
   });
   if (insertError) throw new Error(`Could not record that confirmation: ${insertError.message}`);
+
+  if (status === "pending") {
+    revalidatePath(`/venue/${venueId}`);
+    return { status };
+  }
 
   const attribution = `Confirmed by ${confirmedBy} (${company.name}) on ${new Date().toLocaleDateString("en-US", { dateStyle: "medium" })}.`;
 
@@ -372,6 +399,19 @@ export async function confirmVenueDetailAction(formData: FormData) {
         max_capacity: confirmedMaxCapacity,
         capacity_trust: "confirmed_by_planner",
         notes: note ? `${attribution} "${note}"` : attribution,
+        // A human phoned the venue: set, not scored (see confidence.ts).
+        capacity_confidence: PLANNER_CONFIDENCE,
+        is_estimate: false,
+        confidence_features: featureLog({
+          source: "planner",
+          agreementSpread: null,
+          privateDiningPageFound: false,
+          grounded: false,
+          competingCandidates: 0,
+          hasRoomHint: false,
+          renderedWithJs: false,
+          category: "",
+        }),
       })
       .eq("id", roomId)
       .eq("venue_id", venueId);
@@ -387,6 +427,7 @@ export async function confirmVenueDetailAction(formData: FormData) {
   revalidatePath(`/venue/${venueId}`);
   revalidatePath("/shortlist");
   revalidatePath("/search");
+  return { status };
 }
 
 /**

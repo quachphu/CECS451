@@ -36,6 +36,8 @@ export type CoverageSummary = {
   freshNearby: number;
   /** Candidate sites actually fetched and scraped, when discovery ran. */
   scraped: number;
+  /** Hosts with pages skipped because robots.txt disallowed them, when discovery ran. */
+  robotsSkippedHosts?: number;
 };
 
 export async function ensureCoverage(origin: LatLng, radiusMeters: number): Promise<CoverageSummary> {
@@ -60,6 +62,6 @@ export async function ensureCoverage(origin: LatLng, radiusMeters: number): Prom
     return { ...base, ranDiscovery: false, scraped: 0 };
   }
 
-  const { discovered } = await runDiscoveryPipeline(origin, radiusMeters);
-  return { ...base, ranDiscovery: true, scraped: discovered };
+  const { discovered, robotsSkippedHosts } = await runDiscoveryPipeline(origin, radiusMeters);
+  return { ...base, ranDiscovery: true, scraped: discovered, robotsSkippedHosts };
 }

@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
-import { renderPage } from "@/lib/discovery/render";
+import type { RenderedPage } from "@/lib/discovery/render";
+import { createRobotsChecker, CRAWLER_USER_AGENT, type RobotsChecker } from "@/lib/discovery/robots";
 
 export type ScrapedSignals = {
   privateDiningPageFound: boolean;
@@ -17,12 +18,91 @@ export type ScrapedSignals = {
   /** Combined page text, retained so a later LLM pass can re-read the same
    *  source without re-fetching it. Not persisted. */
   combinedText: string;
+  /**
+   * Text of the matched private-dining page(s) only — plus the rendered text
+   * when the rendered page is itself a private-dining page. Not persisted.
+   *
+   * combinedText leads with the homepage, so on a long homepage the page that
+   * actually describes the private rooms can start past the LLM tier's input
+   * cut-off; this lets that tier read it first (see buildLlmInput in
+   * llm-extract.ts).
+   *
+   * The fields below are always set by scrapeVenueForPrivateDining; they're
+   * optional only so hand-built signals (unit tests, eval baselines) stay valid.
+   */
+  privateDiningText?: string;
+  /**
+   * The URL the JS-rendering tier should try when the static pass found no
+   * capacity figure (the private-dining link if one was seen, else the
+   * homepage), or null when no render is needed. Rendering itself is the
+   * pipeline's decision so it can be budgeted per run.
+   */
+  renderTarget?: string | null;
+  /** Every page read, in order — kept so applyRenderedPage can recompute. Not persisted. */
+  pages?: ScrapedPage[];
+  /** Every link seen across those pages. Not persisted. */
+  links?: ScrapedLink[];
+  /** Filtered capacity candidates, per page. capacityNumbers is derived from these. */
+  capacityCandidates?: CapacityCandidate[];
+  /** The site's robots.txt disallows its homepage for us, so nothing was read (Step 7). */
+  robotsBlocked?: boolean;
 };
+
+export type ScrapedLink = { href: string; text: string };
+
+/**
+ * One regex hit for a capacity phrase. The regex is a *candidate generator*
+ * now, not the final answer: which candidate (if any) becomes a room's
+ * capacity is decided in buildVenueDraft (src/lib/discovery/trust.ts).
+ */
+export type CapacityCandidate = {
+  value: number;
+  /** ±150 characters around the match. */
+  context: string;
+  /** The sentence containing the match — used as the evidence quote. */
+  sentence: string;
+  /** Nearest preceding capitalised room name in the same sentence ("Garden Room"), or null. */
+  roomHint: string | null;
+  /** The page it was read on, and whether that page is a private-dining page. */
+  url?: string;
+  onPrivateDiningPage?: boolean;
+};
+
+export type ScrapedPage = {
+  url: string;
+  text: string;
+  /** True when this page is itself a private-dining/events page. */
+  privateDining: boolean;
+};
+
+/**
+ * Joins page texts in combinedText/privateDiningText. Page text has all
+ * whitespace collapsed to single spaces, so this sequence never occurs inside
+ * a page and splitting on it recovers the pages exactly.
+ */
+export const CHUNK_SEPARATOR = " \n ";
 
 const PRIVATE_DINING_KEYWORDS =
   /private\s*(dining|event)s?|group\s*(dining|event|booking)s?|banquet|meetings?\s*(&|and)?\s*events|weddings?|celebrations|book\s*(an\s*)?event|buyouts?/i;
 
 const CAPACITY_PATTERN = /(?:up\s*to|seats?|accommodat(?:es|ing)|hold[s]?|for)\s*(\d{1,4})\s*(?:guests?|people|persons?|pax)/gi;
+
+/** A party this small is a table booking, not a private room. */
+export const MIN_PLAUSIBLE_CAPACITY = 6;
+const CONTEXT_CHARS = 150;
+/**
+ * Reservation phrasing ("table for 2 people", "reservation for 8 guests").
+ * Checked against the match plus the RESERVATION_LOOKBEHIND characters before
+ * it rather than the full ±150 context: almost every restaurant homepage
+ * carries a "Book a table for 2" widget, and a context-wide check would throw
+ * away real room capacities that merely sit near it. See NOTES-ai-core.md.
+ */
+const RESERVATION_PATTERN = /(table|reservation|book)\s+(for|of)\s+\d/i;
+const RESERVATION_LOOKBEHIND = 30;
+const ROOM_HINT_PATTERN =
+  /((?:[A-Z][\w'’&-]*\s+){0,4}(?:Room|Hall|Lounge|Terrace|Space|Suite|Mezzanine|Patio|Bar))\b/g;
+const LEADING_DETERMINER = /^(?:The|Our|A|An|This|Each|Every|Its)\s+/;
+const DETERMINER_BOUNDARY = /\b(?:The|Our|A|An|This|Each|Every|Its)\s+/;
 const MIN_SPEND_PATTERN = /(?:minimum\s*spend|f&b\s*minimum|food\s*(?:and|&)\s*beverage\s*minimum)[^\d$]{0,20}\$?\s?([\d,]{3,7})/gi;
 const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 const PHONE_PATTERN = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/;
@@ -44,7 +124,7 @@ async function fetchText(url: string): Promise<string | null> {
     const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { "User-Agent": "private-dining-finder/0.1 (event-planning research tool)" },
+      headers: { "User-Agent": CRAWLER_USER_AGENT },
     });
     clearTimeout(timeout);
     if (!res.ok) return null;
@@ -64,6 +144,58 @@ function extractNumbers(text: string, pattern: RegExp): number[] {
     if (!Number.isNaN(value) && value > 0) numbers.push(value);
   }
   return numbers;
+}
+
+function sentenceAround(text: string, start: number, end: number): string {
+  const before = text.slice(Math.max(0, start - CONTEXT_CHARS), start);
+  const after = text.slice(end, end + CONTEXT_CHARS);
+  const sentenceStart = Math.max(before.search(/[.!?]\s[^.!?]*$/) + 2, 0);
+  const sentenceEndMatch = after.search(/[.!?](\s|$)/);
+  const tail = sentenceEndMatch === -1 ? after : after.slice(0, sentenceEndMatch + 1);
+  const head = before.search(/[.!?]\s[^.!?]*$/) === -1 ? before : before.slice(sentenceStart);
+  return `${head}${text.slice(start, end)}${tail}`.trim();
+}
+
+function roomHintBefore(text: string, start: number): string | null {
+  const window = text.slice(Math.max(0, start - CONTEXT_CHARS), start);
+  // Only look inside the current sentence, so "The Garden Room holds 40. Our
+  // patio seats 60" doesn't hand the patio's number to the Garden Room.
+  const lastBoundary = window.search(/[.!?]\s[^.!?]*$/);
+  const sentence = lastBoundary === -1 ? window : window.slice(lastBoundary + 2);
+  const hints = Array.from(sentence.matchAll(ROOM_HINT_PATTERN), (m) => m[1].trim());
+  const nearest = hints.at(-1);
+  if (!nearest) return null;
+  // Headings have no sentence punctuation, so "Private Events" + "The Garden
+  // Room holds 40" arrive as one run of capitalised words. A determiner marks
+  // where the room's own name starts; keep what follows the last one.
+  const name = nearest.split(DETERMINER_BOUNDARY).at(-1)!.replace(LEADING_DETERMINER, "").trim();
+  return name || null;
+}
+
+/**
+ * Finds every capacity phrase in `text` as a candidate with its surrounding
+ * context and nearest room name. Drops values below MIN_PLAUSIBLE_CAPACITY and
+ * reservation phrasing ("table for 2 people").
+ */
+export function extractCapacityCandidates(text: string): CapacityCandidate[] {
+  const candidates: CapacityCandidate[] = [];
+  for (const match of text.matchAll(CAPACITY_PATTERN)) {
+    const value = parseInt(match[1] ?? "", 10);
+    if (Number.isNaN(value) || value < MIN_PLAUSIBLE_CAPACITY) continue;
+
+    const start = match.index ?? 0;
+    const end = start + match[0].length;
+    const local = text.slice(Math.max(0, start - RESERVATION_LOOKBEHIND), end);
+    if (RESERVATION_PATTERN.test(local)) continue;
+
+    candidates.push({
+      value,
+      context: text.slice(Math.max(0, start - CONTEXT_CHARS), Math.min(text.length, end + CONTEXT_CHARS)),
+      sentence: sentenceAround(text, start, end),
+      roomHint: roomHintBefore(text, start),
+    });
+  }
+  return candidates;
 }
 
 /** Normalizes matched dietary phrases into a stable, de-duplicated list. */
@@ -126,22 +258,8 @@ function textFromHtml(html: string): { text: string; links: Array<{ href: string
   return { text, links };
 }
 
-/**
- * Fetches a venue's homepage, follows links that look like a private
- * dining / events / banquet page (up to MAX_SUBPAGES of them), and
- * extracts capacity numbers, minimum-spend figures, menu links, dietary
- * accommodations, and contact details via pattern matching over the visible
- * text. This is the automated replacement for manually reading a venue's
- * website.
- *
- * When the static pass finds no capacity figure — either because the site
- * renders that content client-side, or because it blocked a plain fetch
- * outright — a JS-rendering pass retries the most relevant URL (see
- * src/lib/discovery/render.ts). If that also finds nothing, the venue still
- * degrades honestly to "unverified — needs a call" rather than guessing.
- */
-export async function scrapeVenueForPrivateDining(website: string): Promise<ScrapedSignals> {
-  const empty: ScrapedSignals = {
+function emptySignals(renderTarget: string | null): ScrapedSignals {
+  return {
     privateDiningPageFound: false,
     scrapedUrls: [],
     capacityNumbers: [],
@@ -153,14 +271,106 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
     dietaryNotes: null,
     renderedWithJs: false,
     combinedText: "",
+    privateDiningText: "",
+    renderTarget,
+    pages: [],
+    links: [],
+    capacityCandidates: [],
   };
+}
 
+/**
+ * Derives every signal from the pages read so far. The static pass and the
+ * post-render pass both go through here, so a rendered page is read with
+ * exactly the same rules as a fetched one.
+ */
+function finalizeSignals(
+  pages: ScrapedPage[],
+  links: ScrapedLink[],
+  website: string,
+  extra: { renderedWithJs: boolean; renderTarget: string | null }
+): ScrapedSignals {
+  if (pages.length === 0) return emptySignals(extra.renderTarget);
+
+  const textChunks = pages.map((p) => p.text);
+  const combinedText = textChunks.join(CHUNK_SEPARATOR);
+  const capacityCandidates = pages.flatMap((page) =>
+    extractCapacityCandidates(page.text).map((c) => ({ ...c, url: page.url, onPrivateDiningPage: page.privateDining }))
+  );
+  // Kept for backward compatibility; now derived from the filtered candidates,
+  // so "table for 2 people" no longer turns into a minimum capacity of 2.
+  const capacityNumbers = capacityCandidates.map((c) => c.value).sort((a, b) => a - b);
+  const minSpendUsd = extractNumbers(combinedText, MIN_SPEND_PATTERN);
+  const email = combinedText.match(EMAIL_PATTERN)?.[0] ?? null;
+  const phone = combinedText.match(PHONE_PATTERN)?.[0] ?? null;
+
+  // Prefer an excerpt from the private-dining page itself (chunk index 1+)
+  // over the homepage for the venue description.
+  const descriptionSource = textChunks[1] ?? textChunks[0] ?? "";
+  const descriptionExcerpt = descriptionSource ? descriptionSource.slice(0, 320).trim() : null;
+
+  return {
+    privateDiningPageFound: pages.some((p) => p.privateDining),
+    scrapedUrls: Array.from(new Set(pages.map((p) => p.url))),
+    capacityNumbers,
+    minSpendUsd,
+    email,
+    phone,
+    descriptionExcerpt,
+    menuUrl: pickMenuUrl(links, website),
+    dietaryNotes: extractDietaryNotes(combinedText),
+    renderedWithJs: extra.renderedWithJs,
+    combinedText,
+    privateDiningText: pages
+      .filter((p) => p.privateDining)
+      .map((p) => p.text)
+      .join(CHUNK_SEPARATOR),
+    renderTarget: extra.renderTarget,
+    pages,
+    links,
+    capacityCandidates,
+  };
+}
+
+/**
+ * Rebuilds signals from stored page texts — the offline evaluation harness
+ * replays snapshots through exactly the extraction the live scraper uses.
+ */
+export function signalsFromPages(
+  pages: ScrapedPage[],
+  links: ScrapedLink[],
+  website: string,
+  extra: { renderedWithJs: boolean; renderTarget: string | null } = { renderedWithJs: false, renderTarget: null }
+): ScrapedSignals {
+  return finalizeSignals(pages, links, website, extra);
+}
+
+/**
+ * Fetches a venue's homepage, follows links that look like a private
+ * dining / events / banquet page (up to MAX_SUBPAGES of them), and
+ * extracts capacity numbers, minimum-spend figures, menu links, dietary
+ * accommodations, and contact details via pattern matching over the visible
+ * text. This is the automated replacement for manually reading a venue's
+ * website.
+ *
+ * This is the static pass only. When it finds no capacity figure — because
+ * the site renders that content client-side, or blocked a plain fetch
+ * outright — it reports a `renderTarget`, and the pipeline decides whether the
+ * run's render budget allows a JS-rendering pass (see applyRenderedPage and
+ * src/lib/discovery/pipeline.ts). If nothing finds a figure, the venue still
+ * degrades honestly to "unverified — needs a call" rather than guessing.
+ */
+export async function scrapeVenueForPrivateDining(
+  website: string,
+  options: { robots?: RobotsChecker } = {}
+): Promise<ScrapedSignals> {
   let base: URL;
   try {
     base = new URL(website);
   } catch {
-    return empty;
+    return emptySignals(null);
   }
+  const robots = options.robots ?? createRobotsChecker();
 
   // Deliberately not scraping og:image / twitter:image as a photo source:
   // for chains and franchises (common among discovered venues) that meta
@@ -170,17 +380,19 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
   // Photos (a photo actually submitted for this exact location), wired in
   // at the discovery step (see src/lib/discovery/places.ts).
 
-  const homepageHtml = await fetchText(website);
+  // robots.txt is fetched in parallel with the homepage so honouring it costs
+  // no extra latency; a disallowed homepage's response is discarded unread.
+  const [homepageResponse, homepageAllowed] = await Promise.all([fetchText(website), robots.isAllowed(website)]);
+  if (!homepageAllowed) return { ...emptySignals(null), robotsBlocked: true };
+  const homepageHtml = homepageResponse;
 
-  const scrapedUrls: string[] = [];
-  const textChunks: string[] = [];
-  const allLinks: Array<{ href: string; text: string }> = [];
-  let privateDiningPageFound = false;
+  const pages: ScrapedPage[] = [];
+  const links: ScrapedLink[] = [];
   let privateDiningUrl: string | null = null;
 
   if (homepageHtml) {
     const homepage = textFromHtml(homepageHtml);
-    allLinks.push(...homepage.links);
+    links.push(...homepage.links);
 
     const candidateLinks = new Set<string>();
     for (const { href, text } of homepage.links) {
@@ -193,75 +405,59 @@ export async function scrapeVenueForPrivateDining(website: string): Promise<Scra
       }
     }
 
-    scrapedUrls.push(website);
-    textChunks.push(homepage.text);
+    // The homepage never counts as the private-dining page itself, even if it
+    // mentions the phrase — same rule as before.
+    pages.push({ url: website, text: homepage.text, privateDining: false });
 
-    for (const url of Array.from(candidateLinks).slice(0, MAX_SUBPAGES)) {
+    const allowedLinks: string[] = [];
+    for (const url of candidateLinks) if (await robots.isAllowed(url)) allowedLinks.push(url);
+
+    for (const url of allowedLinks.slice(0, MAX_SUBPAGES)) {
       const html = await fetchText(url);
       if (!html) continue;
       const page = textFromHtml(html);
-      scrapedUrls.push(url);
-      textChunks.push(page.text);
-      allLinks.push(...page.links);
-      if (PRIVATE_DINING_KEYWORDS.test(page.text)) {
-        privateDiningPageFound = true;
-        privateDiningUrl ??= url;
-      }
+      const isPrivateDining = PRIVATE_DINING_KEYWORDS.test(page.text);
+      pages.push({ url, text: page.text, privateDining: isPrivateDining });
+      links.push(...page.links);
+      if (isPrivateDining) privateDiningUrl ??= url;
     }
 
     // Recorded even when the static pass can't reach the page itself: a
     // homepage link labeled "Private Events" is the best URL to render.
-    if (!privateDiningUrl) privateDiningUrl = Array.from(candidateLinks)[0] ?? null;
+    if (!privateDiningUrl) privateDiningUrl = allowedLinks[0] ?? null;
   }
 
-  let renderedWithJs = false;
-  let capacityNumbers = extractNumbers(textChunks.join(" \n "), CAPACITY_PATTERN).sort((a, b) => a - b);
+  const staticCapacityFound = pages.some((p) => extractCapacityCandidates(p.text).length > 0);
+  // Never ask the render tier for a page robots.txt disallows (Firecrawl would fetch it for us).
+  const target = privateDiningUrl ?? website;
+  const renderTarget = staticCapacityFound || !(await robots.isAllowed(target)) ? null : target;
 
-  // Gated on the static pass having produced no capacity figure, so rendering
-  // spend goes only to pages the cheap path genuinely couldn't read.
-  if (capacityNumbers.length === 0) {
-    const rendered = await renderPage(privateDiningUrl ?? website);
-    if (rendered?.text) {
-      // Kept whatever it contains, not only when it mentions private dining:
-      // sites that block a plain fetch outright leave rendering as the only
-      // read available, and discarding it would also discard the contact
-      // details, menu link, and the page text the LLM tier needs.
-      renderedWithJs = true;
-      capacityNumbers = extractNumbers(rendered.text, CAPACITY_PATTERN).sort((a, b) => a - b);
-      textChunks.push(rendered.text);
-      if (!scrapedUrls.includes(rendered.url)) scrapedUrls.push(rendered.url);
-      allLinks.push(...rendered.links.map((href) => ({ href, text: href })));
+  return finalizeSignals(pages, links, website, { renderedWithJs: false, renderTarget });
+}
 
-      // The trust-relevant claim stays gated on evidence: only a rendered page
-      // that is itself a private-dining page counts, not a homepage that
-      // merely mentions the phrase.
-      if (PRIVATE_DINING_KEYWORDS.test(rendered.text) && rendered.url !== website) privateDiningPageFound = true;
-    }
-  }
+/**
+ * Folds a JS-rendered read of `signals.renderTarget` into the static signals,
+ * re-running the same extraction over the combined text.
+ *
+ * The rendered text is kept whatever it contains, not only when it mentions
+ * private dining: sites that block a plain fetch outright leave rendering as
+ * the only read available, and discarding it would also discard the contact
+ * details, menu link, and the page text the LLM tier needs. The trust-relevant
+ * claim stays gated on evidence: only a rendered page that is itself a
+ * private-dining page counts, not a homepage that merely mentions the phrase.
+ */
+export function applyRenderedPage(signals: ScrapedSignals, rendered: RenderedPage, website: string): ScrapedSignals {
+  if (!rendered.text) return signals;
 
-  if (scrapedUrls.length === 0) return empty;
+  const pages: ScrapedPage[] = [
+    ...(signals.pages ?? []),
+    {
+      url: rendered.url,
+      text: rendered.text,
+      privateDining: PRIVATE_DINING_KEYWORDS.test(rendered.text) && rendered.url !== website,
+    },
+  ];
+  const links: ScrapedLink[] = [...(signals.links ?? []), ...rendered.links.map((href) => ({ href, text: href }))];
 
-  const combinedText = textChunks.join(" \n ");
-  const minSpendUsd = extractNumbers(combinedText, MIN_SPEND_PATTERN);
-  const email = combinedText.match(EMAIL_PATTERN)?.[0] ?? null;
-  const phone = combinedText.match(PHONE_PATTERN)?.[0] ?? null;
-
-  // Prefer an excerpt from the private-dining page itself (chunk index 1+)
-  // over the homepage for the venue description.
-  const descriptionSource = textChunks[1] ?? textChunks[0] ?? "";
-  const descriptionExcerpt = descriptionSource ? descriptionSource.slice(0, 320).trim() : null;
-
-  return {
-    privateDiningPageFound,
-    scrapedUrls,
-    capacityNumbers,
-    minSpendUsd,
-    email,
-    phone,
-    descriptionExcerpt,
-    menuUrl: pickMenuUrl(allLinks, website),
-    dietaryNotes: extractDietaryNotes(combinedText),
-    renderedWithJs,
-    combinedText,
-  };
+  return finalizeSignals(pages, links, website, { renderedWithJs: true, renderTarget: null });
 }

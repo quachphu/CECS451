@@ -1,3 +1,5 @@
+import fitPriors from "@/data/fit-priors.json";
+import { categoryBucket, type CategoryBucket } from "@/lib/category-bucket";
 import { CAPACITY_TRUST_REASONS, PRICE_TRUST_QUALIFIERS } from "@/lib/trust-labels";
 import type { CommuteMode, CommuteResult } from "@/lib/geo/commute";
 import type { RoomStyle, TrustLevel, VenuePhotoRow, VenueRoomRow, VenueRow } from "@/lib/supabase/types";
@@ -22,6 +24,8 @@ export type RankedVenue = {
   commuteEstimated: boolean;
   score: number;
   reasons: string[];
+  /** Probability the venue really has a space that fits the group (expected-utility ranking). */
+  pFit?: number;
 };
 
 // Ordered by strength of evidence, not by how confident the data feels:
@@ -52,14 +56,67 @@ export function countConfirmedCapacities(results: RankedVenue[]): number {
   ).length;
 }
 
-/** Picks the tightest-fitting room that can actually hold the group. */
-function pickBestRoom(rooms: VenueRoomRow[], headcount: number): VenueRoomRow | null {
-  const fitting = rooms.filter((r) => r.max_capacity >= headcount);
-  if (fitting.length === 0) return null;
+/** Penalty for sending a planner to a venue that turns out not to fit (in units of U). */
+export const LAMBDA = 0.25;
+/** Below this probability of fitting, a venue isn't worth a planner's call. */
+export const MIN_PFIT = 0.2;
+/**
+ * A non-estimate room smaller than the group, believed at least this much, is
+ * strong evidence the venue doesn't fit — excluded outright, as before.
+ */
+const STRONG_EVIDENCE = 0.85;
+/** Capacity fit credited to an estimate room, whose number is ignored. */
+const NEUTRAL_FIT = 0.5;
+
+type FitPrior = { h50: number; scale: number };
+const PRIORS = fitPriors as { floor: number; ceil: number; buckets: Record<CategoryBucket, FitPrior> };
+
+/**
+ * q: the base rate that a venue of this category has a private space holding
+ * `headcount` guests, from src/data/fit-priors.json (placeholder constants).
+ */
+export function priorFit(category: string, headcount: number): number {
+  const { h50, scale } = PRIORS.buckets[categoryBucket(category)];
+  const q = 1 / (1 + Math.exp((headcount - h50) / scale));
+  return Math.min(PRIORS.ceil, Math.max(PRIORS.floor, q));
+}
+
+/** How much a room's capacity figure is believed; old rows fall back to the tier weight. */
+export function capacityBelief(room: Pick<VenueRoomRow, "capacity_confidence" | "capacity_trust">): number {
+  return room.capacity_confidence ?? TRUST_WEIGHT[room.capacity_trust];
+}
+
+type RoomChoice = { room: VenueRoomRow; fits: boolean };
+
+/**
+ * The smallest non-estimate room that holds the group (as before); failing
+ * that, an estimate room (its number is ignored); failing that, the largest
+ * non-estimate room, which is too small.
+ */
+function chooseRoom(rooms: VenueRoomRow[], headcount: number): RoomChoice | null {
+  const real = rooms.filter((r) => !r.is_estimate);
   // Prefer the smallest room that still fits — a 50-person group in a
   // 60-cap room reads as "the right size"; the same group in a 1500-cap
   // ballroom is technically fine but a worse experiential fit.
-  return fitting.sort((a, b) => a.max_capacity - b.max_capacity)[0];
+  const fitting = real.filter((r) => r.max_capacity >= headcount).sort((a, b) => a.max_capacity - b.max_capacity);
+  if (fitting.length > 0) return { room: fitting[0], fits: true };
+
+  const estimate = rooms.find((r) => r.is_estimate);
+  if (estimate) return { room: estimate, fits: false };
+
+  const largest = [...real].sort((a, b) => b.max_capacity - a.max_capacity)[0];
+  return largest ? { room: largest, fits: false } : null;
+}
+
+/**
+ * P(the venue really fits the group): believe the room's figure with
+ * probability p, otherwise fall back to the base rate q. An estimate room's
+ * number carries no information, so it's q alone.
+ */
+function probabilityOfFit(room: VenueRoomRow, fits: boolean, q: number): number {
+  if (room.is_estimate) return q;
+  const p = capacityBelief(room);
+  return p * (fits ? 1 : 0) + (1 - p) * q;
 }
 
 function styleScore(roomStyle: RoomStyle, requested?: RoomStyle): number {
@@ -67,15 +124,11 @@ function styleScore(roomStyle: RoomStyle, requested?: RoomStyle): number {
   return roomStyle === requested ? 1 : 0.4;
 }
 
-function trustScore(venue: VenueWithRelations, room: VenueRoomRow): number {
-  // Capacity trust matters most (it's the fact the search itself depends
-  // on); price trust is informative but secondary.
-  return TRUST_WEIGHT[room.capacity_trust] * 0.7 + TRUST_WEIGHT[venue.price_tier_trust] * 0.3;
-}
-
 function buildReasons(
   venue: VenueWithRelations,
   room: VenueRoomRow,
+  fits: boolean,
+  pFit: number,
   commuteMinutes: number,
   criteria: SearchCriteria,
   commuteEstimated: boolean
@@ -86,7 +139,17 @@ function buildReasons(
     `${Math.round(commuteMinutes)} min ${modeLabel}${commuteEstimated ? " (estimated)" : ""} — under your ${criteria.maxCommuteMinutes} min max`
   );
 
-  reasons.push(`Fits ${criteria.headcount} in ${room.room_name} (up to ${room.max_capacity}${room.min_capacity ? ` from ${room.min_capacity}` : ""})`);
+  if (room.is_estimate) {
+    reasons.push(`No published capacity — call to confirm it can host ${criteria.headcount}`);
+  } else if (!fits) {
+    reasons.push(
+      `Largest listed space (${room.room_name}) holds up to ${room.max_capacity} — may be too small for ${criteria.headcount}; worth a call`
+    );
+  } else {
+    reasons.push(`Fits ${criteria.headcount} in ${room.room_name} (up to ${room.max_capacity}${room.min_capacity ? ` from ${room.min_capacity}` : ""})`);
+  }
+
+  reasons.push(`About ${Math.round(pFit * 100)}% likely to fit your group`);
 
   reasons.push(CAPACITY_TRUST_REASONS[room.capacity_trust]);
 
@@ -108,9 +171,21 @@ function buildReasons(
 }
 
 /**
- * Filters venues to ones that can actually fit the group within the
- * commute cutoff, then ranks the rest by a weighted "best overall fit"
- * score: commute closeness, capacity fit, data trust, and style match.
+ * Filters venues to ones within the commute cutoff that plausibly fit, then
+ * ranks them by expected utility (maximum expected utility, Russell & Norvig
+ * ch. 16 [P7]):
+ *
+ *   U     = 0.5·commute + 0.35·capacityFit + 0.15·style
+ *   score = pFit·U − (1 − pFit)·LAMBDA
+ *
+ * pFit is the probability the venue really has a space for the group, so a
+ * venue is credited with its utility only in proportion to how much its
+ * capacity is believed, and charged LAMBDA for the wasted call when it isn't.
+ * A guessed capacity can no longer buy a tight-fit bonus: its number is
+ * ignored and only the base rate counts.
+ *
+ * Ties break on pFit, then shorter commute, then name, so the order is
+ * deterministic regardless of the order the database returned rows in.
  */
 export function rankVenues(
   criteria: SearchCriteria,
@@ -126,25 +201,27 @@ export function rankVenues(
     const commuteMinutes = commute.durationSeconds / 60;
     if (commuteMinutes > criteria.maxCommuteMinutes) continue;
 
-    const bestRoom = pickBestRoom(venue.rooms, criteria.headcount);
-    if (!bestRoom) continue;
+    const choice = chooseRoom(venue.rooms, criteria.headcount);
+    if (!choice) continue;
+    const { room: bestRoom, fits } = choice;
+
+    // Strong evidence it doesn't fit: the venue's own (believed) figure is too small.
+    if (!fits && !bestRoom.is_estimate && capacityBelief(bestRoom) >= STRONG_EVIDENCE) continue;
+
+    const q = priorFit(venue.category, criteria.headcount);
+    const pFit = probabilityOfFit(bestRoom, fits, q);
+    if (pFit < MIN_PFIT) continue;
 
     const commuteScoreValue = Math.max(0, 1 - commuteMinutes / criteria.maxCommuteMinutes);
-    const rawCapacityFit = 1 - Math.min(1, (bestRoom.max_capacity - criteria.headcount) / Math.max(bestRoom.max_capacity, 1));
-    // Fit credit is proportional to how much the capacity figure is believed.
-    //
-    // Venues with no published capacity fall back to a category estimate (see
-    // estimateCapacityByCategory in discovery/trust.ts), and a guess of ~60
-    // happens to be a near-perfect "fit" for a party of 50. Scoring raw fit let
-    // that fabricated tightness beat a real, site-confirmed 200-seat room:
-    // a Times Square load test put Joe's Pizza and Raising Cane's above
-    // Carmine's private party room. A number we invented cannot be allowed to
-    // outscore one the venue published.
-    const capacityFitScore = rawCapacityFit * TRUST_WEIGHT[bestRoom.capacity_trust];
-    const trust = trustScore(venue, bestRoom);
+    const rawCapacityFit = fits
+      ? 1 - Math.min(1, (bestRoom.max_capacity - criteria.headcount) / Math.max(bestRoom.max_capacity, 1))
+      : bestRoom.is_estimate
+        ? NEUTRAL_FIT
+        : 0;
     const style = styleScore(bestRoom.style, criteria.style);
 
-    const score = commuteScoreValue * 0.35 + capacityFitScore * 0.3 + trust * 0.25 + style * 0.1;
+    const utility = 0.5 * commuteScoreValue + 0.35 * rawCapacityFit + 0.15 * style;
+    const score = pFit * utility - (1 - pFit) * LAMBDA;
 
     ranked.push({
       venue,
@@ -153,9 +230,16 @@ export function rankVenues(
       commuteMiles: commute.distanceMeters / 1609.34,
       commuteEstimated: commute.estimated,
       score,
-      reasons: buildReasons(venue, bestRoom, commuteMinutes, criteria, commute.estimated),
+      pFit,
+      reasons: buildReasons(venue, bestRoom, fits, pFit, commuteMinutes, criteria, commute.estimated),
     });
   }
 
-  return ranked.sort((a, b) => b.score - a.score);
+  return ranked.sort(
+    (a, b) =>
+      b.score - a.score ||
+      (b.pFit ?? 0) - (a.pFit ?? 0) ||
+      a.commuteMinutes - b.commuteMinutes ||
+      a.venue.name.localeCompare(b.venue.name)
+  );
 }

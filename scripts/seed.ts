@@ -85,6 +85,7 @@ async function main() {
         style: room.style,
         capacity_trust: room.capacityTrust,
         notes: room.notes ?? null,
+        is_estimate: room.isEstimate ?? false,
       }))
     );
 

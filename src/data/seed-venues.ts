@@ -15,6 +15,8 @@ export type SeedRoom = {
   style: "seated" | "reception" | "either";
   capacityTrust: "verified" | "likely" | "unverified";
   notes?: string;
+  /** The capacity was estimated during research, not quoted anywhere (migration 0011). */
+  isEstimate?: boolean;
 };
 
 export type SeedPhoto = {
@@ -330,7 +332,7 @@ export const seedVenues: SeedVenue[] = [
     sourceNote:
       "Venue confirms daily happy hour and beachfront layout, but no published full-buyout capacity for private events — estimate below is inferred from the venue's beachfront restaurant footprint, not a quoted figure. Call events team to confirm.",
     rooms: [
-      { roomName: "Full restaurant buyout (estimated)", maxCapacity: 180, style: "reception", capacityTrust: "unverified" },
+      { roomName: "Full restaurant buyout (estimated)", maxCapacity: 180, style: "reception", capacityTrust: "unverified", isEstimate: true },
     ],
     photos: [],
   },
@@ -350,7 +352,7 @@ export const seedVenues: SeedVenue[] = [
     sourceNote:
       "No private-dining page or published capacity found on the venue's own site — flagged unverified/needs a call. Estimated capacity is a rough category-based guess, not a quoted number.",
     rooms: [
-      { roomName: "Group buyout (estimated, unconfirmed)", maxCapacity: 100, style: "reception", capacityTrust: "unverified" },
+      { roomName: "Group buyout (estimated, unconfirmed)", maxCapacity: 100, style: "reception", capacityTrust: "unverified", isEstimate: true },
     ],
     photos: [],
   },

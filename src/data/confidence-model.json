@@ -1,0 +1,24 @@
+{
+  "version": "placeholder-0",
+  "description": "Hand-set logistic coefficients chosen so canonical cases roughly reproduce the old tier weights (planner 0.98, regex+LLM agree 0.9, grounded LLM 0.7, regex only 0.6, category estimate 0.2). Refit with scripts/train_confidence.py once eval/labels.csv has labels.",
+  "intercept": 0,
+  "weights": {
+    "source=planner": 3.892,
+    "source=both": 1.647,
+    "source=llm": 0.097,
+    "source=regex": -0.195,
+    "source=estimate": -1.386,
+    "agreementSpread": -4.0,
+    "privateDiningPageFound": 0.6,
+    "grounded": 0.0,
+    "competingCandidates": -0.08,
+    "hasRoomHint": 0.15,
+    "renderedWithJs": -0.1,
+    "category=banquet": 0.0,
+    "category=hotel": 0.0,
+    "category=bar": 0.0,
+    "category=club": 0.0,
+    "category=restaurant": 0.0,
+    "category=other": 0.0
+  }
+}
