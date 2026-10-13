@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPinned, ShieldCheck, UtensilsCrossed, Users } from "lucide-react";
+import { startErrorMessage } from "@/lib/start-errors";
 
 const FEATURES = [
   { icon: MapPinned, title: "Search by address", description: "Any office, headcount, and max commute." },
@@ -15,12 +16,17 @@ const FEATURES = [
   { icon: Users, title: "Shared with your team", description: "One code, same saved offices and shortlist for everyone." },
 ];
 
-export default async function StartPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function StartPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string; error?: string }>;
+}) {
   const company = await getCurrentCompany();
   if (company) redirect("/search");
 
-  const { tab } = await searchParams;
+  const { tab, error } = await searchParams;
   const defaultTab = tab === "join" ? "join" : "create";
+  const errorMessage = startErrorMessage(error);
 
   return (
     <div className="relative flex min-h-[calc(100vh-0px)] items-center justify-center overflow-hidden bg-background px-4 py-12 sm:px-6 lg:px-10">
@@ -83,6 +89,15 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
             <p className="mt-1 text-sm text-muted-foreground">
               Set up your company&apos;s workspace, or join one that already exists.
             </p>
+
+            {errorMessage && (
+              <p
+                role="alert"
+                className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+              >
+                {errorMessage}
+              </p>
+            )}
 
             <Tabs defaultValue={defaultTab} className="mt-6">
               <TabsList className="w-full">
