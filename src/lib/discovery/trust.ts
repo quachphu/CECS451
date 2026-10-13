@@ -83,6 +83,10 @@ const AGREEMENT_TOLERANCE = 0.2;
 /** Source note for a venue whose robots.txt disallows its homepage (Step 7). */
 export const ROBOTS_BLOCKED_NOTE = "Site asks crawlers not to read it — call the venue.";
 
+/** Source note for a venue whose site couldn't be reached at all during discovery. */
+export const SITE_UNREACHABLE_NOTE =
+  "The venue's website couldn't be read during discovery, so private-dining availability and capacity are unconfirmed. Call the venue directly.";
+
 function inferStyle(category: string): RoomStyle {
   const c = category.toLowerCase();
   if (c.includes("bar") || c.includes("night") || c.includes("club")) return "reception";
@@ -168,6 +172,15 @@ function pickRegexCandidates(candidates: CapacityCandidate[]): CapacityCandidate
   return Array.from(byRoom.values());
 }
 
+/**
+ * Whether a candidate was read on the private-dining page itself. Candidates
+ * from hand-built signals carry no page information and count as on it, which
+ * keeps their behaviour unchanged.
+ */
+function onPrivateDiningPage(c: CapacityCandidate): boolean {
+  return c.onPrivateDiningPage !== false;
+}
+
 /** Candidates from hand-built signals (tests, eval baselines) that only carry capacityNumbers. */
 function candidatesOf(signals: ScrapedSignals): CapacityCandidate[] {
   const raw =
@@ -198,7 +211,12 @@ function roomsFromEvidence(
   if (llmRooms.length > 0) {
     return llmRooms.map((room): DraftRoom => {
       const evidenceUrl = findEvidenceUrl(room.evidenceQuote, pages);
-      const agreeing = candidates
+      // Only a figure about this room can corroborate it: one read on the
+      // private-dining page, or one the page itself attached this room's name
+      // to. A homepage's "main dining room seats 45" landing within 20% of a
+      // private room's 40 is a coincidence, not a second read.
+      const comparable = candidates.filter((c) => onPrivateDiningPage(c) || sameRoom(c.roomHint, room.roomName));
+      const agreeing = comparable
         .filter((c) => capacitySpread(c.value, room.maxCapacity) <= AGREEMENT_TOLERANCE)
         .sort(
           (a, b) =>
@@ -232,9 +250,15 @@ function roomsFromEvidence(
 
       // The same room read two ways: matched by name, or — when the page has a
       // single room — the regex's own pick for that room.
+      // Only figures from the private-dining page are eligible for the
+      // single-room fallback — otherwise a homepage's "seats 180" would be
+      // shown for a private room the model correctly read as 40.
+      const privatePageCandidates = comparable.filter(onPrivateDiningPage);
       const conflicting =
-        candidates.find((c) => sameRoom(c.roomHint, room.roomName)) ??
-        (llmRooms.length === 1 && candidates.length > 0 ? pickRegexCandidates(candidates)[0] : undefined);
+        comparable.find((c) => sameRoom(c.roomHint, room.roomName)) ??
+        (llmRooms.length === 1 && privatePageCandidates.length > 0
+          ? pickRegexCandidates(privatePageCandidates)[0]
+          : undefined);
 
       if (conflicting) {
         return scored(
@@ -293,10 +317,14 @@ function roomsFromEvidence(
             roomName: c.roomHint ?? "Private Dining / Event Space",
             maxCapacity: c.value,
             style,
-            capacityTrust: signals.privateDiningPageFound ? "likely" : "unverified",
-            notes: signals.privateDiningPageFound
-              ? "Capacity figure read from the venue's own private-dining/events page by pattern match, not confirmed by a second independent read — confirm before booking."
-              : "Capacity figure appears on the venue's site but not on a private-dining page, so it may not describe a private room — call to confirm.",
+            // `likely` needs the figure to come from the private-dining page
+            // itself; the same pattern on the homepage usually describes the
+            // main dining room.
+            capacityTrust: signals.privateDiningPageFound && onPrivateDiningPage(c) ? "likely" : "unverified",
+            notes:
+              signals.privateDiningPageFound && onPrivateDiningPage(c)
+                ? "Capacity figure read from the venue's own private-dining/events page by pattern match, not confirmed by a second independent read — confirm before booking."
+                : "Capacity figure appears on the venue's site but not on a private-dining page, so it may not describe a private room — call to confirm.",
             isEstimate: false,
             evidenceQuote: c.sentence || null,
             evidenceUrl: c.url ?? null,
@@ -330,8 +358,9 @@ export function buildVenueDraft(
   const style = inferStyle(candidate.category);
   const priceTier = priceLevelToTier(candidate.priceLevelGoogle);
 
-  if (!signals || signals.robotsBlocked) {
+  if (!signals || signals.robotsBlocked || signals.siteUnreachable) {
     const robotsBlocked = Boolean(signals?.robotsBlocked);
+    const unreachable = Boolean(signals?.siteUnreachable);
     return {
       placeSourceId: candidate.placeSourceId,
       name: candidate.name,
@@ -340,7 +369,7 @@ export function buildVenueDraft(
       lng: candidate.lng,
       category: candidate.category,
       // Kept when robots.txt is what stopped us — the planner can still visit it.
-      website: robotsBlocked ? (candidate.website ?? null) : null,
+      website: robotsBlocked || unreachable ? (candidate.website ?? null) : null,
       phone: candidate.phone ?? null,
       email: null,
       priceTier,
@@ -350,7 +379,9 @@ export function buildVenueDraft(
       description: `${candidate.name} — discovered near your search location.`,
       sourceNote: robotsBlocked
         ? ROBOTS_BLOCKED_NOTE
-        : "No website found for this venue during discovery, so private-dining availability and capacity are unconfirmed. Call the venue directly.",
+        : unreachable
+          ? SITE_UNREACHABLE_NOTE
+          : "No website found for this venue during discovery, so private-dining availability and capacity are unconfirmed. Call the venue directly.",
       rooms: [
         scored(
           {

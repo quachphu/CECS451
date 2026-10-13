@@ -100,8 +100,9 @@ export function DietarySummaryPanel({
       try {
         const formData = new FormData();
         formData.set("code", code);
-        await generateDietarySummaryAction(formData);
-        toast.success("Dietary roster updated.");
+        const result = await generateDietarySummaryAction(formData);
+        if (result.error) toast.error(result.error);
+        else toast.success("Dietary roster updated.");
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Could not summarize the replies.");
       }

@@ -6,6 +6,12 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { featureLog, PLANNER_CONFIDENCE } from "@/lib/discovery/confidence";
 import { confirmationStatus } from "@/lib/corroboration";
 import type { ConfirmationStatus } from "@/lib/supabase/types";
+import type { StartErrorCode } from "@/lib/start-errors";
+
+/** Sends the person back to the workspace form with a message they can act on. */
+function backToStart(tab: "create" | "join", error: StartErrorCode): never {
+  redirect(`/start?tab=${tab}&error=${error}`);
+}
 import { geocodeAddress } from "@/lib/geo/geocode";
 import { isEmptyParse, isNaturalLanguageSearchConfigured, parseNaturalLanguageQuery } from "@/lib/nl-query";
 import { isDietarySummaryConfigured, summarizeDietaryNeeds } from "@/lib/dietary-summary";
@@ -18,13 +24,22 @@ import {
   setDisplayName,
 } from "@/lib/workspace";
 
+/**
+ * What the client-invoked actions return. Next.js omits the message of an
+ * error thrown from a Server Action in production builds (the client only
+ * sees "An error occurred in the Server Components render…"), so messages
+ * meant for the person are returned as values instead of thrown.
+ */
+export type ActionResult<T extends object = object> = T & { error?: string };
+
 export async function joinOrCreateWorkspaceAction(formData: FormData) {
   const mode = String(formData.get("mode") ?? "join");
   const displayName = String(formData.get("displayName") ?? "").trim();
   // Required in both flows: a workspace's organizer (creator) and every
   // joining member need a real name attached, so shortlist notes and the
   // workspace itself can always be attributed to someone.
-  if (!displayName) throw new Error("Your name is required.");
+  const tab = mode === "create" ? "create" : "join";
+  if (!displayName) backToStart(tab, "name-required");
   await setDisplayName(displayName);
 
   if (mode === "create") {
@@ -34,11 +49,11 @@ export async function joinOrCreateWorkspaceAction(formData: FormData) {
     const companyName = String(formData.get("companyName") ?? "").trim();
     const addressLabel = String(formData.get("addressLabel") ?? "").trim();
     const addressQuery = String(formData.get("addressQuery") ?? "").trim();
-    if (!addressLabel || !addressQuery) throw new Error("Office label and address are required.");
-    if (!companyName) throw new Error("Workspace name is required.");
+    if (!addressLabel || !addressQuery) backToStart("create", "address-required");
+    if (!companyName) backToStart("create", "workspace-name-required");
 
     const geocoded = await geocodeAddress(addressQuery);
-    if (!geocoded) throw new Error("Could not find that address. Try adding city and state.");
+    if (!geocoded) backToStart("create", "address-not-found");
 
     const { company } = await createCompanyWorkspace(companyName, displayName);
 
@@ -53,9 +68,9 @@ export async function joinOrCreateWorkspaceAction(formData: FormData) {
     });
   } else {
     const code = String(formData.get("code") ?? "").trim();
-    if (!code) throw new Error("Company code is required.");
+    if (!code) backToStart("join", "code-required");
     const company = await joinCompanyWorkspace(code);
-    if (!company) throw new Error("No workspace found for that code — double check it or create a new one.");
+    if (!company) backToStart("join", "code-not-found");
   }
 
   redirect("/search");
@@ -203,7 +218,7 @@ const MAX_EVENT_MESSAGE_CHARS = 600;
  * re-rendering the page here would just be a redundant round-trip for the
  * sender on top of the push they already get.
  */
-export async function sendEventMessageAction(formData: FormData) {
+export async function sendEventMessageAction(formData: FormData): Promise<ActionResult> {
   const code = String(formData.get("code") ?? "")
     .trim()
     .toUpperCase();
@@ -214,13 +229,13 @@ export async function sendEventMessageAction(formData: FormData) {
     .trim()
     .slice(0, MAX_EVENT_MESSAGE_CHARS);
 
-  if (!code) throw new Error("Missing event code.");
-  if (!name) throw new Error("Add your name first so the host knows whose restriction this is.");
-  if (!message) throw new Error("Message can't be empty.");
+  if (!code) return { error: "Missing event code." };
+  if (!name) return { error: "Add your name first so the host knows whose restriction this is." };
+  if (!message) return { error: "Message can't be empty." };
 
   const supabase = createServiceClient();
   const { data: company } = await supabase.from("companies").select("id").eq("code", code).maybeSingle();
-  if (!company) throw new Error("That event link is no longer valid.");
+  if (!company) return { error: "That event link is no longer valid." };
 
   const { data: item } = await supabase
     .from("shortlist_items")
@@ -228,7 +243,7 @@ export async function sendEventMessageAction(formData: FormData) {
     .eq("company_id", company.id)
     .eq("is_selected", true)
     .maybeSingle();
-  if (!item) throw new Error("The host hasn't picked the venue yet — check back shortly.");
+  if (!item) return { error: "The host hasn't picked the venue yet — check back shortly." };
 
   const { error } = await supabase.from("shortlist_messages").insert({
     shortlist_item_id: item.id,
@@ -238,7 +253,8 @@ export async function sendEventMessageAction(formData: FormData) {
     is_highlight_reel: false,
     channel: "event",
   });
-  if (error) throw new Error("Could not send that message.");
+  if (error) return { error: "Could not send that message." };
+  return {};
 }
 
 /**
@@ -256,19 +272,19 @@ export async function sendEventMessageAction(formData: FormData) {
  * they might mistake for complete — which, for allergies, is the failure that
  * actually matters.
  */
-export async function generateDietarySummaryAction(formData: FormData) {
+export async function generateDietarySummaryAction(formData: FormData): Promise<ActionResult> {
   const code = String(formData.get("code") ?? "")
     .trim()
     .toUpperCase();
-  if (!code) throw new Error("Missing event code.");
+  if (!code) return { error: "Missing event code." };
 
   if (!isDietarySummaryConfigured()) {
-    throw new Error("Automatic summarizing isn't configured (XAI_API_KEY). Everyone's replies are still listed below.");
+    return { error: "Automatic summarizing isn't configured (XAI_API_KEY). Everyone's replies are still listed below." };
   }
 
   const supabase = createServiceClient();
   const { data: company } = await supabase.from("companies").select("id").eq("code", code).maybeSingle();
-  if (!company) throw new Error("That event link is no longer valid.");
+  if (!company) return { error: "That event link is no longer valid." };
 
   const { data: item } = await supabase
     .from("shortlist_items")
@@ -276,7 +292,7 @@ export async function generateDietarySummaryAction(formData: FormData) {
     .eq("company_id", company.id)
     .eq("is_selected", true)
     .maybeSingle();
-  if (!item) throw new Error("Pick the venue first — there's no event thread to read yet.");
+  if (!item) return { error: "Pick the venue first — there's no event thread to read yet." };
 
   const { data: messages } = await supabase
     .from("shortlist_messages")
@@ -286,10 +302,10 @@ export async function generateDietarySummaryAction(formData: FormData) {
     .order("created_at", { ascending: true });
 
   const usable = (messages ?? []).filter((m) => m.message.trim());
-  if (usable.length === 0) throw new Error("Nobody has replied yet, so there's nothing to summarize.");
+  if (usable.length === 0) return { error: "Nobody has replied yet, so there's nothing to summarize." };
 
   const summary = await summarizeDietaryNeeds(usable);
-  if (!summary) throw new Error("Couldn't read the replies just now — nothing was changed. Try again in a moment.");
+  if (!summary) return { error: "Couldn't read the replies just now — nothing was changed. Try again in a moment." };
 
   const { error } = await supabase.from("dietary_summaries").insert({
     shortlist_item_id: item.id,
@@ -298,9 +314,10 @@ export async function generateDietarySummaryAction(formData: FormData) {
     message_count: usable.length,
     generated_by: (await getDisplayName()) ?? null,
   });
-  if (error) throw new Error("Could not save that summary.");
+  if (error) return { error: "Could not save that summary." };
 
   revalidatePath(`/event/${code}`);
+  return {};
 }
 
 /**
@@ -328,12 +345,12 @@ export async function generateDietarySummaryAction(formData: FormData) {
  * the same report (see NOTES-ai-core.md). Returns the status so the form can
  * say "Saved for review".
  */
-export async function confirmVenueDetailAction(formData: FormData): Promise<{ status: ConfirmationStatus }> {
+export async function confirmVenueDetailAction(formData: FormData): Promise<ActionResult<{ status?: ConfirmationStatus }>> {
   const company = await getCurrentCompany();
-  if (!company) throw new Error("No active workspace.");
+  if (!company) return { error: "No active workspace." };
 
   const venueId = String(formData.get("venueId") ?? "");
-  if (!venueId) throw new Error("Venue is required.");
+  if (!venueId) return { error: "Venue is required." };
 
   const roomId = formData.get("roomId") ? String(formData.get("roomId")) : null;
   const note = formData.get("note") ? String(formData.get("note")).trim() : null;
@@ -344,16 +361,16 @@ export async function confirmVenueDetailAction(formData: FormData): Promise<{ st
   const confirmedMinSpendUsd = rawMinSpend ? Number.parseInt(rawMinSpend.replace(/[$,]/g, ""), 10) : null;
 
   if (confirmedMaxCapacity == null && confirmedMinSpendUsd == null) {
-    throw new Error("Enter a confirmed capacity, a confirmed minimum spend, or both.");
+    return { error: "Enter a confirmed capacity, a confirmed minimum spend, or both." };
   }
   if (confirmedMaxCapacity != null && (!Number.isFinite(confirmedMaxCapacity) || confirmedMaxCapacity <= 0)) {
-    throw new Error("Confirmed capacity must be a positive number.");
+    return { error: "Confirmed capacity must be a positive number." };
   }
   if (confirmedMinSpendUsd != null && (!Number.isFinite(confirmedMinSpendUsd) || confirmedMinSpendUsd < 0)) {
-    throw new Error("Confirmed minimum spend can't be negative.");
+    return { error: "Confirmed minimum spend can't be negative." };
   }
   if (confirmedMaxCapacity != null && roomId == null) {
-    throw new Error("Pick which room this capacity applies to.");
+    return { error: "Pick which room this capacity applies to." };
   }
 
   // A display name is set when joining or creating a workspace, but the cookie
@@ -383,7 +400,7 @@ export async function confirmVenueDetailAction(formData: FormData): Promise<{ st
     note,
     status,
   });
-  if (insertError) throw new Error(`Could not record that confirmation: ${insertError.message}`);
+  if (insertError) return { error: `Could not record that confirmation: ${insertError.message}` };
 
   if (status === "pending") {
     revalidatePath(`/venue/${venueId}`);
@@ -393,7 +410,7 @@ export async function confirmVenueDetailAction(formData: FormData): Promise<{ st
   const attribution = `Confirmed by ${confirmedBy} (${company.name}) on ${new Date().toLocaleDateString("en-US", { dateStyle: "medium" })}.`;
 
   if (confirmedMaxCapacity != null && roomId) {
-    await supabase
+    const { error: roomError } = await supabase
       .from("venue_rooms")
       .update({
         max_capacity: confirmedMaxCapacity,
@@ -415,13 +432,19 @@ export async function confirmVenueDetailAction(formData: FormData): Promise<{ st
       })
       .eq("id", roomId)
       .eq("venue_id", venueId);
+    // The confirmation row is already saved, so say plainly that the catalog
+    // wasn't updated rather than reporting success.
+    if (roomError) return { error: `Your confirmation was recorded, but the room couldn't be updated: ${roomError.message}` };
   }
 
   if (confirmedMinSpendUsd != null) {
-    await supabase
+    const { error: spendError } = await supabase
       .from("venues")
       .update({ min_spend_usd: confirmedMinSpendUsd, min_spend_trust: "confirmed_by_planner" })
       .eq("id", venueId);
+    if (spendError) {
+      return { error: `Your confirmation was recorded, but the minimum spend couldn't be updated: ${spendError.message}` };
+    }
   }
 
   revalidatePath(`/venue/${venueId}`);

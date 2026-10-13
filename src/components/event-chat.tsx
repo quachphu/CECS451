@@ -225,7 +225,11 @@ export function EventChat({
         formData.set("code", code);
         formData.set("name", trimmedName);
         formData.set("message", value);
-        await sendEventMessageAction(formData);
+        const result = await sendEventMessageAction(formData);
+        if (result.error) {
+          toast.error(result.error);
+          setText(value);
+        }
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Could not send that message.");
         setText(value);
@@ -242,8 +246,9 @@ export function EventChat({
         formData.set("code", code);
         formData.set("name", hostName);
         formData.set("message", ASK_ALLERGY_MESSAGE);
-        await sendEventMessageAction(formData);
-        toast.success("Question posted to the chat.");
+        const result = await sendEventMessageAction(formData);
+        if (result.error) toast.error(result.error);
+        else toast.success("Question posted to the chat.");
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Could not post that question.");
       } finally {

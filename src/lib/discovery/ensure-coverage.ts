@@ -38,6 +38,8 @@ export type CoverageSummary = {
   scraped: number;
   /** Hosts with pages skipped because robots.txt disallowed them, when discovery ran. */
   robotsSkippedHosts?: number;
+  /** Of `scraped`, sites that couldn't be read at all (unreachable, or robots.txt disallows the homepage). */
+  unreadable?: number;
 };
 
 export async function ensureCoverage(origin: LatLng, radiusMeters: number): Promise<CoverageSummary> {
@@ -62,6 +64,15 @@ export async function ensureCoverage(origin: LatLng, radiusMeters: number): Prom
     return { ...base, ranDiscovery: false, scraped: 0 };
   }
 
-  const { discovered, robotsSkippedHosts } = await runDiscoveryPipeline(origin, radiusMeters);
-  return { ...base, ranDiscovery: true, scraped: discovered, robotsSkippedHosts };
+  const { discovered, robotsSkippedHosts, robotsBlockedVenues, unreachableVenues } = await runDiscoveryPipeline(
+    origin,
+    radiusMeters
+  );
+  return {
+    ...base,
+    ranDiscovery: true,
+    scraped: discovered,
+    robotsSkippedHosts,
+    unreadable: robotsBlockedVenues + unreachableVenues,
+  };
 }

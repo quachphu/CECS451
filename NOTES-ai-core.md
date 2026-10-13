@@ -136,3 +136,55 @@ Consequences:
 - **S1** RFC 9309, *Robots Exclusion Protocol*. https://www.rfc-editor.org/rfc/rfc9309
 - **D1** Firecrawl v2 Scrape · **D2** xAI Structured Outputs · **D3** Google Places Nearby Search (New) · **D3b** Maps Platform service terms · **D4** Supabase local development · **D5** PostgreSQL `ALTER TABLE` · **D6** Supabase type generation · **D7** Vitest `vi` · **D8** scikit-learn calibration · **D9** `LogisticRegression` · **D10** OSM Overpass / Map Features · **D11** `ndcg_score` · **D12** `cohen_kappa_score` · **D13** Next.js Server Actions (URLs in the task prompt)
 - **C1** princeton-nlp/ALCE · **C2** gpleiss/temperature_scaling · **C3** google/robotstxt · **C4** sindresorhus/p-limit · **C5** CPython `urllib.robotparser`
+
+## Comprehensive check (2026-10-13)
+
+The production keys are installed in `.env.local` (gitignored). A full review and end-to-end run found and fixed the issues below. All were verified in a production build driven by Playwright, against local Supabase, with the real Google Places key.
+
+### What could be exercised live from the sandbox
+
+| Service | Status here | Result |
+| --- | --- | --- |
+| Google Places (New) | reachable | ✅ 73 candidates around Times Square in about 0.8 s. Every one has a website, a photo and `types`; 39 have a price level. The discovery prior ranks banquet/event hotels top and Joe's Pizza / Raising Cane's / bagel shops bottom. |
+| Your production Supabase project | blocked (network policy), and not in the connected Supabase account | ⚠️ not checkable from here; must have migrations 0001–0011 applied |
+| xAI, Firecrawl, OpenRouteService, Nominatim, Overpass, venue sites | blocked | fallbacks verified: NL search says "the language model didn't respond", the roster shows its real error, commute falls back to the labelled estimate, and unreachable sites get an honest note |
+
+### Bugs found by the review and fixed (with regression tests that fail without the fix)
+
+1. **Unreachable site described as "asks crawlers not to read it".** An unreachable robots.txt (RFC 9309 §2.3.1.4, treat as disallowed) is now kept apart from an explicit `Disallow`. It sets `siteUnreachable` and gets the note "The venue's website couldn't be read during discovery…". The run summary counts the two separately.
+2. **Homepage figure shown for a private room.** The single-room disagreement fallback could pair the model's grounded "Garden Room 40" with a homepage "main dining room seats 180" and display 180. Now only figures from the private-dining page are eligible.
+3. **Coincidental agreement.** A homepage figure within 20% of a private room's figure (for example "seats 45" vs 40) could mark it `verified`. Agreement now requires a figure from the private-dining page, or one the page names the same room for.
+4. **Regex-only homepage figure labelled `likely`** with a note claiming it came from the private-dining page. Now `unverified`, with the "not on a private-dining page" note.
+5. **Model `minCapacity` unvalidated.** It is now dropped unless it's a positive integer ≤ the maximum.
+6. **Silent database write failures.** Room inserts during discovery are logged (with a hint that migration 0011 may be missing). Failed confirmation updates now tell the planner instead of reporting success.
+7. **Error messages hidden in production** (pre-existing). Next.js replaces a thrown Server Action error's message with "An error occurred in the Server Components render…". The event-chat, dietary-roster and confirmation actions now *return* `{ error }`, and their toasts show the real message.
+8. **Mistyped team code → "This page couldn't load"** (pre-existing). The workspace form now redirects back with a coded message ("No workspace found for that code…", "Could not find that address…"). The codes are mapped server-side, so a crafted link can't inject text; the test for this caught an `in`-operator prototype-key bug.
+9. **Progress panel said "fetched and read 25 sites" when none could be read.** It now says "checked 25 sites (25 couldn't be read)" when that's the case.
+
+### End-to-end walkthrough (production build, Playwright)
+
+These all passed:
+- landing page;
+- create workspace;
+- NL search box with xAI down;
+- search with cached coverage (SF);
+- **search with live Google discovery** (Union Square NYC: 25 candidate sites, 6 results, honest notes);
+- venue page;
+- add to shortlist;
+- shortlist, compare and summary pages;
+- choose venue → event page;
+- host question and guest reply delivered **live over Supabase Realtime**;
+- roster button with xAI down (real error message);
+- confirmation held for review (35 vs a `verified` 20, and 300 vs 30);
+- empty confirmation (validation message);
+- leave workspace;
+- bad team code;
+- unknown address.
+
+A first run lost its local Docker daemon mid-sweep; after a restart, Realtime was confirmed working from both Node and the browser.
+
+### Still open
+
+- `_leaflet_pos` page error: Leaflet throws when navigating away from the search map mid-animation. This is pre-existing; maps are out of scope.
+- The other form-posted actions (save/delete address, shortlist add/remove, select venue) still *throw* on rare server-side failures, which shows the generic error page. These need a DB failure or missing workspace to trigger.
+- Supabase advisors on `PrivateDining`: no security lints. Performance notes are INFO-level only (7 foreign keys without covering indexes, 11 indexes not yet used on a low-traffic project).

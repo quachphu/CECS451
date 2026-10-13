@@ -71,7 +71,11 @@ export function VenueConfirmationCard({
     : null;
 
   async function saveConfirmation(formData: FormData) {
-    const { status } = await confirmVenueDetailAction(formData);
+    const { status, error } = await confirmVenueDetailAction(formData);
+    if (error) {
+      toast.error(error);
+      return;
+    }
     if (status === "pending") {
       toast.info("Saved for review — that differs a lot from the figure on file, so it won't replace it until it's corroborated.");
     }

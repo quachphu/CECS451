@@ -178,7 +178,7 @@ async function upsertVenueDraft(draft: VenueDraft) {
   // don't linger after a venue updates its site.
   await supabase.from("venue_rooms").delete().eq("venue_id", venue.id);
   if (draft.rooms.length > 0) {
-    await supabase.from("venue_rooms").insert(
+    const { error: roomsError } = await supabase.from("venue_rooms").insert(
       draft.rooms.map((room) => ({
         venue_id: venue.id,
         room_name: room.roomName,
@@ -194,6 +194,14 @@ async function upsertVenueDraft(draft: VenueDraft) {
         confidence_features: featureLog(room.confidenceFeatures),
       }))
     );
+    // A venue with no rooms never appears in search, so this must not fail
+    // silently. The usual cause is a database missing migration 0011.
+    if (roomsError) {
+      console.error(
+        `Failed to write rooms for ${draft.name} — is supabase/migrations/0011_ai_core.sql applied?`,
+        roomsError
+      );
+    }
   }
 
   // Photos are replaced on every re-scrape too, same as rooms — a venue that
@@ -240,6 +248,8 @@ export type EnrichmentStats = {
   robotsSkippedHosts: number;
   /** Venues drafted without reading their site because the homepage was disallowed. */
   robotsBlockedVenues: number;
+  /** Venues whose site (robots.txt) couldn't be reached at all, so nothing was read. */
+  unreachableVenues: number;
 };
 
 function needsLlmRead(signals: ScrapedSignals | null, deps: EnrichmentDeps): signals is ScrapedSignals {
@@ -261,7 +271,13 @@ export async function enrichCandidates(
   candidates: CandidateVenue[],
   deps: EnrichmentDeps = defaultDeps
 ): Promise<{ drafts: VenueDraft[]; stats: EnrichmentStats }> {
-  const stats: EnrichmentStats = { renders: 0, llmCalls: 0, robotsSkippedHosts: 0, robotsBlockedVenues: 0 };
+  const stats: EnrichmentStats = {
+    renders: 0,
+    llmCalls: 0,
+    robotsSkippedHosts: 0,
+    robotsBlockedVenues: 0,
+    unreachableVenues: 0,
+  };
   // One robots.txt fetch per host per run.
   const robots = createRobotsChecker();
   const scrapeLimit = createLimiter(SCRAPE_CONCURRENCY);
@@ -273,6 +289,7 @@ export async function enrichCandidates(
       scrapeLimit(async () => {
         let signals = candidate.website ? await deps.scrape(candidate.website, robots) : null;
         if (signals?.robotsBlocked) stats.robotsBlockedVenues += 1;
+        if (signals?.siteUnreachable) stats.unreachableVenues += 1;
 
         // Budgets are claimed synchronously, before any await, so concurrent
         // workers can never overshoot them.
@@ -312,7 +329,7 @@ export async function enrichCandidates(
 export async function runDiscoveryPipeline(
   origin: LatLng,
   radiusMeters: number
-): Promise<{ discovered: number; robotsSkippedHosts: number; robotsBlockedVenues: number }> {
+): Promise<{ discovered: number; robotsSkippedHosts: number; robotsBlockedVenues: number; unreachableVenues: number }> {
   const candidates = await discoverNearbyVenues(origin, radiusMeters);
   // Likeliest private-event hosts first, so the cap and the render/LLM
   // budgets (claimed in this order) go to them rather than to whatever is
@@ -327,5 +344,6 @@ export async function runDiscoveryPipeline(
     discovered: drafts.length,
     robotsSkippedHosts: stats.robotsSkippedHosts,
     robotsBlockedVenues: stats.robotsBlockedVenues,
+    unreachableVenues: stats.unreachableVenues,
   };
 }
