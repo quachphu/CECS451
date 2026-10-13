@@ -65,7 +65,7 @@ describe("scraping the Garden Room site", () => {
     );
     const signals = await scrapeVenueForPrivateDining(GARDEN_SITE);
 
-    expect(signals.robotsBlocked).toBe(true);
+    expect(signals.siteUnreachable).toBe(true);
     expect(signals.renderTarget).toBeNull();
   });
 });

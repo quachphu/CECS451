@@ -4,6 +4,14 @@ import { countConfirmedCapacities } from "@/lib/ranking";
 import type { SearchStages } from "@/lib/search-stages";
 import { cn } from "@/lib/utils";
 
+/** "fetched and read 25 sites", or "checked 25 sites (18 couldn't be read)" when some weren't reachable. */
+function siteSummary(checked: number, unreadable: number): string {
+  const sites = (n: number) => `${n} ${n === 1 ? "site" : "sites"}`;
+  return unreadable > 0
+    ? `checked ${sites(checked)} (${unreadable} couldn't be read)`
+    : `fetched and read ${sites(checked)}`;
+}
+
 /**
  * A live readout of the search pipeline, streamed stage by stage.
  *
@@ -78,7 +86,7 @@ async function CoverageRow({ stages }: { stages: SearchStages }) {
       label={coverage.ranDiscovery ? "Checked venue websites directly" : "Reused recent checks for this area"}
       detail={
         coverage.ranDiscovery
-          ? `fetched and read ${coverage.scraped} ${coverage.scraped === 1 ? "site" : "sites"}`
+          ? siteSummary(coverage.scraped, coverage.unreadable ?? 0)
           : `${coverage.freshNearby} ${coverage.freshNearby === 1 ? "venue" : "venues"} checked within the last 30 days`
       }
       state="done"

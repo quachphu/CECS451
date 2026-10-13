@@ -7,7 +7,7 @@ import {
   ROBOTS_AGENT_TOKEN,
 } from "@/lib/discovery/robots";
 import { scrapeVenueForPrivateDining } from "@/lib/discovery/scraper";
-import { buildVenueDraft, ROBOTS_BLOCKED_NOTE } from "@/lib/discovery/trust";
+import { buildVenueDraft, ROBOTS_BLOCKED_NOTE, SITE_UNREACHABLE_NOTE } from "@/lib/discovery/trust";
 import { enrichCandidates, type EnrichmentDeps } from "@/lib/discovery/pipeline";
 import {
   GARDEN_HOMEPAGE_HTML,
@@ -84,14 +84,20 @@ describe("robots.txt access rules (§2.3.1)", () => {
   });
 
   it("5xx disallows everything", async () => {
-    expect(await fetchRobotsPolicy("https://a.example", undefined, respond(503))).toEqual({ kind: "disallow-all" });
+    expect(await fetchRobotsPolicy("https://a.example", undefined, respond(503))).toEqual({
+      kind: "disallow-all",
+      reason: "unreachable",
+    });
   });
 
   it("a network error disallows everything", async () => {
     const failing = vi.fn(async () => {
       throw new Error("ECONNRESET");
     });
-    expect(await fetchRobotsPolicy("https://a.example", undefined, failing)).toEqual({ kind: "disallow-all" });
+    expect(await fetchRobotsPolicy("https://a.example", undefined, failing)).toEqual({
+      kind: "disallow-all",
+      reason: "unreachable",
+    });
   });
 
   it("a timeout (3 s) disallows everything", async () => {
@@ -104,7 +110,7 @@ describe("robots.txt access rules (§2.3.1)", () => {
     );
     const pending = fetchRobotsPolicy("https://a.example", undefined, hanging);
     await vi.advanceTimersByTimeAsync(3_000);
-    expect(await pending).toEqual({ kind: "disallow-all" });
+    expect(await pending).toEqual({ kind: "disallow-all", reason: "unreachable" });
     vi.useRealTimers();
   });
 
@@ -123,6 +129,17 @@ describe("robots.txt access rules (§2.3.1)", () => {
       .mockResolvedValueOnce(new Response("User-agent: *\nDisallow: /\n", { status: 200 }));
     expect(await fetchRobotsPolicy("https://a.example", undefined, once)).toMatchObject({ kind: "rules" });
     expect(once.mock.calls[1][0]).toBe("https://cdn.example/robots.txt");
+  });
+
+  it("tells an unreachable robots.txt apart from a real Disallow", async () => {
+    const down = createRobotsChecker(undefined, respond(503));
+    expect(await down.check("https://down.example/")).toEqual({ allowed: false, unreachable: true });
+    expect([...down.unreachableHosts]).toEqual(["down.example"]);
+    expect(down.skippedHosts.size).toBe(0);
+
+    const disallowing = createRobotsChecker(undefined, respond(200, "User-agent: *\nDisallow: /\n"));
+    expect(await disallowing.check("https://shy.example/")).toEqual({ allowed: false, unreachable: false });
+    expect([...disallowing.skippedHosts]).toEqual(["shy.example"]);
   });
 
   it("fetches each host's robots.txt once per run", async () => {
@@ -178,6 +195,32 @@ describe("honouring robots.txt while scraping", () => {
     expect(signals.robotsBlocked).toBe(true);
     expect(signals.scrapedUrls).toEqual([]);
     expect(draft.sourceNote).toBe(ROBOTS_BLOCKED_NOTE);
+    expect(draft.rooms[0]).toMatchObject({ capacityTrust: "unverified", isEstimate: true });
+  });
+
+  it("never tells the planner a site asked not to be crawled when it was simply unreachable", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.reject(new Error("ENOTFOUND")))
+    );
+    const signals = await scrapeVenueForPrivateDining(GARDEN_SITE);
+    const draft = buildVenueDraft(
+      {
+        placeSourceId: "g",
+        name: "Garden",
+        formattedAddress: "",
+        lat: 0,
+        lng: 0,
+        category: "restaurant",
+        website: GARDEN_SITE,
+      },
+      signals
+    );
+
+    expect(signals.siteUnreachable).toBe(true);
+    expect(signals.robotsBlocked).toBeUndefined();
+    expect(draft.sourceNote).toBe(SITE_UNREACHABLE_NOTE);
+    expect(draft.sourceNote).not.toBe(ROBOTS_BLOCKED_NOTE);
     expect(draft.rooms[0]).toMatchObject({ capacityTrust: "unverified", isEstimate: true });
   });
 

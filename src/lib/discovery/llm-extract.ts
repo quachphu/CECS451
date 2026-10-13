@@ -124,7 +124,16 @@ export function groundExtraction(parsed: RawLlmExtraction, inputText: string): L
   const plausible = (parsed.rooms ?? []).filter(
     (room) => Number.isInteger(room.maxCapacity) && room.maxCapacity > 0 && room.maxCapacity <= 5000 && room.roomName?.trim()
   );
-  const rooms = plausible.filter((room) => isGrounded(room.evidenceQuote, inputText, room.maxCapacity));
+  const rooms = plausible
+    .filter((room) => isGrounded(room.evidenceQuote, inputText, room.maxCapacity))
+    // A minimum that isn't a positive integer at or below the maximum is noise.
+    .map((room) => ({
+      ...room,
+      minCapacity:
+        Number.isInteger(room.minCapacity) && room.minCapacity! > 0 && room.minCapacity! <= room.maxCapacity
+          ? room.minCapacity
+          : null,
+    }));
 
   const rawMinSpend = Number.isInteger(parsed.minSpendUsd) && (parsed.minSpendUsd ?? 0) > 0 ? parsed.minSpendUsd : null;
   const minSpendGrounded = rawMinSpend != null && isGrounded(parsed.minSpendEvidence, inputText, rawMinSpend);

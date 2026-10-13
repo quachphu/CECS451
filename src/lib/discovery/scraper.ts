@@ -46,6 +46,12 @@ export type ScrapedSignals = {
   capacityCandidates?: CapacityCandidate[];
   /** The site's robots.txt disallows its homepage for us, so nothing was read (Step 7). */
   robotsBlocked?: boolean;
+  /**
+   * The site's robots.txt couldn't be fetched at all (down, DNS failure, 5xx),
+   * which RFC 9309 treats as "don't crawl" — so nothing was read either, but
+   * the site never asked not to be crawled.
+   */
+  siteUnreachable?: boolean;
 };
 
 export type ScrapedLink = { href: string; text: string };
@@ -382,8 +388,12 @@ export async function scrapeVenueForPrivateDining(
 
   // robots.txt is fetched in parallel with the homepage so honouring it costs
   // no extra latency; a disallowed homepage's response is discarded unread.
-  const [homepageResponse, homepageAllowed] = await Promise.all([fetchText(website), robots.isAllowed(website)]);
-  if (!homepageAllowed) return { ...emptySignals(null), robotsBlocked: true };
+  const [homepageResponse, homepage] = await Promise.all([fetchText(website), robots.check(website)]);
+  if (!homepage.allowed) {
+    return homepage.unreachable
+      ? { ...emptySignals(null), siteUnreachable: true }
+      : { ...emptySignals(null), robotsBlocked: true };
+  }
   const homepageHtml = homepageResponse;
 
   const pages: ScrapedPage[] = [];

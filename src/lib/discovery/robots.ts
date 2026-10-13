@@ -31,10 +31,20 @@ const MAX_ROBOTS_BYTES = 500 * 1024;
 type Rule = { allow: boolean; pattern: string };
 
 /** What a host's robots.txt allows, as resolved for our agent. */
-export type RobotsPolicy = { kind: "allow-all" } | { kind: "disallow-all" } | { kind: "rules"; rules: Rule[] };
+/**
+ * What a host's robots.txt allows, as resolved for our agent. `disallow-all`
+ * only arises from an unreachable robots.txt (5xx, timeout, network error —
+ * §2.3.1.4); an explicit "Disallow: /" is an ordinary `rules` policy. The two
+ * are kept apart so a site that is simply down is never described as one that
+ * asked not to be crawled.
+ */
+export type RobotsPolicy =
+  | { kind: "allow-all" }
+  | { kind: "disallow-all"; reason: "unreachable" }
+  | { kind: "rules"; rules: Rule[] };
 
 const ALLOW_ALL: RobotsPolicy = { kind: "allow-all" };
-const DISALLOW_ALL: RobotsPolicy = { kind: "disallow-all" };
+const UNREACHABLE: RobotsPolicy = { kind: "disallow-all", reason: "unreachable" };
 
 /** The [A-Za-z_-] prefix of a user-agent value, lowercased (§2.2.1; ExtractUserAgent in [C3]). */
 function productToken(value: string): string {
@@ -156,20 +166,30 @@ export async function fetchRobotsPolicy(
       }
       if (res.ok) return parseRobotsTxt(await res.text(), agentToken);
       if (res.status >= 400 && res.status < 500) return ALLOW_ALL;
-      return DISALLOW_ALL; // 5xx: unreachable
+      return UNREACHABLE; // 5xx
     }
   } catch {
-    return DISALLOW_ALL; // timeout or network error: unreachable
+    return UNREACHABLE; // timeout or network error
   } finally {
     clearTimeout(timeout);
   }
 }
 
+export type RobotsDecision = {
+  allowed: boolean;
+  /** True when the reason it isn't allowed is that robots.txt couldn't be fetched at all. */
+  unreachable: boolean;
+};
+
 export type RobotsChecker = {
+  /** May `url` be fetched, and if not, is that because the site's robots.txt was unreachable? */
+  check: (url: string) => Promise<RobotsDecision>;
   /** True when `url` may be fetched. */
   isAllowed: (url: string) => Promise<boolean>;
-  /** Hosts with at least one URL skipped because robots.txt disallowed it. */
+  /** Hosts with at least one URL skipped because a robots.txt rule disallowed it. */
   skippedHosts: Set<string>;
+  /** Hosts skipped because their robots.txt couldn't be fetched (treated as disallowed, §2.3.1.4). */
+  unreachableHosts: Set<string>;
 };
 
 /**
@@ -179,25 +199,32 @@ export type RobotsChecker = {
 export function createRobotsChecker(agentToken: string = ROBOTS_AGENT_TOKEN, fetchImpl?: FetchLike): RobotsChecker {
   const policies = new Map<string, Promise<RobotsPolicy>>();
   const skippedHosts = new Set<string>();
+  const unreachableHosts = new Set<string>();
+
+  async function check(url: string): Promise<RobotsDecision> {
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+    } catch {
+      return { allowed: false, unreachable: false };
+    }
+    let policy = policies.get(parsed.origin);
+    if (!policy) {
+      policy = fetchRobotsPolicy(parsed.origin, agentToken, fetchImpl);
+      policies.set(parsed.origin, policy);
+    }
+    const resolved = await policy;
+    const allowed = isPathAllowed(resolved, `${parsed.pathname}${parsed.search}`);
+    const unreachable = !allowed && resolved.kind === "disallow-all";
+    if (!allowed) (unreachable ? unreachableHosts : skippedHosts).add(parsed.host);
+    return { allowed, unreachable };
+  }
 
   return {
     skippedHosts,
-    async isAllowed(url: string) {
-      let parsed: URL;
-      try {
-        parsed = new URL(url);
-      } catch {
-        return false;
-      }
-      let policy = policies.get(parsed.origin);
-      if (!policy) {
-        policy = fetchRobotsPolicy(parsed.origin, agentToken, fetchImpl);
-        policies.set(parsed.origin, policy);
-      }
-      const allowed = isPathAllowed(await policy, `${parsed.pathname}${parsed.search}`);
-      if (!allowed) skippedHosts.add(parsed.host);
-      return allowed;
-    },
+    unreachableHosts,
+    check,
+    isAllowed: async (url: string) => (await check(url)).allowed,
   };
 }
 

@@ -226,3 +226,100 @@ describe("the reproduced Garden Room defect", () => {
     expect(draft.rooms[0]).toMatchObject({ maxCapacity: 40, capacityTrust: "verified" });
   });
 });
+
+describe("review fixes: figures from the wrong page", () => {
+  const HOME = "https://example.com";
+  const home = (value: number, sentence: string): CapacityCandidate => ({
+    value,
+    roomHint: null,
+    sentence,
+    context: sentence,
+    url: HOME,
+    onPrivateDiningPage: false,
+  });
+
+  it("does not show a homepage figure for a private room the model read in prose (B)", () => {
+    const draft = buildVenueDraft(
+      venue,
+      signals([home(180, "Our main dining room seats 180 guests.")]),
+      llm([
+        {
+          roomName: "Garden Room",
+          maxCapacity: 40,
+          minCapacity: null,
+          evidenceQuote: "garden room comfortably hosts forty guests",
+        },
+      ])
+    );
+
+    expect(draft.rooms[0]).toMatchObject({ roomName: "Garden Room", maxCapacity: 40, capacityTrust: "ai_extracted" });
+    expect(draft.rooms[0].notes).not.toMatch(/disagree/i);
+  });
+
+  it("does not let a homepage figure that happens to be close 'verify' a private room (C)", () => {
+    const draft = buildVenueDraft(
+      venue,
+      signals([home(45, "Our main dining room seats 45 guests.")]),
+      llm([
+        {
+          roomName: "Garden Room",
+          maxCapacity: 40,
+          minCapacity: null,
+          evidenceQuote: "The Garden Room holds 40 guests",
+        },
+      ])
+    );
+
+    expect(draft.rooms[0].capacityTrust).toBe("ai_extracted");
+    expect(draft.rooms[0].maxCapacity).toBe(40);
+  });
+
+  it("still lets a homepage figure corroborate when the page names the same room", () => {
+    const draft = buildVenueDraft(
+      venue,
+      signals([{ ...home(40, "The Garden Room holds 40 guests."), roomHint: "Garden Room" }]),
+      llm([
+        {
+          roomName: "Garden Room",
+          maxCapacity: 40,
+          minCapacity: null,
+          evidenceQuote: "The Garden Room holds 40 guests",
+        },
+      ])
+    );
+
+    expect(draft.rooms[0].capacityTrust).toBe("verified");
+  });
+
+  it("labels a regex-only homepage figure unverified even when a private-dining page exists (D)", () => {
+    const draft = buildVenueDraft(venue, signals([home(180, "Our main dining room seats 180 guests.")]));
+
+    expect(draft.rooms[0].capacityTrust).toBe("unverified");
+    expect(draft.rooms[0].notes).toMatch(/not on a private-dining page/i);
+  });
+});
+
+describe("review fix: model minimums are validated (E)", () => {
+  it("drops a minCapacity above the maximum or not a positive integer", () => {
+    const grounded = groundExtraction(
+      {
+        hostsPrivateEvents: true,
+        rooms: [
+          { roomName: "Garden Room", maxCapacity: 40, minCapacity: 400, evidenceQuote: GARDEN_SENTENCE },
+          {
+            roomName: "Chef's Table",
+            maxCapacity: 12,
+            minCapacity: 6,
+            evidenceQuote: "The Chef's Table seats 12 guests.",
+          },
+        ],
+        minSpendUsd: null,
+        minSpendEvidence: null,
+        dietaryNotes: null,
+      },
+      PD_TEXT
+    );
+
+    expect(grounded.rooms.map((r) => r.minCapacity)).toEqual([null, 6]);
+  });
+});
