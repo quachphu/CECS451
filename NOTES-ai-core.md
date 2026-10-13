@@ -146,7 +146,7 @@ The production keys are installed in `.env.local` (gitignored). A full review an
 | Service | Status here | Result |
 | --- | --- | --- |
 | Google Places (New) | reachable | ✅ 73 candidates around Times Square in about 0.8 s. Every one has a website, a photo and `types`; 39 have a price level. The discovery prior ranks banquet/event hotels top and Joe's Pizza / Raising Cane's / bagel shops bottom. |
-| Supabase `wfqriatzstdvbdowxxnl` | blocked (network policy), and not in the connected Supabase account | ⚠️ not checkable from here; must have migrations 0001–0011 applied |
+| Your production Supabase project | blocked (network policy), and not in the connected Supabase account | ⚠️ not checkable from here; must have migrations 0001–0011 applied |
 | xAI, Firecrawl, OpenRouteService, Nominatim, Overpass, venue sites | blocked | fallbacks verified: NL search says "the language model didn't respond", the roster shows its real error, commute falls back to the labelled estimate, and unreachable sites get an honest note |
 
 ### Bugs found by the review and fixed (with regression tests that fail without the fix)
