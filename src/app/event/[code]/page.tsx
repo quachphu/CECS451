@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { VenuePhoto } from "@/components/venue-photo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarCheck, MapPin } from "lucide-react";
@@ -101,7 +101,7 @@ export default async function EventPage({ params }: { params: Promise<{ code: st
 
       {photo && (
         <div className="relative h-56 w-full overflow-hidden rounded-2xl bg-muted">
-          <Image src={photo.url} alt={selected.venue.name} fill className="object-cover" unoptimized />
+          <VenuePhoto src={photo.url} alt={selected.venue.name} fill className="object-cover" unoptimized />
         </div>
       )}
 

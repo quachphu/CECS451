@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { VenuePhoto } from "@/components/venue-photo";
 import { redirect } from "next/navigation";
 import { Check, Columns3, PartyPopper, Share2, Utensils, X } from "lucide-react";
 import { getCurrentCompany } from "@/lib/workspace";
@@ -119,7 +119,7 @@ export default async function ShortlistPage() {
               >
                 <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg bg-muted">
                   {primaryPhoto && (
-                    <Image src={primaryPhoto.url} alt={item.venue.name} fill className="object-cover" unoptimized />
+                    <VenuePhoto src={primaryPhoto.url} alt={item.venue.name} fill className="object-cover" unoptimized />
                   )}
                 </div>
                 <div className="min-w-0 flex-1">

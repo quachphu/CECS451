@@ -1,10 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ImageOff } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { TrustBadge } from "@/components/trust-badge";
+import { VenuePhoto } from "@/components/venue-photo";
 import { addToShortlistAction } from "@/app/actions";
 import { cn } from "@/lib/utils";
 import { costPerPerson, priceSignal } from "@/lib/price-signal";
@@ -36,13 +36,14 @@ export function VenueCard({
         <div className="relative h-44 w-full bg-muted">
           {primaryPhoto ? (
             <>
-              <Image
+              <VenuePhoto
                 src={primaryPhoto.url}
                 alt={isPlaceholder ? `Placeholder image — not a photo of ${venue.name}` : (primaryPhoto.alt_text ?? venue.name)}
                 fill
                 sizes="(max-width: 640px) 100vw, 33vw"
                 className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                 unoptimized
+                fallback={<NoPhoto />}
               />
               {isPlaceholder && (
                 <span className="absolute inset-x-0 bottom-0 bg-foreground/70 px-2 py-1 text-center text-[10px] font-medium text-background">
@@ -51,10 +52,7 @@ export function VenueCard({
               )}
             </>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-1.5 text-muted-foreground">
-              <ImageOff className="size-5" />
-              <span className="text-xs">No photo found</span>
-            </div>
+            <NoPhoto />
           )}
           <span
             className={cn(
@@ -130,5 +128,14 @@ export function VenueCard({
         </form>
       </CardFooter>
     </Card>
+  );
+}
+
+function NoPhoto() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-1.5 text-muted-foreground">
+      <ImageOff className="size-5" />
+      <span className="text-xs">No photo found</span>
+    </div>
   );
 }
