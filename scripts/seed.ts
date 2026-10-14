@@ -11,6 +11,7 @@ config({ path: [".env.local", ".env"] });
 import { createClient } from "@supabase/supabase-js";
 import { seedVenues } from "../src/data/seed-venues";
 import { geocodeAddress } from "../src/lib/geo/geocode";
+import { backfillVenuePhotos } from "./backfill-photos";
 
 async function main() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -106,6 +107,14 @@ async function main() {
   }
 
   console.log(`\nSeeded ${seedVenues.length} venues.`);
+
+  // Re-seeding clears each curated venue's photos, so look them up again.
+  if (process.env.GOOGLE_PLACES_API_KEY) {
+    console.log("\nLooking up Google photos for venues without one...");
+    await backfillVenuePhotos(supabase, process.env.GOOGLE_PLACES_API_KEY);
+  } else {
+    console.log("\nGOOGLE_PLACES_API_KEY not set — skipping the photo lookup.");
+  }
 }
 
 main().catch((err) => {

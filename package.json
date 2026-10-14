@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed.ts",
+    "photos:backfill": "tsx scripts/backfill-photos.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:scenarios": "node --conditions=react-server --import tsx scripts/test-scenarios.ts",

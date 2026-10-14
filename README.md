@@ -120,6 +120,8 @@ npm run seed
 
 Loads the curated venues (Carmine's, Dos Caminos, Perbacco, Hilton Hawaiian Village, and others) that guarantee the 3 required scenarios have real, verified data before the live pipeline ever runs.
 
+With `GOOGLE_PLACES_API_KEY` set, the seed then looks up a real Google photo for every venue that has none, accepting only a same-name place within 300 m. Run that step on its own at any time with `npm run photos:backfill`.
+
 ### 5. Run it
 
 ```bash
