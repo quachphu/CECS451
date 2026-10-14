@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { VenuePhoto } from "@/components/venue-photo";
 import { redirect } from "next/navigation";
 import { Instrument_Serif, Inter } from "next/font/google";
 import { getCurrentCompany } from "@/lib/workspace";
@@ -118,7 +118,7 @@ async function LivePreview() {
               <div className="relative h-48 overflow-hidden rounded-lg bg-muted lg:h-56">
                 {card.photoUrl ? (
                   <>
-                    <Image src={card.photoUrl} alt={card.name} fill sizes="340px" className="object-cover" unoptimized />
+                    <VenuePhoto src={card.photoUrl} alt={card.name} fill sizes="340px" className="object-cover" unoptimized />
                     {isPlaceholderPhoto(card.photoUrl) && (
                       <span className="absolute bottom-1.5 left-1.5 rounded bg-background/85 px-1.5 py-0.5 text-[10px] text-muted-foreground">
                         Placeholder image

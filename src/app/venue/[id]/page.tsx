@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { VenuePhoto } from "@/components/venue-photo";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PartyPopper } from "lucide-react";
@@ -72,7 +72,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
             {photos.map((photo) => (
               <CarouselItem key={photo.id}>
                 <div className="relative h-80 w-full overflow-hidden rounded-lg bg-muted">
-                  <Image src={photo.url} alt={photo.alt_text ?? typedVenue.name} fill className="object-cover" unoptimized />
+                  <VenuePhoto src={photo.url} alt={photo.alt_text ?? typedVenue.name} fill className="object-cover" unoptimized />
                 </div>
               </CarouselItem>
             ))}
@@ -82,7 +82,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
         </Carousel>
       ) : photos[0] ? (
         <div className="relative h-80 w-full overflow-hidden rounded-lg bg-muted">
-          <Image src={photos[0].url} alt={photos[0].alt_text ?? typedVenue.name} fill className="object-cover" unoptimized />
+          <VenuePhoto src={photos[0].url} alt={photos[0].alt_text ?? typedVenue.name} fill className="object-cover" unoptimized />
         </div>
       ) : null}
 

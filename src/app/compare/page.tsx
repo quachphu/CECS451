@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { VenuePhoto } from "@/components/venue-photo";
 import { redirect } from "next/navigation";
 import { ImageOff } from "lucide-react";
 import { getCurrentCompany } from "@/lib/workspace";
@@ -216,7 +216,7 @@ export default async function ComparePage({
                     <div className="relative mb-2 h-24 w-full overflow-hidden rounded-md bg-muted">
                       {photo ? (
                         <>
-                          <Image
+                          <VenuePhoto
                             src={photo.url}
                             alt={placeholder ? `Placeholder image — not a photo of ${item.venue.name}` : (photo.alt_text ?? item.venue.name)}
                             fill
