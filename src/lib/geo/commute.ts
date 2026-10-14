@@ -92,8 +92,3 @@ export async function getCommuteMatrix(
     return destinations.map((d) => haversineEstimate(origin, d, mode));
   }
 }
-
-export async function getCommute(origin: LatLng, destination: LatLng, mode: CommuteMode): Promise<CommuteResult> {
-  const [result] = await getCommuteMatrix(origin, [destination], mode);
-  return result;
-}

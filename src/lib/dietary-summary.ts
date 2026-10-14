@@ -217,11 +217,6 @@ export function sanitizeDietarySummary(raw: unknown): DietarySummary {
   };
 }
 
-/** True when the extraction found nothing to report, so callers can say so plainly. */
-export function isEmptyDietarySummary(summary: DietarySummary): boolean {
-  return summary.people.length === 0 && summary.unclear.length === 0;
-}
-
 export async function summarizeDietaryNeeds(messages: DietaryInputMessage[]): Promise<DietarySummary | null> {
   const apiKey = process.env.XAI_API_KEY;
   if (!apiKey) return null;
