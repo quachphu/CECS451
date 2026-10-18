@@ -23,9 +23,8 @@
  */
 
 import type { DietaryNeed, DietaryNeedKind, DietaryPerson, DietarySummary } from "@/lib/supabase/types";
-import { xaiModel } from "@/lib/discovery/extraction-config";
+import { xaiBaseUrl, xaiModel } from "@/lib/discovery/extraction-config";
 
-const XAI_ENDPOINT = "https://api.x.ai/v1/chat/completions";
 // Considerably longer than the free-text parser's 20s (src/lib/nl-query.ts):
 // that reads one sentence on the critical path of a page load, whereas this
 // reads an entire thread behind a button the host chose to press. 30s proved
@@ -232,7 +231,7 @@ export async function summarizeDietaryNeeds(messages: DietaryInputMessage[]): Pr
   const timeout = setTimeout(() => controller.abort(), XAI_TIMEOUT_MS);
 
   try {
-    const res = await fetch(XAI_ENDPOINT, {
+    const res = await fetch(`${xaiBaseUrl()}/chat/completions`, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({

@@ -88,7 +88,8 @@ export type ScrapedPage = {
  */
 export const CHUNK_SEPARATOR = " \n ";
 
-const PRIVATE_DINING_KEYWORDS =
+/** Links and pages about private dining / events. Exported so offline snapshots pick pages by the same rule. */
+export const PRIVATE_DINING_KEYWORDS =
   /private\s*(dining|event)s?|group\s*(dining|event|booking)s?|banquet|meetings?\s*(&|and)?\s*events|weddings?|celebrations|book\s*(an\s*)?event|buyouts?/i;
 
 const CAPACITY_PATTERN = /(?:up\s*to|seats?|accommodat(?:es|ing)|hold[s]?|for)\s*(\d{1,4})\s*(?:guests?|people|persons?|pax)/gi;
@@ -243,7 +244,8 @@ export function pickMenuUrl(links: Array<{ href: string; text: string }>, baseUr
   return (candidates.find((c) => c.isPdf) ?? candidates[0]).url;
 }
 
-function textFromHtml(html: string): { text: string; links: Array<{ href: string; text: string }> } {
+/** Visible text and links of an HTML page, exactly as the scraper reads it (shared with the offline snapshots). */
+export function textFromHtml(html: string): { text: string; links: Array<{ href: string; text: string }> } {
   const $ = cheerio.load(html);
   const links: Array<{ href: string; text: string }> = [];
   $("a[href]").each((_, el) => {

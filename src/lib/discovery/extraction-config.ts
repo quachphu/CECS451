@@ -28,3 +28,8 @@ export const DEFAULT_XAI_MODEL = "grok-4.7";
 export function xaiModel(): string {
   return process.env.XAI_MODEL?.trim() || DEFAULT_XAI_MODEL;
 }
+
+/** xAI API base (OpenAI-compatible). Overridable for a compatible proxy or an offline test double. */
+export function xaiBaseUrl(): string {
+  return (process.env.XAI_BASE_URL?.trim() || "https://api.x.ai/v1").replace(/\/+$/, "");
+}

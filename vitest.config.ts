@@ -7,7 +7,7 @@ export default defineConfig({
     // signalling) is pure and server-side, so plain node is enough — no
     // jsdom/browser environment needed.
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "scripts/**/*.test.ts"],
   },
   resolve: {
     alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },

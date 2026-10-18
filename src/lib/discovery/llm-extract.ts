@@ -18,6 +18,7 @@ import {
   MIN_SUCCESSFUL_READS,
   SELF_CONSISTENCY_K,
   SELF_CONSISTENCY_TEMPERATURE,
+  xaiBaseUrl,
   xaiModel,
 } from "@/lib/discovery/extraction-config";
 import { aggregateReads, type AggregatedRoom, type ReadRoom } from "@/lib/discovery/features";
@@ -25,7 +26,6 @@ import { isGrounded } from "@/lib/discovery/grounding";
 import { normalizeStyle, type RoomStyleLabel } from "@/lib/discovery/room-normalize";
 import { CHUNK_SEPARATOR } from "@/lib/discovery/scraper";
 
-const XAI_ENDPOINT = "https://api.x.ai/v1/chat/completions";
 const XAI_TIMEOUT_MS = 45_000;
 
 // Only the leading slice of page text is sent, to bound token spend. Because
@@ -259,7 +259,7 @@ export async function requestLlmExtraction(
     const timeout = setTimeout(() => controller.abort(), XAI_TIMEOUT_MS);
 
     try {
-      const res = await fetch(XAI_ENDPOINT, {
+      const res = await fetch(`${xaiBaseUrl()}/chat/completions`, {
         method: "POST",
         headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
         body,
