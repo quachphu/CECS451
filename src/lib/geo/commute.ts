@@ -40,6 +40,11 @@ export function haversineEstimate(origin: LatLng, destination: LatLng, mode: Com
 
 const ORS_PROFILE: Record<CommuteMode, string> = { walk: "foot-walking", drive: "driving-car" };
 
+// A search waits on this one call, so a stalled connection must not hold the
+// page open (Node's fetch has no overall timeout). Past this, fall back to
+// the labelled estimate.
+const ORS_TIMEOUT_MS = 8_000;
+
 /**
  * Real routing via OpenRouteService (free tier, signup required — no
  * credit card) when ORS_API_KEY is set; otherwise a labeled haversine
@@ -55,10 +60,13 @@ export async function getCommuteMatrix(
     return destinations.map((d) => haversineEstimate(origin, d, mode));
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ORS_TIMEOUT_MS);
   try {
     const locations = [[origin.lng, origin.lat], ...destinations.map((d) => [d.lng, d.lat])];
     const res = await fetch(`https://api.openrouteservice.org/v2/matrix/${ORS_PROFILE[mode]}`, {
       method: "POST",
+      signal: controller.signal,
       headers: {
         Authorization: apiKey,
         "Content-Type": "application/json",
@@ -86,14 +94,14 @@ export async function getCommuteMatrix(
       }
       return { distanceMeters, durationSeconds, estimated: false };
     });
-  } catch {
-    // Network hiccup or quota exceeded — degrade gracefully rather than
-    // failing the whole search.
+  } catch (err) {
+    // Network hiccup, timeout or quota exceeded — degrade gracefully rather
+    // than failing the whole search.
+    console.warn(
+      `[commute] OpenRouteService unavailable, using estimates: ${controller.signal.aborted ? `timed out after ${ORS_TIMEOUT_MS / 1000}s` : (err as Error).message}`
+    );
     return destinations.map((d) => haversineEstimate(origin, d, mode));
+  } finally {
+    clearTimeout(timeout);
   }
-}
-
-export async function getCommute(origin: LatLng, destination: LatLng, mode: CommuteMode): Promise<CommuteResult> {
-  const [result] = await getCommuteMatrix(origin, [destination], mode);
-  return result;
 }

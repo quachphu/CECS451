@@ -1,214 +1,374 @@
 # Private Dining Finder
 
-Find a private dining room that actually fits your group, with real evidence behind every number instead of a guess.
+Private Dining Finder helps event planners find a restaurant or venue with a private room that fits their group, within a set commute of the office. Each venue's capacity is read from its own website and checked against the source text. Every figure carries a trust label, and results are ranked by the probability that the venue can actually host the group.
 
-You give it an address, a headcount, and a max commute time. It gives you back a ranked list of private dining venues, and next to every capacity and price figure it tells you exactly how much you should trust that number.
+CECS 451 (Artificial Intelligence) course project. Built with Next.js 16, Supabase and xAI Grok.
 
-- Demo video: [youtu.be/Fx1vd5Y7TZE](https://youtu.be/Fx1vd5Y7TZE)
+## Contents
 
-- Pitch deck: [Google Slides](https://docs.google.com/presentation/d/1WdNsidrCnGDCRgebB9BCLryj4KqDXmhgPk-UHxAW6jg/edit?usp=sharing)
+1. [Project description](#1-project-description)
+2. [Problem](#2-problem)
+3. [Solution](#3-solution)
+4. [Architecture and project structure](#4-architecture-and-project-structure)
+5. [AI algorithms](#5-ai-algorithms)
+6. [Getting started](#6-getting-started)
+7. [Limitations and next steps](#7-limitations-and-next-steps)
 
----
+## 1. Project description
 
-## The problem
+### Videos
 
-Booking a private room for 30 to 200 people is a research project disguised as a search box. There's no API for "restaurant with a private room that seats fifty." The real answer lives scattered across a dozen open browser tabs: a venue's own events page, a three year old Yelp photo, a phone call nobody's made yet. Every planner ends up rebuilding the same spreadsheet from scratch, and the numbers in it carry wildly different reliability with no way to tell them apart.
+- Demo video: to be added
+- Architecture walkthrough: to be added
 
-The failure that actually hurts isn't picking the wrong restaurant. It's showing up with 60 people to a room nobody ever confirmed could hold more than 40.
+### Features
 
-## The solution
+| Feature | Description |
+| --- | --- |
+| Search | Filter by office address, headcount, maximum commute, walk or drive, and room style. A plain-English request ("40 people, 10-minute walk, seated") can fill in the form. |
+| Venue discovery | When an area has fewer than three recently checked venues, the app finds new candidates, reads their websites and extracts room capacities. |
+| Ranking | Venues are ranked by expected utility, which combines commute, room fit and the probability that the room really fits. Each result lists its reasons, including "About N% likely to fit your group". |
+| Trust labels | Every capacity and price figure is labelled `confirmed_by_planner`, `verified`, `likely`, `ai_extracted` or `unverified`. |
+| Shortlist and compare | Save candidates, compare rooms, prices and commute times side by side, and choose one. |
+| Event page | A shared page where guests post allergies and dietary needs in real time. The app summarises them into a roster for the venue. |
+| Shared catalog | A planner who confirms a figure with the venue updates it for later searches. Confirmations that contradict strong evidence are held for review. |
 
-Instead of one search box, Private Dining Finder runs a small discovery and verification pipeline, and it never lets a guess look as trustworthy as a fact. Every capacity and price figure gets stamped with one of five trust tiers, and ranking is built so a confirmed number can't lose to a made up one just because the made up one happens to fit better.
+The application supports research and coordination only. It does not make bookings or payments.
 
-- Search by address, headcount, commute time, mode, and room style. Or describe the event in plain English and let it fill the form in for you to check over.
-- Ranking looks at real fit, not just proximity. Commute, capacity fit, evidence quality, and style all factor into one score, and a venue with no published number can't outrank one that has an actual figure.
-- While a search runs you get a live readout of what's actually happening (sites fetched, results confirmed) instead of a spinner.
-- Call a venue, get a real answer, confirm it in the app, and that figure flows straight into the shared catalog for the next person searching near there.
-- Once you've compared and picked a venue, open a live event page where everyone attending tells you about allergies and dietary needs, and the host gets an AI-built roster ready to hand the kitchen.
+### Screenshots
 
-This is a research and coordination tool, not a booking system. It never books, holds, or pays for anything. Calling the venue and placing the actual order are still on you.
+| New York (Times Square) | San Francisco (Salesforce Tower) | Waikiki (Hilton Hawaiian Village) |
+| --- | --- | --- |
+| ![New York results](architecture/new_york.png) | ![San Francisco results](architecture/SanFrancisco_result.png) | ![Waikiki results](architecture/Hawai.png) |
 
-## The trust tiers
+## 2. Problem
 
-This is really the whole idea, made visible everywhere a number shows up:
+Finding a private room for 30 to 200 people is mostly manual research.
 
-| Tier                   | What it means                                                                          |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| `confirmed_by_planner` | Someone actually called the venue and reported the answer back into the shared catalog |
-| `verified`             | Printed on the venue's own private dining page, and two independent reads agree on it  |
-| `likely`               | Read off the private dining page by pattern only, or the venue hosts events but publishes no number |
-| `ai_extracted`         | Read from the venue's own wording by an LLM, not matched word for word                 |
-| `unverified`           | Not confirmed anywhere. Needs a call                                                   |
+- **No structured source exists.** No public API lists private rooms and their capacities. The information sits on each venue's events page, in PDFs, on JavaScript-rendered sites, or only with the venue's staff.
+- **Capacity is stated inconsistently.** Sites write "seats 40", "up to 120 guests for receptions", or describe a room without giving any number.
+- **Reliability is not visible.** A planner's notes mix confirmed figures, estimates and outdated listings, with no record of which is which.
+- **Simple automation introduces errors.** A keyword scraper can take "our dining room seats 180" from a homepage and report it as a private room. A language model can produce a capacity that the page never states.
 
-Ranking actually uses these tiers, they're not just decoration. Each stored capacity carries a confidence score, and ranking weighs a venue by the probability it really fits the group, so an estimated capacity can't outrank a published one just because the guess happens to land closer to the headcount. See "How the AI works" below.
+The main risk is booking a room that cannot hold the group.
 
-## Architecture
+## 3. Solution
 
-![System architecture](architecture/Architecture1.png)
+The system attaches evidence to each capacity figure and ranks venues by how likely that figure is to be correct.
 
-Planners only ever touch the client pages at the top. Every action they take, running a search, adding to a shortlist, sending a chat message, goes through a Server Action, which is the single door into the backend. From there it splits into two engines: the discovery pipeline, which goes and finds real information about a venue instead of trusting a database that might be stale or empty, and the ranking engine, which decides which of the venues already on file are actually a good fit for this search.
+1. **Discovery.** Candidates come from Google Places and OpenStreetMap. A learned prior decides which candidates receive the limited budget of page renders and model calls.
+2. **Two independent readers.** A pattern matcher and a language model each read the venue's private-dining page. The model must return the exact sentence that supports each capacity.
+3. **Grounding.** A model answer is kept only if its quoted sentence appears on the page and contains the number. Agreement between the two readers makes a figure `verified`.
+4. **Confidence.** Each room receives a probability that its capacity is correct, computed from the evidence features.
+5. **Ranking.** Expected-utility ranking ensures an estimated capacity cannot outrank a published one simply because the estimate is closer to the headcount.
+6. **Planner feedback.** Figures confirmed by phone are written back to the shared catalog, with a check against likely input errors.
 
-The discovery pipeline itself is layered so the paid services only get used when the free ones come up empty. Nominatim turns an address into coordinates, Google Places or OpenStreetMap Overpass finds nearby venues, and then it reads the venue's own website. Only if that page can't be found or doesn't state a number does it escalate to Firecrawl (for pages that render with JavaScript) or xAI Grok (for a capacity written in prose instead of a clean figure). Commute time comes from OpenRouteService, called on the ranking side rather than during discovery, since it depends on the search itself rather than on the venue.
+Only the Supabase keys are required. Each paid service (Google Places, Firecrawl, xAI, OpenRouteService) has a free fallback, and results produced by a fallback are labelled as such.
 
-Here's how that escalation decides which trust tier a number actually gets:
+## 4. Architecture and project structure
 
-![How trust tiers are decided](architecture/workflow.png)
+### System architecture
 
-Everything discovery finds gets written to Postgres, so the next search nearby reuses it instead of re-scraping. Realtime is the one part of the app that doesn't go through a request and response cycle at all. It's what pushes new chat messages to everyone on the event page as they're typed.
+![System architecture](architecture/architecture.png)
 
-## How the AI works
+The editable source is [`architecture/architecture.excalidraw`](architecture/architecture.excalidraw). It opens at [excalidraw.com](https://excalidraw.com) via Open.
 
-Four stages turn a venue's website into a ranked, honestly-labelled result. Paper IDs refer to the reference list in `NOTES-ai-core.md`.
+Steps 1 to 10 describe one search; the lower panel shows what happens after it. Box colours indicate the component type: application, AI model, discovery step, external API, or database.
 
-1. **Extraction (two independent reads).** The scraper's regex is a *candidate generator*. It finds every "seats / holds / up to N guests" phrase with its sentence and the nearest room name, and drops reservation phrasing ("table for 2") and values under 6. Separately, xAI Grok (`grok-4.5`, temperature 0, strict JSON schema) reads the private-dining page first and must copy the exact sentence that states each room's capacity into `evidenceQuote` (`src/lib/discovery/llm-extract.ts`).
-2. **Grounding.** A model's figure is kept only if its quote is really on the page (normalised substring match: case, curly quotes, markdown) *and* the quote states the number, in digits or words (`src/lib/discovery/grounding.ts`, after ALCE [P3]). Rejected rooms are counted as a hallucination proxy [P2].
-3. **Trust and confidence.** If the regex and a grounded model read agree within 20%, the figure is `verified`. If they describe the same room but disagree, it's `likely` with both numbers shown. A grounded model read alone is `ai_extracted`, and a regex read alone is `likely`. Nothing found means a category estimate, flagged `is_estimate`. Every room also gets `capacity_confidence`, a logistic score over evidence features computed once at write time (`src/lib/discovery/confidence.ts`, coefficients in `src/data/confidence-model.json`, refit offline with `scripts/train_confidence.py` [P4–P6]).
-4. **Expected-utility ranking.** `pFit` is the probability the venue really has a space for the group. It is the room's confidence if its figure fits, falling back to a per-category base rate `q` (and only `q` for an estimate). The score is `pFit·U − (1 − pFit)·0.25`, where `U = 0.5·commute + 0.35·capacity fit + 0.15·style`: maximum expected utility [P7], with a cost for sending a planner to a venue that doesn't fit (`src/lib/ranking.ts`). Each card shows "About N% likely to fit your group".
+| Step | Description | Source |
+| --- | --- | --- |
+| 1 | Geocode the office address | `src/lib/geo/geocode.ts` |
+| 2 | Cache check: at least three nearby venues checked in the last 30 days skips to step 8 | `src/lib/discovery/ensure-coverage.ts` |
+| 3 | Find candidates in Google Places and OpenStreetMap; merge duplicates within 75 m | `src/lib/discovery/places.ts` |
+| 4 | Order candidates by the discovery prior | `src/lib/discovery/discovery-prior.ts` |
+| 5 | Check robots.txt, fetch the site, render JavaScript-only pages with Firecrawl | `scraper.ts`, `robots.ts`, `render.ts` |
+| 6 | Extract capacities with the regex reader and the LLM reader | `scraper.ts`, `llm-extract.ts` |
+| 7 | Grounding check, trust tier and confidence score; save to Postgres | `grounding.ts`, `trust.ts`, `confidence.ts` |
+| 8 | Commute times from the OpenRouteService matrix, or a labelled estimate | `src/lib/geo/commute.ts` |
+| 9 | Expected-utility ranking | `src/lib/ranking.ts` |
+| 10 | Result cards and map | `src/components/venue-card.tsx` |
 
-Discovery spends its budgets where they matter. Candidates are ordered by a discovery prior (P(hosts private events) from place type, price level, website and name) before the per-run cap. Firecrawl renders are capped at 10 per run, and LLM reads at 12, on their own queue so a slow model call never holds a scrape slot. robots.txt is honoured per RFC 9309: longest match wins, 4xx means allowed, and 5xx or unreachable means disallowed for the run.
+### Technology stack
 
-A planner's confirmation still sets `confirmed_by_planner`. If it contradicts a strongly believed capacity (confidence ≥ 0.85) by more than 50%, it is saved for review instead of overwriting the catalog.
+| Layer | Technology |
+| --- | --- |
+| Framework | Next.js 16 (App Router, Server Components, Server Actions), React 19, TypeScript |
+| UI | Tailwind CSS 4, shadcn/ui, Leaflet (2D map), MapLibre GL (3D map) |
+| Database | Supabase: Postgres 17, row-level security, Realtime |
+| Language model | xAI Grok `grok-4.5` over HTTPS, temperature 0, JSON-schema structured output |
+| Venue data | Google Places API (New), OpenStreetMap Overpass |
+| Page rendering | Firecrawl v2, used only for JavaScript-rendered pages |
+| Routing and geocoding | OpenRouteService Matrix, Nominatim, Photon |
+| Testing | Vitest, Playwright |
+| Offline modelling | Python, scikit-learn (training and metric cross-checks) |
 
-## Tech stack
+### Project structure
 
-| Layer                      | Choice                                                                             |
-| -------------------------- | ---------------------------------------------------------------------------------- |
-| Framework                  | Next.js 16 (App Router, Server Components, Server Actions) + React 19              |
-| UI                         | Tailwind CSS 4 + shadcn/ui                                                         |
-| Database                   | Supabase (Postgres), accessed server side via the service role key                 |
-| Realtime                   | Supabase Realtime (event chat)                                                     |
-| Geocoding                  | OpenStreetMap Nominatim (free, keyless)                                            |
-| Commute routing            | OpenRouteService Matrix API (free tier), haversine fallback                        |
-| Venue discovery            | Google Places API (New) (optional, paid) or OpenStreetMap Overpass (free fallback) |
-| JS render fallback         | Firecrawl (optional, paid, budget capped)                                          |
-| AI extraction / NL parsing | xAI Grok, structured outputs (optional, paid, budget capped)                       |
-| Maps                       | Leaflet (2D) + MapLibre GL JS / OpenFreeMap (3D, keyless)                          |
-| Tests                      | Vitest                                                                             |
-
-The app runs end to end with zero paid API keys. Every external call degrades to a free, clearly labeled fallback. See "Optional API keys" below.
-
-## Getting started
-
-### 1. Install dependencies
-
-```bash
-npm install
+```
+CECS451/
+├── architecture/              Architecture diagram (.excalidraw, .png) and screenshots
+├── eval/                      Offline evaluation: metrics, baselines, label templates
+├── public/                    Static assets (curated venue photos)
+├── scripts/
+│   ├── seed.ts                Load the curated venues, then look up their photos
+│   ├── backfill-photos.ts     Add Google photos to venues without one
+│   ├── test-scenarios.ts      Run the three reference searches
+│   ├── eval-*.ts              Page snapshots, extraction scores, NDCG@5, Cohen's kappa
+│   ├── train_confidence.py    Fit the logistic models from labelled data
+│   ├── verify-*.ts            Checks against the live external services
+│   └── loadtest-density.ts    Cold-discovery timing in a dense area
+├── src/
+│   ├── app/                   Routes: /, /start, /search, /venue/[id], /shortlist,
+│   │   │                      /compare, /summary/[code], /event/[code]
+│   │   ├── actions.ts         Server Actions (all writes)
+│   │   └── api/               place-photo (photo proxy), geocode-suggest
+│   ├── components/            Search form, venue card, map, event chat, dietary panel
+│   ├── data/                  Curated venues and model coefficients (JSON)
+│   └── lib/
+│       ├── discovery/         Places, scraper, robots.txt, rendering, LLM extraction,
+│       │                      grounding, trust, confidence, discovery prior, pipeline
+│       ├── geo/               Geocoding, commute matrix, bounding boxes
+│       ├── ranking.ts         Expected-utility ranking
+│       ├── nl-query.ts        Plain-English search parsing
+│       ├── dietary-summary.ts Dietary roster from the event chat
+│       ├── corroboration.ts   Review rule for planner confirmations
+│       └── supabase/          Database clients and types
+├── supabase/migrations/       Database schema, 0001 to 0011
+└── NOTES-ai-core.md           Design decisions, verification and references
 ```
 
-### 2. Create a Supabase project
+## 5. AI algorithms
 
-Create a project at [supabase.com](https://supabase.com), then apply every migration in `supabase/migrations/` in filename order (`0001_init.sql` through `0011_ai_core.sql`; `0011_ai_core.sql` adds the evidence, estimate and confidence columns on `venue_rooms` and the review status on `venue_confirmations`). Either:
+The system combines three language-model tasks with four small, interpretable models. Model coefficients are stored as JSON in `src/data/` and can be refitted from labelled data.
 
-- Paste each file into the Supabase Studio SQL editor and run them in order, or
-- Use the Supabase CLI: `npx supabase link --project-ref <your-project-ref>` then `npx supabase db push`
+### 5.1 Components
 
-You can also run everything against a local Supabase instance instead. See "Local development" below.
+| Component | Method | Purpose |
+| --- | --- | --- |
+| Query parsing | LLM, structured output | Convert a plain-English request into search fields |
+| Capacity extraction | Regex and LLM | Read room names and capacities from a venue's site |
+| Grounding | Deterministic check | Reject model answers the page does not support |
+| Capacity confidence | Logistic regression | Probability that a stored capacity is correct |
+| Discovery prior | Logistic regression | Probability that a candidate hosts private events |
+| Ranking | Expected utility | Order venues by the expected value of contacting them |
+| Dietary roster | LLM, structured output | Summarise guests' messages into per-person needs |
 
-### 3. Configure environment variables
+All language-model calls use xAI Grok `grok-4.5` at temperature 0 with a strict JSON schema. Each call has an input limit, a timeout and a non-model fallback, so the application keeps working when the model is unavailable.
+
+### 5.2 Capacity extraction
+
+Each venue's capacity is read by two independent readers.
+
+- **Regex reader.** It matches phrases such as "seats 40" or "up to 120 guests". For each match it records the surrounding sentence and the nearest room name. Values below 6 and reservation phrases ("table for 2") are discarded.
+- **LLM reader.** It reads the private-dining page (up to 12,000 characters) and returns each room with its capacity and an `evidenceQuote`: the exact sentence that states the capacity.
+
+The private-dining page is read before the homepage, because homepage figures usually describe the main dining room rather than a private space.
+
+### 5.3 Grounding
+
+A model answer is accepted only when two conditions hold:
+
+1. its `evidenceQuote` appears on the page, after case, whitespace and quotation marks are normalised; and
+2. the quote contains the capacity, written in digits or in words.
+
+Answers that fail either condition are discarded. The approach follows the citation checking in ALCE (Gao et al., 2023), but uses an exact match in place of a second model.
+
+### 5.4 Trust tiers
+
+| Evidence | Tier |
+| --- | --- |
+| Confirmed by a planner with the venue | `confirmed_by_planner` |
+| Regex (private-dining page) and grounded LLM agree within 20% | `verified` |
+| Both readers found the same room but disagree, or the regex reader alone on the private-dining page | `likely` |
+| Grounded LLM reading only | `ai_extracted` |
+| Regex reading from the homepage only | `unverified` |
+| No figure found; category estimate shown as "Capacity unpublished" | `is_estimate` |
+
+### 5.5 Capacity confidence
+
+Each room receives a confidence score from a logistic model:
+
+```
+confidence = σ(b + Σ wᵢ xᵢ),    σ(z) = 1 / (1 + e^(−z))
+```
+
+The features `xᵢ` are:
+
+- which readers produced the figure;
+- the spread between their readings;
+- whether a private-dining page was found;
+- the number of competing figures;
+- whether a room name was attached;
+- whether the page required JavaScript rendering;
+- the venue category.
+
+The feature vector is stored with each room so the model can be refitted (`scripts/train_confidence.py`). Calibration is measured with Expected Calibration Error (Guo et al., 2017).
+
+### 5.6 Discovery prior
+
+Each search is limited to 10 Firecrawl renders and 12 LLM reads. Before this budget is spent, every candidate is scored with a second logistic model:
+
+```
+P(hosts private events) = σ(b + w · features)
+```
+
+The features are the Google place type (banquet hall, hotel, steakhouse, fast food and others), price level, presence of a website, and keywords in the name. Candidates are processed in descending order of this probability.
+
+### 5.7 Expected-utility ranking
+
+```
+pFit  = p · 1[room fits] + (1 − p) · q     p = capacity confidence
+pFit  = q                                  when the capacity is an estimate
+
+U     = 0.5 · commute score + 0.35 · capacity fit + 0.15 · style match
+
+score = pFit · U − (1 − pFit) · λ          λ = 0.25
+```
+
+`q` is the base rate at which a venue of the given category has a space for `h` guests, modelled as a logistic curve in `h`. `λ` is the cost of contacting a venue that turns out not to fit.
+
+Venues with `pFit < 0.2` are excluded, as are rooms that are too small with confidence of 0.85 or more. Ties are broken by `pFit`, then commute time, then name. This follows the maximum expected utility principle (Russell and Norvig, ch. 16): an unconfirmed estimate contributes utility only in proportion to the belief that it is correct.
+
+### 5.8 Safeguards
+
+- **robots.txt (RFC 9309).**
+  - The longest matching rule applies, and Allow wins a tie.
+  - A 4xx response permits crawling.
+  - A 5xx or unreachable robots.txt means the site is skipped and marked for a phone call.
+- **Planner corroboration.** A confirmation is held for review instead of being applied when the room's confidence is at least 0.85 and the reported figure differs by more than 50%.
+- **Separate queues.** Scraping and model calls run in separate queues, eight at a time, so a slow model call does not hold up scraping.
+
+### 5.9 Evaluation
+
+The `eval/` harness compares the original logic, the regex reader alone, the LLM reader alone and the combined system.
+
+| Metric | Measures |
+| --- | --- |
+| Capacity accuracy; precision, recall and F1 | Extraction quality |
+| Grounding rejection rate | Share of model answers without support on the page |
+| Expected Calibration Error (10 bins) | Agreement between confidence and observed accuracy |
+| NDCG@5, gain 2^rel − 1 | Ranking quality against human judgments |
+| Cohen's kappa | Agreement between two annotators |
+
+Metric implementations are cross-checked against scikit-learn. See [`eval/README.md`](eval/README.md) for the labelling workflow.
+
+## 6. Getting started
+
+### Prerequisites
+
+- Node.js 20 or later
+- A Supabase project, or Docker to run Supabase locally
+- Optional API keys: Google Places, xAI, Firecrawl, OpenRouteService
+
+### Installation
 
 ```bash
+git clone https://github.com/quachphu/CECS451.git
+cd CECS451
+npm install
 cp .env.example .env.local
 ```
 
-Fill in your Supabase project's URL, anon key, and service role key (under Project Settings, then API). Every other key is optional, see "Optional API keys" below. `.env*` files are gitignored; only `.env.example` is tracked.
+### Environment variables
 
-### 4. Seed the fallback venues
+| Variable | Required | Behaviour when unset |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | |
+| `GOOGLE_PLACES_API_KEY` | No | Discovery uses OpenStreetMap only; venues have no photos |
+| `XAI_API_KEY` | No | No LLM reader, query parsing or dietary roster; figures stay `likely` |
+| `FIRECRAWL_API_KEY` | No | JavaScript-rendered pages are marked for a phone call |
+| `ORS_API_KEY` | No | Commute times are straight-line estimates, labelled as such |
+
+`.env.local` is excluded from version control.
+
+### Database
+
+Apply the migrations in `supabase/migrations/` and load the curated venues:
 
 ```bash
+npx supabase login
+npx supabase link --project-ref <project-ref>
+npx supabase db push
 npm run seed
 ```
 
-Loads the curated venues (Carmine's, Dos Caminos, Perbacco, Hilton Hawaiian Village, and others) that guarantee the 3 required scenarios have real, verified data before the live pipeline ever runs.
+To use a local Supabase instance instead, run `npx supabase start`, copy the printed URL and keys into `.env.local`, then run `npm run seed`. `npx supabase db reset` reapplies all migrations.
 
-### 5. Run it
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000), create a workspace, and search.
-
-## Local development (no hosted Supabase project needed)
+### Running
 
 ```bash
-npx supabase init          # first time only
-npx supabase start         # spins up Postgres + API locally via Docker, applies migrations
-npm run seed                # seed against the local instance
-npm run dev
+npm run dev                          # development server at http://localhost:3000
+npm run build && npm run start       # production build
 ```
 
-`supabase start` prints a local API URL plus anon and service role keys. Copy those into `.env.local`. `npx supabase db reset` re-applies migrations from scratch.
+### Reference scenarios
 
-## Optional API keys
+| Scenario | Address |
+| --- | --- |
+| 50 people, under 20 minutes | `Times Square, New York, NY` |
+| 30 people, under 15 minutes | `415 Mission St, San Francisco, CA 94105` |
+| 200 people, reception style, under 15 minutes walking | `Hilton Hawaiian Village, Honolulu, HI` |
 
-| Variable                | Without it                                                         | With it                                                                                                   |
-| ----------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `ORS_API_KEY`           | Commute time is a haversine estimate, labeled "estimated"          | Real walking/driving routes via [OpenRouteService](https://openrouteservice.org/dev/#/signup) (free tier) |
-| `GOOGLE_PLACES_API_KEY` | Discovery uses the free OpenStreetMap Overpass API                 | Richer discovery and real venue photos via Google Places (New)                                            |
-| `FIRECRAWL_API_KEY`     | Client rendered private dining pages come back `unverified`        | Those pages get rendered and read instead of mislabeled from a tooling gap (max 10 renders per run)       |
-| `XAI_API_KEY`           | Regex figures stay `likely`, prose capacities aren't captured, and free text search is disabled | A second, grounded read of every private-dining page: adds `verified` agreement, the `ai_extracted` tier, and NL query parsing (max 12 reads per run) |
+### Commands
 
-Firecrawl only renders pages the static pass couldn't read. Both paid tiers are budget capped per discovery run and spent on the likeliest venues first.
+| Command | Description |
+| --- | --- |
+| `npm test` | Unit and integration tests |
+| `npm run lint` | ESLint |
+| `npm run test:scenarios` | Run the three reference searches |
+| `npm run photos:backfill` | Add Google photos to venues without one |
+| `npm run eval:snapshot -- eval/urls.csv` | Snapshot venue pages for evaluation (respects robots.txt) |
+| `npm run eval:extraction` | Score the extraction systems against labels |
+| `npm run eval:ranking` | NDCG@5 for each ranking method |
+| `npm run eval:agreement` | Cohen's kappa between two annotators |
+| `python3 scripts/train_confidence.py` | Refit the confidence model and report ECE (requires `pip install -r requirements-dev.txt`) |
 
-## Testing the 3 required scenarios
+The scripts in `scripts/verify-*.ts` and `scripts/loadtest-density.ts` call the live external services and use API credits. Run them with `npx tsx scripts/<name>.ts`. Scripts that import server modules need `node --conditions=react-server --import tsx scripts/<name>.ts`.
 
-1. 50 people, Times Square, NYC, under 20 min: search `Times Square, New York, NY`
-2. 30 people, Salesforce Tower, SF, under 15 min: search `415 Mission St, San Francisco, CA 94105`
-3. 200 people, reception style, Hilton Hawaiian Village, Waikiki, under 15 min walk: search `Hilton Hawaiian Village, Honolulu, HI`, style set to "Reception / happy hour"
+### Troubleshooting
 
-```bash
-npm run test:scenarios   # runs all 3 scenarios directly against search/ranking, prints results
-npm test                  # unit tests (Vitest): extraction, grounding, trust, confidence, ranking, robots.txt, eval metrics, ...
-```
+| Symptom | Resolution |
+| --- | --- |
+| `Failed to write rooms … is 0011_ai_core.sql applied?` | Run `npx supabase db push` to apply the missing migration |
+| Venue cards show "No photo found" | Set `GOOGLE_PLACES_API_KEY`, run `npm run photos:backfill` and restart the server |
+| Port 3000 is in use | `npm run dev -- -p 3001` |
+| Plain-English search reports that the model did not respond | Check `XAI_API_KEY`; the standard search form works without it |
 
-Unit tests can't prove an external API still behaves as documented, so there are scripts that hit the real services directly. These make live network calls and cost API credits where a key is configured:
+## 7. Limitations and next steps
 
-```bash
-npx tsx scripts/verify-enrichment.ts
-npx tsx scripts/verify-nl-query.ts
-node --conditions=react-server --import tsx scripts/verify-flywheel.ts
-node --conditions=react-server --import tsx scripts/verify-dietary-summary.ts
-node --conditions=react-server --import tsx scripts/loadtest-density.ts
-```
+### Limitations
 
-Two real defects (a ranking hole where a category guessed capacity outranked a venue's own published figure, and a stale prop bug in the dietary roster button) were caught by these scripts and by walking the flow directly, not by the unit suite.
+- **Untrained models.** The confidence model, discovery prior and category base rates use hand-set coefficients (`placeholder-0`). Until they are fitted, categories with generous base rates, such as hotels, can rank slightly too high.
+- **No accuracy figures yet.** The evaluation harness is implemented and tested, but no labelled dataset exists.
+- **Strict grounding.** Exact quote matching rejects correct answers that paraphrase the page, which lowers recall.
+- **First-search latency.** In an area with no cached venues, verifying figures with the model can make the first search slower: about 15 s instead of 6 s in simulation. Later searches use the 30-day cache.
+- **Authentication.** Workspaces are shared through a team code, which is not suitable for production use.
+- **Interface gaps.**
+  - Map markers and the compare page do not yet handle estimated capacities consistently.
+  - Some capacity ranges display in reverse order.
 
-### Evaluating the AI core
+### Next steps
 
-`eval/` holds an offline harness for measuring extraction and ranking against human labels: capacity accuracy, private-event precision/recall/F1, grounding rejection rate, calibration (ECE), NDCG@5 and inter-labeler kappa. It compares the original logic (v0) with regex-only, LLM-only and the combined system. See `eval/README.md` for the label schema and workflow:
+| Priority | Task |
+| --- | --- |
+| High | Label about 100 venue pages with two annotators and report Cohen's kappa |
+| High | Report extraction F1, grounding rejection rate and NDCG@5 against the baselines |
+| Medium | Fit the confidence model, discovery prior and base rates; report ECE before and after |
+| Medium | Reduce first-search latency by capping verification reads or raising model concurrency |
+| Medium | Accept paraphrased evidence through an entailment check behind the exact match |
+| Low | Separate event links from workspace codes and add authentication |
+| Low | Handle estimated capacities consistently on the map and the compare page |
+| Low | Deploy to Vercel with the production Supabase project |
 
-```bash
-npm run eval:snapshot -- eval/urls.csv   # snapshot venue pages (live, honours robots.txt)
-npm run eval:agreement                    # Cohen's kappa between two labelers
-npm run eval:extraction                   # offline: v0 vs regex vs LLM vs combined -> eval/results.json
-npm run eval:ranking -- --export          # once: dump scenario venues from Supabase
-npm run eval:ranking                      # offline: NDCG@5 for distance-only, v0 and expected utility
-pip install -r requirements-dev.txt && python3 scripts/train_confidence.py   # refit confidence (ECE report)
-```
+## References
 
-## Known trade-offs
+- Gao et al., *Enabling Large Language Models to Generate Text with Citations* (ALCE), EMNLP 2023
+- Guo et al., *On Calibration of Modern Neural Networks*, ICML 2017
+- Russell and Norvig, *Artificial Intelligence: A Modern Approach*, 4th ed., ch. 16
+- Järvelin and Kekäläinen, *Cumulated Gain-Based Evaluation of IR Techniques*, ACM TOIS 2002
+- Cohen, *A Coefficient of Agreement for Nominal Scales*, 1960
+- RFC 9309, *Robots Exclusion Protocol*
 
-- Photos are partial. Auto-discovered venues pull real Google Places photos; a handful of curated seed venues show an honest "no photo found" instead of a stock placeholder, after one was tried and found more misleading than helpful.
-- Capacity gets estimated when a venue publishes none, labeled `unverified` and named "Capacity unconfirmed." Kept because excluding unknown venues entirely would drop real candidates worth calling, and ranking no longer lets that guess outrank a published figure.
-- No real authentication. A shared workspace code trades real auth for zero friction sharing, which is fine for a research tool with no sensitive data, but not for production as it stands.
-- Confirmations are mostly trusted on sight. Anyone with a workspace code can push a `confirmed_by_planner` figure into the shared catalog. Provenance is recorded, and a figure that contradicts a strongly believed capacity by more than 50% is held for review instead of applied, but there's no second-planner corroboration yet.
-- The confidence model, fit priors and discovery prior ship with hand-set placeholder coefficients (`version: "placeholder-0"`) until `eval/` has labels to fit them on.
-
-## Project structure
-
-```
-src/lib/geo/               geocoding + commute time
-src/lib/discovery/         live discovery, scraping, JS render + LLM tiers, trust labeling, caching
-src/lib/ranking.ts         expected-utility ranking (pFit, fit priors)
-src/lib/dietary-summary.ts AI-built dietary roster from the event chat thread
-src/lib/workspace.ts       company-code workspace (create/join, cookie based)
-src/app/                   routes (search, shortlist, compare, venue, event, summary)
-src/data/                  curated fallback venue data + model coefficients (confidence, fit priors, discovery prior)
-supabase/migrations/       database schema (apply in filename order)
-scripts/                   seed, scenario smoke test, live-service verification, eval and training scripts
-eval/                      offline evaluation harness (metrics, v0 baselines, label templates)
-```
-
----
-
-Built for Nowadays' "Private Dining Finder" take-home challenge.
+The full reference list and design notes are in [`NOTES-ai-core.md`](NOTES-ai-core.md).

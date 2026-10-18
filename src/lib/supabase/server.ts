@@ -19,15 +19,3 @@ export function createServiceClient() {
     { auth: { persistSession: false } }
   );
 }
-
-/**
- * Anon-key client for use in Server Components / Server Actions that only
- * need the same access a browser client would have (RLS still applies).
- */
-export function createAnonServerClient() {
-  return createClient<Database>(
-    requireEnv("NEXT_PUBLIC_SUPABASE_URL"),
-    requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"),
-    { auth: { persistSession: false } }
-  );
-}

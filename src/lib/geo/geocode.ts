@@ -16,6 +16,9 @@ async function throttle() {
   lastRequestAt = Date.now();
 }
 
+/** The first search stage waits on this; a stalled lookup must not hold the page open. */
+const NOMINATIM_TIMEOUT_MS = 8_000;
+
 async function nominatimSearch(query: string): Promise<GeocodeResult | null> {
   await throttle();
 
@@ -24,14 +27,19 @@ async function nominatimSearch(query: string): Promise<GeocodeResult | null> {
   url.searchParams.set("format", "jsonv2");
   url.searchParams.set("limit", "1");
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), NOMINATIM_TIMEOUT_MS);
   const res = await fetch(url, {
     headers: {
       "User-Agent": "private-dining-finder/0.1 (event-planning research tool)",
       Accept: "application/json",
     },
-  });
+    signal: controller.signal,
+  })
+    .catch(() => null)
+    .finally(() => clearTimeout(timeout));
 
-  if (!res.ok) return null;
+  if (!res?.ok) return null;
   const results = (await res.json()) as Array<{ lat: string; lon: string; display_name: string }>;
   const first = results[0];
   if (!first) return null;
