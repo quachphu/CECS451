@@ -55,3 +55,12 @@ next-env.d.ts
 # python (offline training scripts)
 __pycache__/
 *.pyc
+
+# training pipeline: never commit scraped pages or Google Places content
+/eval/snapshots/
+/eval/google_features.csv
+/eval/google_raw/
+/eval/fsq_raw/
+/eval/**/*.parquet
+/eval/.spend/
+/ml/.venv/
