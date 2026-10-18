@@ -7,9 +7,18 @@
  * (textFromHtml) and the same private-dining keyword rule — so the training
  * data is what the app would have read.
  */
-import { isEventPdfLink, isExternalEventLink } from "../../../src/lib/discovery/web-links";
-import { createRobotsChecker, ROBOTS_AGENT_TOKEN } from "../../../src/lib/discovery/robots";
-import { PRIVATE_DINING_KEYWORDS, textFromHtml } from "../../../src/lib/discovery/scraper";
+import {
+  isEventPdfLink,
+  isExternalEventLink,
+} from "../../../src/lib/discovery/web-links";
+import {
+  createRobotsChecker,
+  ROBOTS_AGENT_TOKEN,
+} from "../../../src/lib/discovery/robots";
+import {
+  PRIVATE_DINING_KEYWORDS,
+  textFromHtml,
+} from "../../../src/lib/discovery/scraper";
 import { sha256 } from "./io";
 
 export const RESEARCH_USER_AGENT =
@@ -55,12 +64,15 @@ export type Snapshot = {
   notes?: string[];
 };
 
-export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
+export type FetchLike = (
+  input: string,
+  init?: RequestInit,
+) => Promise<Response>;
 
 /** Firecrawl (or a test double): rendered text of a page or PDF, and the credits charged. */
 export type Renderer = (
   url: string,
-  mode: "page" | "pdf"
+  mode: "page" | "pdf",
 ) => Promise<{ text: string; status: number | null; credits: number } | null>;
 
 export type SnapshotDeps = {
@@ -75,13 +87,22 @@ export type SnapshotDeps = {
 };
 
 type StaticResult =
-  | { kind: "ok"; status: number; finalUrl: string; html: string; redirectHosts: string[] }
+  | {
+      kind: "ok";
+      status: number;
+      finalUrl: string;
+      html: string;
+      redirectHosts: string[];
+    }
   | { kind: "status"; status: number; finalUrl: string; body: string }
   | { kind: "timeout" }
   | { kind: "network" };
 
 /** One static GET, following up to five redirects by hand so registrar redirects are visible. */
-export async function fetchStatic(url: string, fetchImpl: FetchLike): Promise<StaticResult> {
+export async function fetchStatic(
+  url: string,
+  fetchImpl: FetchLike,
+): Promise<StaticResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   const redirectHosts: string[] = [];
@@ -91,22 +112,37 @@ export async function fetchStatic(url: string, fetchImpl: FetchLike): Promise<St
       const res = await fetchImpl(current, {
         redirect: "manual",
         signal: controller.signal,
-        headers: { "User-Agent": RESEARCH_USER_AGENT, Accept: "text/html,application/xhtml+xml" },
+        headers: {
+          "User-Agent": RESEARCH_USER_AGENT,
+          Accept: "text/html,application/xhtml+xml",
+        },
       });
       if (res.status >= 300 && res.status < 400) {
         const location = res.headers.get("location");
         if (!location || hop === MAX_REDIRECTS)
-          return { kind: "status", status: res.status, finalUrl: current, body: "" };
+          return {
+            kind: "status",
+            status: res.status,
+            finalUrl: current,
+            body: "",
+          };
         current = new URL(location, current).toString();
         redirectHosts.push(new URL(current).hostname);
         continue;
       }
       const body = await res.text();
       const type = res.headers.get("content-type") ?? "";
-      if (!res.ok) return { kind: "status", status: res.status, finalUrl: current, body };
+      if (!res.ok)
+        return { kind: "status", status: res.status, finalUrl: current, body };
       if (type && !/html|xml|text\/plain/i.test(type))
         return { kind: "status", status: 415, finalUrl: current, body: "" };
-      return { kind: "ok", status: res.status, finalUrl: current, html: body, redirectHosts };
+      return {
+        kind: "ok",
+        status: res.status,
+        finalUrl: current,
+        html: body,
+        redirectHosts,
+      };
     }
     return { kind: "network" };
   } catch (err) {
@@ -123,23 +159,31 @@ const REGISTRAR_HOSTS =
 const PARKED_TEXT =
   /\b(this domain (is|may be) for sale|domain (is )?for sale|buy this domain|domain parked|parked (free|domain)|this domain has expired|permanently closed|closed permanently|has (now )?closed (its doors )?permanently|we('| a)re permanently closed)\b/i;
 
-export function isParkedOrClosed(text: string, redirectHosts: string[]): boolean {
-  return redirectHosts.some((h) => REGISTRAR_HOSTS.test(h)) || PARKED_TEXT.test(text.slice(0, 4000));
+export function isParkedOrClosed(
+  text: string,
+  redirectHosts: string[],
+): boolean {
+  return (
+    redirectHosts.some((h) => REGISTRAR_HOSTS.test(h)) ||
+    PARKED_TEXT.test(text.slice(0, 4000))
+  );
 }
 
 const CHALLENGE =
   /just a moment\.\.\.|attention required! \| cloudflare|cf-chl-|cf_chl_|checking your browser|ddos protection by|captcha|access denied|request unsuccessful\. incapsula|perimeterx|px-captcha/i;
 
 export function isBotChallenge(status: number, body: string): boolean {
-  return status === 403 || status === 429 || CHALLENGE.test(body.slice(0, 20000));
+  return (
+    status === 403 || status === 429 || CHALLENGE.test(body.slice(0, 20000))
+  );
 }
 
 // Words that are common in English and rare in Spanish, French, Italian or German
 // ("a", "in" and "on" are left out: they are words in those languages too).
 const EN_STOPWORDS = new Set(
   "the and of to for is with our are we you your at be this that from or as by all private event events dining room menu".split(
-    " "
-  )
+    " ",
+  ),
 );
 
 /** Crude language check: share of common English words. Flags non-English pages for review. */
@@ -152,8 +196,13 @@ export function detectLanguage(text: string): Snapshot["language"] {
 }
 
 /** Links in rendered markdown, "[text](url)". */
-export function markdownLinks(markdown: string): Array<{ href: string; text: string }> {
-  return Array.from(markdown.matchAll(/\[([^\]]*)\]\(([^)\s]+)[^)]*\)/g), (m) => ({ href: m[2], text: m[1] }));
+export function markdownLinks(
+  markdown: string,
+): Array<{ href: string; text: string }> {
+  return Array.from(
+    markdown.matchAll(/\[([^\]]*)\]\(([^)\s]+)[^)]*\)/g),
+    (m) => ({ href: m[2], text: m[1] }),
+  );
 }
 
 function page(
@@ -161,21 +210,35 @@ function page(
   kind: SnapshotPage["kind"],
   status: number | null,
   method: SnapshotPage["method"],
-  text: string
+  text: string,
 ): SnapshotPage {
-  return { url, kind, status, method, text, chars: text.length, sha256: sha256(text) };
+  return {
+    url,
+    kind,
+    status,
+    method,
+    text,
+    chars: text.length,
+    sha256: sha256(text),
+  };
 }
 
 /** PDFs most likely to describe private events first. */
 export function rankPdfLinks(links: string[]): string[] {
   const score = (u: string) =>
-    /private|event/i.test(u) ? 3 : /group|banquet|packet|party|wedding/i.test(u) ? 2 : /menu|catering/i.test(u) ? 1 : 0;
+    /private|event/i.test(u)
+      ? 3
+      : /group|banquet|packet|party|wedding/i.test(u)
+        ? 2
+        : /menu|catering/i.test(u)
+          ? 1
+          : 0;
   return [...links].sort((a, b) => score(b) - score(a));
 }
 
 export async function snapshotVenue(
   venue: { venue_id: string; website: string | null },
-  deps: SnapshotDeps
+  deps: SnapshotDeps,
 ): Promise<Snapshot> {
   const now = deps.now ?? (() => new Date().toISOString());
   const notes: string[] = [];
@@ -190,7 +253,10 @@ export async function snapshotVenue(
     fetched_at: now(),
     credits_used: 0,
   };
-  const finish = (fetch_outcome: FetchOutcome, robots: Snapshot["robots"]): Snapshot => ({
+  const finish = (
+    fetch_outcome: FetchOutcome,
+    robots: Snapshot["robots"],
+  ): Snapshot => ({
     ...base,
     fetch_outcome,
     robots,
@@ -199,7 +265,7 @@ export async function snapshotVenue(
       base.pages
         .filter((p) => p.kind !== "pdf")
         .map((p) => p.text)
-        .join(" ")
+        .join(" "),
     ),
     ...(notes.length ? { notes } : {}),
   });
@@ -207,12 +273,22 @@ export async function snapshotVenue(
   if (!venue.website) return finish("no_website", "not_checked");
 
   // robots.txt first, with our research User-Agent; 4xx = allowed, 5xx/timeout = disallowed for this run.
-  const robots = createRobotsChecker(ROBOTS_AGENT_TOKEN, async (input, init) => {
-    await deps.wait();
-    return deps.fetchImpl(input, { ...init, headers: { "User-Agent": RESEARCH_USER_AGENT } });
-  });
+  const robots = createRobotsChecker(
+    ROBOTS_AGENT_TOKEN,
+    async (input, init) => {
+      await deps.wait();
+      return deps.fetchImpl(input, {
+        ...init,
+        headers: { "User-Agent": RESEARCH_USER_AGENT },
+      });
+    },
+  );
   const home = await robots.check(venue.website);
-  if (!home.allowed) return finish("robots_blocked", home.unreachable ? "unavailable" : "disallowed");
+  if (!home.allowed)
+    return finish(
+      "robots_blocked",
+      home.unreachable ? "unavailable" : "disallowed",
+    );
 
   /** Firecrawl fallback for an empty or blocked page; returns null when unavailable or still empty. */
   const renderFallback = async (url: string, reason: string) => {
@@ -223,7 +299,9 @@ export async function snapshotVenue(
     const rendered = await deps.render(url, "page");
     if (rendered) credits += rendered.credits;
     if (!rendered || rendered.text.length < MIN_VISIBLE_CHARS) {
-      notes.push(`${url}: ${reason}; render ${rendered ? "still empty" : "failed"}`);
+      notes.push(
+        `${url}: ${reason}; render ${rendered ? "still empty" : "failed"}`,
+      );
       return null;
     }
     return rendered;
@@ -243,36 +321,57 @@ export async function snapshotVenue(
       notes.push(`homepage HTTP ${res.status}`);
       return finish("http_error", "allowed");
     }
-    const rendered = await renderFallback(venue.website, `blocked (HTTP ${res.status})`);
+    const rendered = await renderFallback(
+      venue.website,
+      `blocked (HTTP ${res.status})`,
+    );
     if (!rendered) return finish("bot_blocked", "allowed");
     homeText = rendered.text;
     links = markdownLinks(rendered.text);
-    base.pages.push(page(venue.website, "homepage", rendered.status, "firecrawl", homeText));
+    base.pages.push(
+      page(venue.website, "homepage", rendered.status, "firecrawl", homeText),
+    );
   } else {
     homeUrl = res.finalUrl;
     const parsed = textFromHtml(res.html);
     homeText = parsed.text;
     links = parsed.links;
-    if (isBotChallenge(res.status, res.html) && homeText.length < MIN_VISIBLE_CHARS) {
+    if (
+      isBotChallenge(res.status, res.html) &&
+      homeText.length < MIN_VISIBLE_CHARS
+    ) {
       const rendered = await renderFallback(venue.website, "challenge page");
       if (!rendered) return finish("bot_blocked", "allowed");
       homeText = rendered.text;
       links = markdownLinks(rendered.text);
-      base.pages.push(page(homeUrl, "homepage", rendered.status, "firecrawl", homeText));
+      base.pages.push(
+        page(homeUrl, "homepage", rendered.status, "firecrawl", homeText),
+      );
     } else if (isParkedOrClosed(homeText, res.redirectHosts)) {
-      base.pages.push(page(homeUrl, "homepage", res.status, "static", homeText));
+      base.pages.push(
+        page(homeUrl, "homepage", res.status, "static", homeText),
+      );
       return finish("parked_or_closed", "allowed");
     } else if (homeText.length < MIN_VISIBLE_CHARS) {
-      const rendered = await renderFallback(homeUrl, `only ${homeText.length} visible characters`);
+      const rendered = await renderFallback(
+        homeUrl,
+        `only ${homeText.length} visible characters`,
+      );
       if (!rendered) {
-        base.pages.push(page(homeUrl, "homepage", res.status, "static", homeText));
+        base.pages.push(
+          page(homeUrl, "homepage", res.status, "static", homeText),
+        );
         return finish("empty_after_render", "allowed");
       }
       homeText = rendered.text;
       links = [...links, ...markdownLinks(rendered.text)];
-      base.pages.push(page(homeUrl, "homepage", rendered.status, "firecrawl", homeText));
+      base.pages.push(
+        page(homeUrl, "homepage", rendered.status, "firecrawl", homeText),
+      );
     } else {
-      base.pages.push(page(homeUrl, "homepage", res.status, "static", homeText));
+      base.pages.push(
+        page(homeUrl, "homepage", res.status, "static", homeText),
+      );
     }
   }
 
@@ -295,7 +394,8 @@ export async function snapshotVenue(
     if (isEventPdfLink(abs, text)) pdfs.add(abs);
     else if (
       resolved.hostname === baseUrl.hostname &&
-      (PRIVATE_DINING_KEYWORDS.test(text) || PRIVATE_DINING_KEYWORDS.test(href)) &&
+      (PRIVATE_DINING_KEYWORDS.test(text) ||
+        PRIVATE_DINING_KEYWORDS.test(href)) &&
       abs !== homeUrl &&
       !candidates.includes(abs)
     )
@@ -305,7 +405,8 @@ export async function snapshotVenue(
   base.pdf_links = rankPdfLinks(Array.from(pdfs));
 
   const allowedCandidates: string[] = [];
-  for (const url of candidates) if (await robots.isAllowed(url)) allowedCandidates.push(url);
+  for (const url of candidates)
+    if (await robots.isAllowed(url)) allowedCandidates.push(url);
   for (const url of allowedCandidates.slice(0, MAX_CANDIDATE_PAGES)) {
     await deps.wait();
     const r = await fetchStatic(url, deps.fetchImpl);
@@ -316,17 +417,36 @@ export async function snapshotVenue(
       text = textFromHtml(r.html).text;
       status = r.status;
       if (text.length < MIN_VISIBLE_CHARS) {
-        const rendered = await renderFallback(url, `only ${text.length} visible characters`);
-        if (rendered) [text, status, method] = [rendered.text, rendered.status, "firecrawl"];
+        const rendered = await renderFallback(
+          url,
+          `only ${text.length} visible characters`,
+        );
+        if (rendered)
+          [text, status, method] = [
+            rendered.text,
+            rendered.status,
+            "firecrawl",
+          ];
       }
     } else if (r.kind === "status" && isBotChallenge(r.status, r.body)) {
       const rendered = await renderFallback(url, `blocked (HTTP ${r.status})`);
-      if (rendered) [text, status, method] = [rendered.text, rendered.status, "firecrawl"];
+      if (rendered)
+        [text, status, method] = [rendered.text, rendered.status, "firecrawl"];
     } else {
-      notes.push(`${url}: ${r.kind === "status" ? `HTTP ${r.status}` : r.kind}`);
+      notes.push(
+        `${url}: ${r.kind === "status" ? `HTTP ${r.status}` : r.kind}`,
+      );
     }
     if (text)
-      base.pages.push(page(url, PRIVATE_DINING_KEYWORDS.test(text) ? "private_dining" : "other", status, method, text));
+      base.pages.push(
+        page(
+          url,
+          PRIVATE_DINING_KEYWORDS.test(text) ? "private_dining" : "other",
+          status,
+          method,
+          text,
+        ),
+      );
   }
 
   // Event PDFs, only when allowed for this run (pilot, or approved full parsing).
@@ -336,7 +456,10 @@ export async function snapshotVenue(
       if (!(await robots.isAllowed(url))) continue;
       const parsed = await deps.render(url, "pdf");
       if (parsed) credits += parsed.credits;
-      if (parsed?.text) base.pages.push(page(url, "pdf", parsed.status, "firecrawl_pdf", parsed.text));
+      if (parsed?.text)
+        base.pages.push(
+          page(url, "pdf", parsed.status, "firecrawl_pdf", parsed.text),
+        );
       else notes.push(`${url}: PDF parse failed`);
     }
   }

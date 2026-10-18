@@ -17,7 +17,7 @@ export function nameTokens(name: string): Set<string> {
       .replace(/\p{M}/gu, "")
       .replace(/&/g, " and ")
       .split(/[^a-z0-9]+/)
-      .filter((t) => t && !NAME_STOPWORDS.has(t))
+      .filter((t) => t && !NAME_STOPWORDS.has(t)),
   );
 }
 
@@ -45,17 +45,27 @@ export type MatchDecision = {
  */
 export function decideMatch(
   venue: { name: string; lat: number; lng: number; website: string | null },
-  place: { name: string; lat: number | null; lng: number | null; websiteUri: string | null }
+  place: {
+    name: string;
+    lat: number | null;
+    lng: number | null;
+    websiteUri: string | null;
+  },
 ): MatchDecision {
   const distanceM =
     place.lat == null || place.lng == null
       ? null
-      : haversineMeters({ lat: venue.lat, lng: venue.lng }, { lat: place.lat, lng: place.lng });
+      : haversineMeters(
+          { lat: venue.lat, lng: venue.lng },
+          { lat: place.lat, lng: place.lng },
+        );
   const similarity = nameSimilarity(venue.name, place.name);
   const a = registeredDomain(venue.website);
   const domainMatch = a != null && a === registeredDomain(place.websiteUri);
   const accepted =
-    distanceM != null && distanceM <= MAX_MATCH_METERS && (similarity >= MIN_NAME_SIMILARITY || domainMatch);
+    distanceM != null &&
+    distanceM <= MAX_MATCH_METERS &&
+    (similarity >= MIN_NAME_SIMILARITY || domainMatch);
   return { accepted, distanceM, nameSimilarity: similarity, domainMatch };
 }
 

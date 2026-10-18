@@ -12,3 +12,8 @@ ranking-results.json
 labels.csv
 ranking-judgments.csv
 urls.csv
+
+# Review sheets carry page text from venue sites.
+review/sheets/
+# Per-item caches for resumable runs.
+.cache/

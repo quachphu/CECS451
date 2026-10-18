@@ -24,7 +24,9 @@ export type ManifestEntry = {
 
 export function gitSha(): string | null {
   try {
-    return execSync("git rev-parse HEAD", { stdio: ["ignore", "pipe", "ignore"] })
+    return execSync("git rev-parse HEAD", {
+      stdio: ["ignore", "pipe", "ignore"],
+    })
       .toString()
       .trim();
   } catch {
@@ -48,7 +50,8 @@ export class RunManifest {
   }
 
   write(status: ManifestEntry["status"] = "ok"): ManifestEntry {
-    const hash = (files: string[]) => Object.fromEntries(files.map((f) => [f, sha256File(f)]));
+    const hash = (files: string[]) =>
+      Object.fromEntries(files.map((f) => [f, sha256File(f)]));
     const entry: ManifestEntry = {
       script: this.script,
       git_sha: gitSha(),

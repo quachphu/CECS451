@@ -22,12 +22,24 @@ import {
   xaiBaseUrl,
   xaiModel,
 } from "../../src/lib/discovery/extraction-config";
-import { roomConfidenceFeatures, type ConfidenceFeatures } from "../../src/lib/discovery/features";
-import { extractWithSelfConsistency, type XaiUsage } from "../../src/lib/discovery/llm-extract";
+import {
+  roomConfidenceFeatures,
+  type ConfidenceFeatures,
+} from "../../src/lib/discovery/features";
+import {
+  extractWithSelfConsistency,
+  type XaiUsage,
+} from "../../src/lib/discovery/llm-extract";
 import { createLimiter } from "../../src/lib/limiter";
 import { Budget, BudgetExceededError, tokenPrice } from "./lib/budget";
 import { requireEnv } from "./lib/env";
-import { cliArgs, evalDir, readJson, writeJsonAtomic, writeJsonlAtomic } from "./lib/io";
+import {
+  cliArgs,
+  evalDir,
+  readJson,
+  writeJsonAtomic,
+  writeJsonlAtomic,
+} from "./lib/io";
 import { RunManifest } from "./lib/manifest";
 import { studentInput } from "./lib/student-input";
 import { loadSnapshot, readVenueIndex } from "./lib/venue-index";
@@ -71,7 +83,12 @@ function slug(s: string): string {
     .replace(/^-|-$/g, "");
 }
 
-export function roomKey(venueId: string, roomName: string, style: string, taken: Set<string>): string {
+export function roomKey(
+  venueId: string,
+  roomName: string,
+  style: string,
+  taken: Set<string>,
+): string {
   let key = `${venueId}#${slug(roomName) || "room"}${style === "unspecified" ? "" : `@${style}`}`;
   for (let n = 2; taken.has(key); n++) key = `${key.replace(/~\d+$/, "")}~${n}`;
   taken.add(key);
@@ -83,11 +100,16 @@ async function verifyModel(apiKey: string, model: string): Promise<string[]> {
     headers: { Authorization: `Bearer ${apiKey}` },
     signal: AbortSignal.timeout(20_000),
   });
-  if (!res.ok) throw new Error(`GET /v1/models failed: ${res.status} ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok)
+    throw new Error(
+      `GET /v1/models failed: ${res.status} ${(await res.text()).slice(0, 200)}`,
+    );
   const body = (await res.json()) as { data?: Array<{ id: string }> };
   const ids = (body.data ?? []).map((m) => m.id);
   if (!ids.includes(model)) {
-    throw new Error(`XAI_MODEL "${model}" is not available to this key. Available: ${ids.join(", ") || "(none)"}`);
+    throw new Error(
+      `XAI_MODEL "${model}" is not available to this key. Available: ${ids.join(", ") || "(none)"}`,
+    );
   }
   return ids;
 }
@@ -101,11 +123,17 @@ async function main() {
   manifest.models.student = model;
   manifest.models.k = String(SELF_CONSISTENCY_K);
   manifest.models.temperature = String(SELF_CONSISTENCY_TEMPERATURE);
-  manifest.models.available_models = (await verifyModel(apiKey, model)).join(" ");
+  manifest.models.available_models = (await verifyModel(apiKey, model)).join(
+    " ",
+  );
 
   const priceIn = tokenPrice("XAI_PRICE_INPUT_PER_M", 2);
   const priceOut = tokenPrice("XAI_PRICE_OUTPUT_PER_M", 6);
-  const budget = new Budget("xai", "usd", Number(process.env.XAI_BUDGET_USD ?? 25));
+  const budget = new Budget(
+    "xai",
+    "usd",
+    Number(process.env.XAI_BUDGET_USD ?? 25),
+  );
   const tokens = { prompt: 0, completion: 0, reasoning: 0, calls: 0 };
   // Reasoning tokens are charged as output on top of completion tokens: an
   // overestimate if xAI already counts them in completion_tokens.
@@ -114,7 +142,10 @@ async function main() {
     tokens.completion += u.completionTokens;
     tokens.reasoning += u.reasoningTokens;
     tokens.calls += 1;
-    budget.charge(u.promptTokens * priceIn + (u.completionTokens + u.reasoningTokens) * priceOut);
+    budget.charge(
+      u.promptTokens * priceIn +
+        (u.completionTokens + u.reasoningTokens) * priceOut,
+    );
   };
 
   const venues = readVenueIndex().filter((v) => v.in_dataset === "1");
@@ -125,7 +156,12 @@ async function main() {
 
   const work = venues.map((v) =>
     run(async () => {
-      if (existsSync(cacheFile(v.venue_id)) || status !== "ok" || processed >= limit) return;
+      if (
+        existsSync(cacheFile(v.venue_id)) ||
+        status !== "ok" ||
+        processed >= limit
+      )
+        return;
       processed++;
       const snap = loadSnapshot(v.venue_id)!;
       const { input, privateDiningPageFound } = studentInput(snap);
@@ -141,11 +177,18 @@ async function main() {
           input_chars: 0,
           model,
         };
-        writeJsonAtomic(cacheFile(v.venue_id), { venue, rooms: [], usd: 0 } satisfies Cached);
+        writeJsonAtomic(cacheFile(v.venue_id), {
+          venue,
+          rooms: [],
+          usd: 0,
+        } satisfies Cached);
         return;
       }
       // Worst case for one venue: k reads plus k retries, all input plus 4k output tokens.
-      const estimate = 2 * SELF_CONSISTENCY_K * ((input.length / 3) * priceIn + 4000 * priceOut);
+      const estimate =
+        2 *
+        SELF_CONSISTENCY_K *
+        ((input.length / 3) * priceIn + 4000 * priceOut);
       try {
         budget.reserve(estimate);
       } catch (err) {
@@ -153,24 +196,30 @@ async function main() {
         throw err;
       }
       const spentBefore = budget.spent;
-      const extraction = await extractWithSelfConsistency(v.name, input, { onUsage });
+      const extraction = await extractWithSelfConsistency(v.name, input, {
+        onUsage,
+      });
       const successfulReads = extraction?.successfulReads ?? 0;
       const failed = successfulReads < 2;
       const taken = new Set<string>();
-      const rooms: ExtractionRow[] = (extraction?.aggregatedRooms ?? []).map((r) => ({
-        venue_id: v.venue_id,
-        room_key: roomKey(v.venue_id, r.roomName, r.style, taken),
-        room_name: r.roomName,
-        capacity: r.capacity,
-        min_capacity: r.minCapacity,
-        style: r.style,
-        evidence_quote: r.evidenceQuote,
-        reads: r.reads,
-        features: failed ? null : roomConfidenceFeatures(r, input, privateDiningPageFound),
-        extraction_failed: failed,
-        model,
-        temperature: SELF_CONSISTENCY_TEMPERATURE,
-      }));
+      const rooms: ExtractionRow[] = (extraction?.aggregatedRooms ?? []).map(
+        (r) => ({
+          venue_id: v.venue_id,
+          room_key: roomKey(v.venue_id, r.roomName, r.style, taken),
+          room_name: r.roomName,
+          capacity: r.capacity,
+          min_capacity: r.minCapacity,
+          style: r.style,
+          evidence_quote: r.evidenceQuote,
+          reads: r.reads,
+          features: failed
+            ? null
+            : roomConfidenceFeatures(r, input, privateDiningPageFound),
+          extraction_failed: failed,
+          model,
+          temperature: SELF_CONSISTENCY_TEMPERATURE,
+        }),
+      );
       const venue: ExtractionVenue = {
         venue_id: v.venue_id,
         status: failed ? "extraction_failed" : "ok",
@@ -182,12 +231,17 @@ async function main() {
         input_chars: input.length,
         model,
       };
-      writeJsonAtomic(cacheFile(v.venue_id), { venue, rooms, usd: budget.spent - spentBefore } satisfies Cached);
-    })
+      writeJsonAtomic(cacheFile(v.venue_id), {
+        venue,
+        rooms,
+        usd: budget.spent - spentBefore,
+      } satisfies Cached);
+    }),
   );
   const results = await Promise.allSettled(work);
   for (const r of results) {
-    if (r.status === "rejected" && !(r.reason instanceof BudgetExceededError)) throw r.reason;
+    if (r.status === "rejected" && !(r.reason instanceof BudgetExceededError))
+      throw r.reason;
     if (r.status === "rejected") console.error(r.reason.message);
   }
 
@@ -201,21 +255,32 @@ async function main() {
   writeJsonlAtomic(evalDir("extraction_venues.jsonl"), venueRows);
 
   for (const s of ["ok", "extraction_failed", "no_input"])
-    manifest.counts[`venues_${s}`] = venueRows.filter((v) => v.status === s).length;
+    manifest.counts[`venues_${s}`] = venueRows.filter(
+      (v) => v.status === s,
+    ).length;
   manifest.counts.rooms = rooms.length;
-  manifest.counts.rooms_grounded = rooms.filter((r) => r.features?.grounded).length;
-  manifest.counts.venues_zero_rooms = venueRows.filter((v) => v.rooms_found === 0).length;
+  manifest.counts.rooms_grounded = rooms.filter(
+    (r) => r.features?.grounded,
+  ).length;
+  manifest.counts.venues_zero_rooms = venueRows.filter(
+    (v) => v.rooms_found === 0,
+  ).length;
   manifest.counts.venues_pending = venues.length - cached.length;
   manifest.counts.calls_this_run = tokens.calls;
   manifest.counts.prompt_tokens_this_run = tokens.prompt;
   manifest.counts.completion_tokens_this_run = tokens.completion;
   manifest.counts.reasoning_tokens_this_run = tokens.reasoning;
   manifest.spend.xai_usd_total = Number(budget.spent.toFixed(4));
-  manifest.spend.xai_usd_this_run = Number(cached.reduce((s, c) => s + c.usd, 0).toFixed(4));
-  manifest.outputs.push(evalDir("extractions.jsonl"), evalDir("extraction_venues.jsonl"));
+  manifest.spend.xai_usd_this_run = Number(
+    cached.reduce((s, c) => s + c.usd, 0).toFixed(4),
+  );
+  manifest.outputs.push(
+    evalDir("extractions.jsonl"),
+    evalDir("extraction_venues.jsonl"),
+  );
   manifest.write(status);
   console.log(
-    `Venues: ${cached.length}/${venues.length} extracted (${manifest.counts.venues_extraction_failed} failed, ${manifest.counts.venues_zero_rooms} with no rooms). Rooms: ${rooms.length}. xAI spend: $${budget.spent.toFixed(2)} of $${budget.cap}.`
+    `Venues: ${cached.length}/${venues.length} extracted (${manifest.counts.venues_extraction_failed} failed, ${manifest.counts.venues_zero_rooms} with no rooms). Rooms: ${rooms.length}. xAI spend: $${budget.spent.toFixed(2)} of $${budget.cap}.`,
   );
 }
 

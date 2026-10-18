@@ -3,7 +3,13 @@
  * the eval/ directory, and the fixed random seed.
  */
 import { createHash, randomBytes } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 
 /** Where eval/ lives; TRAINING_EVAL_DIR points a dry run at a scratch folder. */
@@ -38,7 +44,10 @@ export function readJsonl<T>(file: string): T[] {
 }
 
 export function writeJsonlAtomic(file: string, rows: unknown[]): void {
-  writeFileAtomic(file, rows.map((r) => JSON.stringify(r)).join("\n") + (rows.length ? "\n" : ""));
+  writeFileAtomic(
+    file,
+    rows.map((r) => JSON.stringify(r)).join("\n") + (rows.length ? "\n" : ""),
+  );
 }
 
 export function sha256(data: string | Buffer): string {
@@ -81,11 +90,15 @@ export function parseCsv(text: string): Record<string, string>[] {
   if (row.some((f) => f !== "")) rows.push(row);
   const [header, ...body] = rows;
   if (!header) return [];
-  return body.map((r) => Object.fromEntries(header.map((h, i) => [h.trim(), r[i] ?? ""])));
+  return body.map((r) =>
+    Object.fromEntries(header.map((h, i) => [h.trim(), r[i] ?? ""])),
+  );
 }
 
 export function readCsv(file: string): Record<string, string>[] {
-  return existsSync(file) ? parseCsv(readFileSync(file, "utf8").replace(/^﻿/, "")) : [];
+  return existsSync(file)
+    ? parseCsv(readFileSync(file, "utf8").replace(/^﻿/, ""))
+    : [];
 }
 
 function csvCell(value: unknown): string {
@@ -94,11 +107,23 @@ function csvCell(value: unknown): string {
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-export function toCsv(columns: readonly string[], rows: Array<Record<string, unknown>>): string {
-  return [columns.join(","), ...rows.map((r) => columns.map((c) => csvCell(r[c])).join(","))].join("\n") + "\n";
+export function toCsv(
+  columns: readonly string[],
+  rows: Array<Record<string, unknown>>,
+): string {
+  return (
+    [
+      columns.join(","),
+      ...rows.map((r) => columns.map((c) => csvCell(r[c])).join(",")),
+    ].join("\n") + "\n"
+  );
 }
 
-export function writeCsvAtomic(file: string, columns: readonly string[], rows: Array<Record<string, unknown>>): void {
+export function writeCsvAtomic(
+  file: string,
+  columns: readonly string[],
+  rows: Array<Record<string, unknown>>,
+): void {
   writeFileAtomic(file, toCsv(columns, rows));
 }
 
@@ -131,7 +156,10 @@ export function sleep(ms: number): Promise<void> {
 }
 
 /** "--name value" / "--flag" command-line options. */
-export function cliArgs(argv = process.argv.slice(2)): { flags: Set<string>; values: Map<string, string> } {
+export function cliArgs(argv = process.argv.slice(2)): {
+  flags: Set<string>;
+  values: Map<string, string>;
+} {
   const flags = new Set<string>();
   const values = new Map<string, string>();
   for (let i = 0; i < argv.length; i++) {
@@ -139,7 +167,8 @@ export function cliArgs(argv = process.argv.slice(2)): { flags: Set<string>; val
     if (!arg.startsWith("--")) continue;
     const [key, inline] = arg.slice(2).split("=", 2);
     if (inline !== undefined) values.set(key, inline);
-    else if (argv[i + 1] && !argv[i + 1].startsWith("--")) values.set(key, argv[++i]);
+    else if (argv[i + 1] && !argv[i + 1].startsWith("--"))
+      values.set(key, argv[++i]);
     else flags.add(key);
   }
   return { flags, values };

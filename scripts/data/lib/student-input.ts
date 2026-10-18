@@ -5,13 +5,20 @@
  * read PDFs (the student must see exactly what production sees).
  */
 import { buildLlmInput } from "../../../src/lib/discovery/llm-extract";
-import { signalsFromPages, type ScrapedPage } from "../../../src/lib/discovery/scraper";
+import {
+  signalsFromPages,
+  type ScrapedPage,
+} from "../../../src/lib/discovery/scraper";
 import type { Snapshot } from "./snapshot-core";
 
 export function studentPages(snapshot: Snapshot): ScrapedPage[] {
   return snapshot.pages
     .filter((p) => p.kind !== "pdf")
-    .map((p) => ({ url: p.url, text: p.text, privateDining: p.kind === "private_dining" }));
+    .map((p) => ({
+      url: p.url,
+      text: p.text,
+      privateDining: p.kind === "private_dining",
+    }));
 }
 
 export function studentInput(snapshot: Snapshot): {

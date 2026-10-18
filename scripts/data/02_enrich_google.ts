@@ -73,27 +73,42 @@ async function textSearch(
   query: string,
   lat: number,
   lng: number,
-  budget: Budget
+  budget: Budget,
 ): Promise<Place | null> {
   for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
     budget.reserve(1);
     const res = await fetch(ENDPOINT, {
       method: "POST",
       signal: AbortSignal.timeout(15_000),
-      headers: { "Content-Type": "application/json", "X-Goog-Api-Key": apiKey, "X-Goog-FieldMask": FIELD_MASK },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": apiKey,
+        "X-Goog-FieldMask": FIELD_MASK,
+      },
       body: JSON.stringify({
         textQuery: query,
         pageSize: 1,
-        locationBias: { circle: { center: { latitude: lat, longitude: lng }, radius: BIAS_RADIUS_M } },
+        locationBias: {
+          circle: {
+            center: { latitude: lat, longitude: lng },
+            radius: BIAS_RADIUS_M,
+          },
+        },
       }),
     });
     budget.charge(1);
     if (res.status === 429 || res.status >= 500) {
-      if (attempt === MAX_TRIES) throw new Error(`Google Text Search kept failing (${res.status}) for "${query}"`);
+      if (attempt === MAX_TRIES)
+        throw new Error(
+          `Google Text Search kept failing (${res.status}) for "${query}"`,
+        );
       await sleep(1000 * 2 ** (attempt - 1));
       continue;
     }
-    if (!res.ok) throw new Error(`Google Text Search ${res.status}: ${(await res.text()).slice(0, 300)}`);
+    if (!res.ok)
+      throw new Error(
+        `Google Text Search ${res.status}: ${(await res.text()).slice(0, 300)}`,
+      );
     const body = (await res.json()) as { places?: Place[] };
     return body.places?.[0] ?? null;
   }
@@ -108,16 +123,25 @@ async function main() {
   manifest.models.google_endpoint = "places:searchText (New)";
 
   const venuesFile = evalDir("venues.csv");
-  if (!existsSync(venuesFile)) throw new Error(`${venuesFile} not found; run 01_sample_venues.ts first.`);
-  const reserveUsed = new Set(readCsv(evalDir("replacements.csv")).map((r) => r.replacement_venue_id));
+  if (!existsSync(venuesFile))
+    throw new Error(`${venuesFile} not found; run 01_sample_venues.ts first.`);
+  const reserveUsed = new Set(
+    readCsv(evalDir("replacements.csv")).map((r) => r.replacement_venue_id),
+  );
   const venues = [
     ...readCsv(venuesFile),
-    ...readCsv(evalDir("venues_reserve.csv")).filter((r) => reserveUsed.has(r.venue_id)),
+    ...readCsv(evalDir("venues_reserve.csv")).filter((r) =>
+      reserveUsed.has(r.venue_id),
+    ),
   ];
   const outFile = evalDir("google_features.csv");
   const rows = readCsv(outFile);
   const done = new Set(rows.map((r) => r.venue_id));
-  const budget = new Budget("google_text_search", "calls", Number(process.env.GOOGLE_TEXT_SEARCH_CAP ?? 900));
+  const budget = new Budget(
+    "google_text_search",
+    "calls",
+    Number(process.env.GOOGLE_TEXT_SEARCH_CAP ?? 900),
+  );
   manifest.inputs.push(venuesFile);
 
   let processed = 0;
@@ -128,7 +152,13 @@ async function main() {
       if (processed >= limit) break;
       const lat = Number(v.lat);
       const lng = Number(v.lng);
-      const place = await textSearch(apiKey, `${v.name}, ${v.address}`, lat, lng, budget);
+      const place = await textSearch(
+        apiKey,
+        `${v.name}, ${v.address}`,
+        lat,
+        lng,
+        budget,
+      );
       const decision = place
         ? decideMatch(
             { name: v.name, lat, lng, website: v.website },
@@ -137,7 +167,7 @@ async function main() {
               lat: place.location?.latitude ?? null,
               lng: place.location?.longitude ?? null,
               websiteUri: place.websiteUri ?? null,
-            }
+            },
           )
         : null;
       const matched = Boolean(place && decision?.accepted);
@@ -148,18 +178,24 @@ async function main() {
         display_name: matched ? place!.displayName?.text : "",
         primary_type: matched ? place!.primaryType : "",
         types: matched ? (place!.types ?? []).join("|") : "",
-        price_level: matched && place!.priceLevel ? PRICE_LEVEL_TO_NUMBER[place!.priceLevel] : "",
+        price_level:
+          matched && place!.priceLevel
+            ? PRICE_LEVEL_TO_NUMBER[place!.priceLevel]
+            : "",
         rating: matched ? place!.rating : "",
         user_rating_count: matched ? place!.userRatingCount : "",
         website_uri: matched ? place!.websiteUri : "",
         lat: matched ? place!.location?.latitude : "",
         lng: matched ? place!.location?.longitude : "",
-        distance_m: decision?.distanceM != null ? Math.round(decision.distanceM) : "",
+        distance_m:
+          decision?.distanceM != null ? Math.round(decision.distanceM) : "",
         name_similarity: decision ? decision.nameSimilarity.toFixed(3) : "",
         domain_match: decision ? Number(decision.domainMatch) : "",
         google_match: matched ? "matched" : "none",
       } as Record<string, string>);
-      manifest.count(matched ? "matched" : place ? "rejected_top_result" : "no_result");
+      manifest.count(
+        matched ? "matched" : place ? "rejected_top_result" : "no_result",
+      );
       processed++;
       if (processed % 25 === 0) writeCsvAtomic(outFile, GOOGLE_COLUMNS, rows);
     }
@@ -173,8 +209,12 @@ async function main() {
     manifest.outputs.push(outFile);
     manifest.write(status);
   }
-  console.log(`Enriched ${processed} venues; ${rows.length} in ${outFile}. ${JSON.stringify(manifest.counts)}`);
-  console.log(`Google Text Search calls so far: ${budget.spent} of cap ${budget.cap}.`);
+  console.log(
+    `Enriched ${processed} venues; ${rows.length} in ${outFile}. ${JSON.stringify(manifest.counts)}`,
+  );
+  console.log(
+    `Google Text Search calls so far: ${budget.spent} of cap ${budget.cap}.`,
+  );
 }
 
 main().catch((err) => {

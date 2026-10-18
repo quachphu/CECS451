@@ -35,8 +35,12 @@ export function loadSnapshot(venueId: string): Snapshot | null {
 
 export function buildVenueIndex(): IndexRow[] {
   const replacements = readCsv(evalDir("replacements.csv"));
-  const replaces = new Map(replacements.map((r) => [r.replacement_venue_id, r.original_venue_id]));
-  const reserve = readCsv(evalDir("venues_reserve.csv")).filter((r) => replaces.has(r.venue_id));
+  const replaces = new Map(
+    replacements.map((r) => [r.replacement_venue_id, r.original_venue_id]),
+  );
+  const reserve = readCsv(evalDir("venues_reserve.csv")).filter((r) =>
+    replaces.has(r.venue_id),
+  );
   const rows = [
     ...readCsv(evalDir("venues.csv")).map((v) => ({ v, source: "sample" })),
     ...reserve.map((v) => ({ v, source: "reserve" })),
@@ -63,6 +67,9 @@ export function buildVenueIndex(): IndexRow[] {
 
 export function readVenueIndex(): IndexRow[] {
   const rows = readCsv(evalDir("venue_index.csv")) as IndexRow[];
-  if (rows.length === 0) throw new Error(`${evalDir("venue_index.csv")} is missing; run 03_snapshot.ts first.`);
+  if (rows.length === 0)
+    throw new Error(
+      `${evalDir("venue_index.csv")} is missing; run 03_snapshot.ts first.`,
+    );
   return rows;
 }

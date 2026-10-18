@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { decideMatch, nameSimilarity } from "./google-match";
 
-const venue = { name: "Perbacco Ristorante", lat: 37.7936, lng: -122.3993, website: "https://www.perbaccosf.com" };
+const venue = {
+  name: "Perbacco Ristorante",
+  lat: 37.7936,
+  lng: -122.3993,
+  website: "https://www.perbaccosf.com",
+};
 
 describe("nameSimilarity", () => {
   it("is token Jaccard, ignoring case, accents, punctuation and 'the'", () => {
@@ -13,7 +18,12 @@ describe("nameSimilarity", () => {
 
 describe("decideMatch", () => {
   it("accepts a nearby place with a similar name", () => {
-    const d = decideMatch(venue, { name: "Perbacco Ristorante + Bar", lat: 37.7937, lng: -122.3994, websiteUri: null });
+    const d = decideMatch(venue, {
+      name: "Perbacco Ristorante + Bar",
+      lat: 37.7937,
+      lng: -122.3994,
+      websiteUri: null,
+    });
     expect(d.accepted).toBe(true);
   });
 
@@ -30,7 +40,12 @@ describe("decideMatch", () => {
   });
 
   it("rejects a matching name more than 150 m away", () => {
-    const d = decideMatch(venue, { name: "Perbacco Ristorante", lat: 37.7966, lng: -122.3993, websiteUri: null });
+    const d = decideMatch(venue, {
+      name: "Perbacco Ristorante",
+      lat: 37.7966,
+      lng: -122.3993,
+      websiteUri: null,
+    });
     expect(d.distanceM).toBeGreaterThan(150);
     expect(d.accepted).toBe(false);
   });
@@ -46,8 +61,13 @@ describe("decideMatch", () => {
   });
 
   it("rejects a result without coordinates", () => {
-    expect(decideMatch(venue, { name: "Perbacco Ristorante", lat: null, lng: null, websiteUri: null }).accepted).toBe(
-      false
-    );
+    expect(
+      decideMatch(venue, {
+        name: "Perbacco Ristorante",
+        lat: null,
+        lng: null,
+        websiteUri: null,
+      }).accepted,
+    ).toBe(false);
   });
 });

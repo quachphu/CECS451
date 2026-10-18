@@ -7,10 +7,17 @@ import { sleep } from "./io";
 
 export type HostLimiter = {
   /** Runs one venue's work with a host slot held. */
-  forHost<T>(host: string, fn: (wait: () => Promise<void>) => Promise<T>): Promise<T>;
+  forHost<T>(
+    host: string,
+    fn: (wait: () => Promise<void>) => Promise<T>,
+  ): Promise<T>;
 };
 
-export function createHostLimiter(hosts = 8, intervalMs = 1000, now = () => Date.now()): HostLimiter {
+export function createHostLimiter(
+  hosts = 8,
+  intervalMs = 1000,
+  now = () => Date.now(),
+): HostLimiter {
   const slots: Limit = createLimiter(hosts);
   const lastRequest = new Map<string, number>();
   const chains = new Map<string, Promise<unknown>>();
@@ -27,7 +34,9 @@ export function createHostLimiter(hosts = 8, intervalMs = 1000, now = () => Date
     forHost(host, fn) {
       // Work for the same host is serialized, so its request spacing holds.
       const previous = chains.get(host) ?? Promise.resolve();
-      const run = previous.catch(() => undefined).then(() => slots(() => fn(waitFor(host))));
+      const run = previous
+        .catch(() => undefined)
+        .then(() => slots(() => fn(waitFor(host))));
       chains.set(host, run);
       return run;
     },

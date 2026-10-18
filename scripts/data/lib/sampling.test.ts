@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { BUCKETS, type Bucket } from "../../../src/lib/discovery/category-buckets";
+import {
+  BUCKETS,
+  type Bucket,
+} from "../../../src/lib/discovery/category-buckets";
 import { seededRandom } from "./io";
 import { allocate, cityOf, drawStratum, venueId } from "./sampling";
 
 const avail = (counts: Partial<Record<Bucket, number>>) =>
-  Object.fromEntries(BUCKETS.map((b) => [b, counts[b] ?? 0])) as Record<Bucket, number>;
-const sum = (r: Record<Bucket, number>) => BUCKETS.reduce((s, b) => s + r[b], 0);
+  Object.fromEntries(BUCKETS.map((b) => [b, counts[b] ?? 0])) as Record<
+    Bucket,
+    number
+  >;
+const sum = (r: Record<Bucket, number>) =>
+  BUCKETS.reduce((s, b) => s + r[b], 0);
 
 describe("allocate", () => {
   it("hits the target, gives every bucket the minimum and splits the rest by availability", () => {
@@ -19,7 +26,7 @@ describe("allocate", () => {
         steakhouse_grill: 25,
         fast_casual_cafe: 300,
       }),
-      145
+      145,
     );
     expect(sum(a)).toBe(145);
     for (const b of BUCKETS) expect(a[b]).toBeGreaterThanOrEqual(8);
@@ -39,7 +46,10 @@ describe("allocate", () => {
 });
 
 describe("drawStratum", () => {
-  const pool = Array.from({ length: 30 }, (_, i) => ({ key: `fsq-${i}`, bucket: "hotel" as const }));
+  const pool = Array.from({ length: 30 }, (_, i) => ({
+    key: `fsq-${i}`,
+    bucket: "hotel" as const,
+  }));
 
   it("is reproducible from the seed and independent of input order", () => {
     const a = drawStratum(pool, 10, seededRandom(451));
