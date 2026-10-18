@@ -23,9 +23,9 @@
  */
 
 import type { DietaryNeed, DietaryNeedKind, DietaryPerson, DietarySummary } from "@/lib/supabase/types";
+import { xaiModel } from "@/lib/discovery/extraction-config";
 
 const XAI_ENDPOINT = "https://api.x.ai/v1/chat/completions";
-const XAI_MODEL = "grok-4.5";
 // Considerably longer than the free-text parser's 20s (src/lib/nl-query.ts):
 // that reads one sentence on the critical path of a page load, whereas this
 // reads an entire thread behind a button the host chose to press. 30s proved
@@ -236,7 +236,7 @@ export async function summarizeDietaryNeeds(messages: DietaryInputMessage[]): Pr
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: XAI_MODEL,
+        model: xaiModel(),
         temperature: 0,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },

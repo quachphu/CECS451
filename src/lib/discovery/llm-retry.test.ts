@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { extractPrivateDiningWithLlm } from "@/lib/discovery/llm-extract";
+import { requestLlmExtraction } from "@/lib/discovery/llm-extract";
 
 const PAGE = "The Garden Room holds 40 guests for private dinners.";
 const okBody = {
@@ -18,7 +18,8 @@ const okBody = {
   ],
 };
 
-describe("xAI retry policy", () => {
+// The retry policy is per request; extractWithSelfConsistency makes k of these.
+describe("xAI retry policy (one request)", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.stubEnv("XAI_API_KEY", "test-key");
@@ -38,7 +39,7 @@ describe("xAI retry policy", () => {
       .mockResolvedValueOnce(Response.json(okBody));
     vi.stubGlobal("fetch", fetchMock);
 
-    const pending = extractPrivateDiningWithLlm("Garden", PAGE, PAGE);
+    const pending = requestLlmExtraction("Garden", PAGE);
     await vi.advanceTimersByTimeAsync(999);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     await vi.advanceTimersByTimeAsync(1);
@@ -52,7 +53,7 @@ describe("xAI retry policy", () => {
     const fetchMock = vi.fn().mockImplementation(async () => new Response("down", { status: 503 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const pending = extractPrivateDiningWithLlm("Garden", PAGE, PAGE);
+    const pending = requestLlmExtraction("Garden", PAGE);
     await vi.runAllTimersAsync();
 
     expect(await pending).toBeNull();
@@ -63,7 +64,7 @@ describe("xAI retry policy", () => {
     const fetchMock = vi.fn().mockImplementation(async () => new Response("bad", { status: 400 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    const pending = extractPrivateDiningWithLlm("Garden", PAGE, PAGE);
+    const pending = requestLlmExtraction("Garden", PAGE);
     await vi.runAllTimersAsync();
 
     expect(await pending).toBeNull();

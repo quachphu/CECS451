@@ -15,9 +15,9 @@
  * Uses the same xAI structured-outputs call shape as the extraction tier (see
  * src/lib/discovery/llm-extract.ts) rather than adding a second integration.
  */
+import { xaiModel } from "@/lib/discovery/extraction-config";
 
 const XAI_ENDPOINT = "https://api.x.ai/v1/chat/completions";
-const XAI_MODEL = "grok-4.5";
 const XAI_TIMEOUT_MS = 20_000;
 
 const MAX_QUERY_CHARS = 500;
@@ -122,7 +122,7 @@ export async function parseNaturalLanguageQuery(text: string): Promise<ParsedQue
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: XAI_MODEL,
+        model: xaiModel(),
         temperature: 0,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
