@@ -2,6 +2,15 @@ import { describe, expect, it } from "vitest";
 import { MIN_PFIT, priorFit, rankVenues, type SearchCriteria, type VenueWithRelations } from "@/lib/ranking";
 import type { CommuteResult } from "@/lib/geo/commute";
 import type { TrustLevel, VenueRoomRow } from "@/lib/supabase/types";
+import { loadModel } from "@/lib/discovery/model-scoring";
+
+// A trained model is needed for stored scores to count (otherwise: v0 tier weights).
+const trained = loadModel(
+  { feature_order: ["x"], impute_median: { x: 0 }, scaler: {}, coef: [0], intercept: 0, calibration: null },
+  "test",
+  "trained-test"
+);
+const scoredBy = { confidence_features: { modelVersion: "trained-test" } };
 
 type RoomSpec = Partial<VenueRoomRow> & { max: number; trust?: TrustLevel };
 
@@ -114,16 +123,32 @@ describe("expected-utility ranking", () => {
   it("excludes an undersized room when its figure is strongly believed", () => {
     const results = rankVenues(
       criteria(50),
-      [venue("bar", [{ max: 40, trust: "likely", capacity_confidence: 0.9 }], { category: "bar" })],
-      new Map([["bar", commute(5)]])
+      [venue("bar", [{ max: 40, trust: "likely", capacity_confidence: 0.9, ...scoredBy }], { category: "bar" })],
+      new Map([["bar", commute(5)]]),
+      { confidenceModel: trained }
     );
 
     expect(results).toEqual([]);
   });
 
-  it("prefers stored capacity_confidence over the tier weight", () => {
+  it("ignores a stored score from a placeholder or older model and uses the tier weight", () => {
     const doubted = venue("doubted", [{ max: 60, trust: "verified", capacity_confidence: 0.5 }]);
     const believed = venue("believed", [{ max: 60, trust: "likely", capacity_confidence: 0.95 }]);
+    const results = rankVenues(
+      criteria(50),
+      [doubted, believed],
+      new Map([
+        ["doubted", commute(5)],
+        ["believed", commute(5)],
+      ]),
+      { confidenceModel: trained }
+    );
+    expect(results.map((r) => r.venue.id)).toEqual(["doubted", "believed"]);
+  });
+
+  it("prefers stored capacity_confidence over the tier weight", () => {
+    const doubted = venue("doubted", [{ max: 60, trust: "verified", capacity_confidence: 0.5, ...scoredBy }]);
+    const believed = venue("believed", [{ max: 60, trust: "likely", capacity_confidence: 0.95, ...scoredBy }]);
 
     const results = rankVenues(
       criteria(50),
@@ -131,7 +156,8 @@ describe("expected-utility ranking", () => {
       new Map([
         ["doubted", commute(5)],
         ["believed", commute(5)],
-      ])
+      ]),
+      { confidenceModel: trained }
     );
 
     expect(results.map((r) => r.venue.id)).toEqual(["believed", "doubted"]);
@@ -148,11 +174,18 @@ describe("expected-utility ranking", () => {
     expect(reversed).toEqual(forward);
   });
 
-  it("puts the '% likely to fit' line third and leaves the other reasons as they were", () => {
+  it("hides '% likely to fit' while the confidence model is a placeholder", () => {
+    const [result] = rankVenues(criteria(50), [venue("a", [{ max: 60, trust: "verified" }])], new Map([["a", commute(10)]]));
+    expect(result.reasons.some((r) => /likely to fit/.test(r))).toBe(false);
+    expect(result.reasons[2]).toBe("Capacity verified directly from the venue's own private-dining page");
+  });
+
+  it("with a trained model, puts the '% likely to fit' line third and leaves the other reasons as they were", () => {
     const [result] = rankVenues(
       criteria(50),
       [venue("a", [{ max: 60, trust: "verified" }])],
-      new Map([["a", commute(10)]])
+      new Map([["a", commute(10)]]),
+      { showFitProbability: true }
     );
 
     expect(result.reasons[0]).toMatch(/^10 min walk/);

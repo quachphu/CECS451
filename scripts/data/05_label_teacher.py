@@ -12,6 +12,11 @@ don't is retried once on the normal API, then marked "unclear".
 
 Model: TEACHER_MODEL (default claude-sonnet-5-5; claude-opus-5-5 also priced).
 Spend cap: ANTHROPIC_BUDGET_USD (default 15), shared ledger eval/.spend/anthropic.json.
+Batches go out TEACHER_BATCH_SIZE venues at a time (default 100). Each is
+reserved against the cap with the output length the pilot measured (1.5x its
+95th percentile, at least 2,000 tokens; TEACHER_OUTPUT_ALLOWANCE overrides),
+collected and charged at its real cost before the next one is reserved, so a
+run can overshoot the cap by at most one batch's estimation error.
 Writes eval/teacher_labels.jsonl. Per-venue results are cached in eval/.cache/teacher/.
 """
 
@@ -49,6 +54,24 @@ from ml.teacher import (  # noqa: E402
 PROMPT_VERSION = os.environ.get("TEACHER_PROMPT_VERSION", "teacher_v1")
 PILOT_SIZE = 20
 MAX_TOKENS = 16_000
+MIN_OUTPUT_ALLOWANCE = 2_000
+BATCH_SIZE = int(os.environ.get("TEACHER_BATCH_SIZE", 100))
+
+
+def output_allowance() -> int:
+    """Output tokens to reserve per batched venue: 1.5x the pilot's 95th percentile (at least 2,000)."""
+    import math
+
+    override = os.environ.get("TEACHER_OUTPUT_ALLOWANCE", "").strip()
+    if override:
+        return int(override)
+    outputs = sorted(
+        read_json(f)["usage"].get("output_tokens") or 0 for f in eval_dir(".cache", "teacher").glob("*.json") if f.name != "batches.json"
+    )
+    if not outputs:
+        return MAX_TOKENS  # no pilot yet: assume the worst
+    p95 = outputs[min(len(outputs) - 1, math.ceil(0.95 * len(outputs)) - 1)]
+    return max(MIN_OUTPUT_ALLOWANCE, math.ceil(1.5 * p95))
 
 
 def client():
@@ -144,14 +167,14 @@ def label_direct(api, venue: dict, model: str, effort: str, budget: Budget, atte
     return failure
 
 
-def submit_batch(api, venues: list[dict], model: str, effort: str, budget: Budget) -> str | None:
+def submit_batch(api, venues: list[dict], model: str, effort: str, budget: Budget, allowance: int) -> str | None:
     from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
     from anthropic.types.messages.batch_create_params import Request
 
     requests, worst = [], 0.0
     for v in venues:
         teacher_input = load_input(v)
-        worst += worst_case_cost(model, teacher_input, MAX_TOKENS, batch=True)
+        worst += worst_case_cost(model, teacher_input, allowance, batch=True)
         requests.append(
             Request(
                 custom_id=v["venue_id"],
@@ -227,6 +250,12 @@ def assemble(venues: list[dict], manifest: RunManifest) -> None:
     manifest.outputs.append(out)
 
 
+def retry_and_report(api, by_id: dict, model: str, effort: str, budget: Budget, wait: bool) -> None:
+    for vid in collect_batches(api, by_id, model, effort, budget, wait=wait):
+        failure = label_direct(api, by_id[vid], model, effort, budget, attempts=2)
+        print(f"retry {vid}: {'ok' if not failure else failure}")
+
+
 def main() -> None:
     load_env_local()
     parser = argparse.ArgumentParser()
@@ -260,13 +289,21 @@ def main() -> None:
                     failure = label_direct(api, v, model, effort, budget, attempts=2)
                 print(f"{v['venue_id']}: {'ok' if not failure else failure}")
         else:
-            pending = {vid for e in (read_json(eval_dir('.cache', 'teacher', 'batches.json')) if eval_dir('.cache', 'teacher', 'batches.json').exists() else []) if not e["collected"] for vid in e["venue_ids"]}
+            state_file = eval_dir(".cache", "teacher", "batches.json")
+            # Finish anything already submitted first, so its real cost is on the ledger.
+            retry_and_report(api, by_id, model, effort, budget, wait=not args.no_wait)
             if args.batch:
-                submit_batch(api, [v for v in todo if v["venue_id"] not in pending], model, effort, budget)
-            retry = collect_batches(api, by_id, model, effort, budget, wait=not args.no_wait)
-            for vid in retry:
-                failure = label_direct(api, by_id[vid], model, effort, budget, attempts=2)
-                print(f"retry {vid}: {'ok' if not failure else failure}")
+                allowance = output_allowance()
+                manifest.counts["output_allowance_tokens"] = allowance
+                print(f"Reserving {allowance} output tokens per venue (from the pilot).")
+                while True:
+                    pending = {vid for e in (read_json(state_file) if state_file.exists() else []) if not e["collected"] for vid in e["venue_ids"]}
+                    left = [v for v in todo if not cache_path(v["venue_id"]).exists() and v["venue_id"] not in pending]
+                    if not left or not submit_batch(api, left[:BATCH_SIZE], model, effort, budget, allowance):
+                        break
+                    if args.no_wait:
+                        break
+                    retry_and_report(api, by_id, model, effort, budget, wait=True)
     except BudgetExceeded as err:
         status = "aborted_budget"
         print(f"{err}. Progress is saved.")

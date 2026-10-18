@@ -15,6 +15,11 @@ import {
   type ConfidenceFeatures,
 } from "../../../src/lib/discovery/features";
 import { canonicalRoomName } from "../../../src/lib/discovery/room-normalize";
+import { scorePrivateEventPrior } from "../../../src/lib/discovery/discovery-prior";
+import {
+  V0_DISCOVERY_PRIOR_MODEL,
+  V0_TRUST_WEIGHT,
+} from "../../../eval/baselines";
 import { correctness, matchRoom, type LabelRoom, type Style } from "./matching";
 
 export type Split = "train" | "test_gold" | "test_la_teacher";
@@ -39,6 +44,7 @@ export const CONFIDENCE_COLUMNS = [
   "y",
   "abs_rel_error",
   ...CONFIDENCE_FEATURE_ORDER,
+  "b0_v0_trust",
 ] as const;
 
 export const DISCOVERY_COLUMNS = [
@@ -50,6 +56,7 @@ export const DISCOVERY_COLUMNS = [
   "label_source",
   "y",
   ...DISCOVERY_POST_FETCH_ORDER,
+  "v0_prior",
 ] as const;
 
 /**
@@ -96,6 +103,19 @@ export function assertNoLeakage(
   }
 }
 
+/**
+ * Baseline B0: the v0 trust weight for a room, by the v0 rules (eval/baselines.ts
+ * v0Rooms): a figure read from the page is `verified` when a private-dining page
+ * was found, else `unverified`; with no figure on the page, `likely` with a
+ * private-dining page, else `unverified`.
+ */
+export function v0TrustWeight(f: ConfidenceFeatures): number {
+  const figureOnPage = f.regex_status !== "absent";
+  if (f.private_page_found)
+    return V0_TRUST_WEIGHT[figureOnPage ? "verified" : "likely"];
+  return V0_TRUST_WEIGHT.unverified;
+}
+
 export type ExtractionLike = {
   venue_id: string;
   room_key: string;
@@ -133,11 +153,34 @@ export function confidenceRow(
       y,
       abs_rel_error: absRelError == null ? "" : Number(absRelError.toFixed(6)),
       ...encodeConfidenceFeatures(ex.features),
+      b0_v0_trust: v0TrustWeight(ex.features),
     },
   };
 }
 
 export type GoogleRow = Record<string, string>;
+
+/** The hand-set discovery prior that shipped before training (the v0 order baseline). */
+export function v0Prior(
+  venue: { name: string; bucket: Bucket; website: string },
+  google: GoogleRow | undefined,
+): number {
+  const matched = google?.google_match === "matched";
+  return scorePrivateEventPrior(
+    {
+      name: matched && google!.display_name ? google!.display_name : venue.name,
+      category: (matched && google!.primary_type) || venue.bucket,
+      website: venue.website || undefined,
+      priceLevelGoogle:
+        matched && google!.price_level !== "" && google!.price_level != null
+          ? Number(google!.price_level)
+          : undefined,
+      types: matched ? (google!.types || "").split("|").filter(Boolean) : [],
+      cuisine: undefined,
+    },
+    V0_DISCOVERY_PRIOR_MODEL,
+  );
+}
 
 /** Discovery features exactly as the app computes them, from Google's fields when matched. */
 export function discoveryRow(

@@ -1,0 +1,2814 @@
+{
+  "source": "synthetic dry run (scripts/data/dryrun)",
+  "tolerance": 1e-06,
+  "model_versions": {
+    "confidence": "trained-2026-10-18",
+    "discovery": "trained-2026-10-18",
+    "fit_prior": "trained-2026-10-18"
+  },
+  "models": {
+    "confidence": {
+      "model": {
+        "feature_order": [
+          "self_consistency",
+          "regex_agree",
+          "regex_absent",
+          "grounded",
+          "competing_numbers",
+          "private_page_found"
+        ],
+        "impute_median": {
+          "self_consistency": 0.6666666666666666,
+          "regex_agree": 1.0,
+          "regex_absent": 0.0,
+          "grounded": 1.0,
+          "competing_numbers": 2.0,
+          "private_page_found": 1.0
+        },
+        "scaler": {
+          "self_consistency": {
+            "mean": 0.6949019607843137,
+            "std": 0.2631883881238193
+          },
+          "competing_numbers": {
+            "mean": 2.2988235294117647,
+            "std": 1.0661082736809957
+          }
+        },
+        "coef": [
+          1.679497083293176,
+          -0.5315719719298084,
+          -0.7101255094849875,
+          3.871604163436223,
+          0.08059180854561973,
+          -1.046836947709331
+        ],
+        "intercept": -0.0419575826767855,
+        "calibration": null
+      },
+      "rows": [
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.89322010718957
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 0.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 2.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9295659515958593
+        },
+        {
+          "x": {
+            "self_consistency": 0.3333333333333333,
+            "regex_agree": 0.0,
+            "regex_absent": 0.0,
+            "grounded": 0.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.03412232635656033
+        },
+        {
+          "x": {
+            "self_consistency": 0.3333333333333333,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 0.0
+          },
+          "p": 0.7395794417575204
+        },
+        {
+          "x": {
+            "self_consistency": 0.3333333333333333,
+            "regex_agree": 0.0,
+            "regex_absent": 0.0,
+            "grounded": 0.0,
+            "competing_numbers": 2.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.03171675121260103
+        },
+        {
+          "x": {
+            "self_consistency": 1.0,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 2.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9848663542569374
+        },
+        {
+          "x": {
+            "self_consistency": 1.0,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 2.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9848663542569374
+        },
+        {
+          "x": {
+            "self_consistency": 1.0,
+            "regex_agree": 0.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 1.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9903544197091371
+        },
+        {
+          "x": {
+            "self_consistency": 1.0,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 4.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9869621403983081
+        },
+        {
+          "x": {
+            "self_consistency": 1.0,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9859527236744655
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 0.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 2.0,
+            "private_page_found": 0.0
+          },
+          "p": 0.9740900810306663
+        },
+        {
+          "x": {
+            "self_consistency": 0.3333333333333333,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 1.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.46151579442419993
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 0.0,
+            "competing_numbers": 1.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.13025233079731965
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 2.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.8857928280744739
+        },
+        {
+          "x": {
+            "self_consistency": 1.0,
+            "regex_agree": 0.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 2.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9910504080779199
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 4.0,
+            "private_page_found": 0.0
+          },
+          "p": 0.9625469513572957
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 4.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9002187757018424
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 4.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9002187757018424
+        },
+        {
+          "x": {
+            "self_consistency": 1.0,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 1.0,
+            "private_page_found": 0.0
+          },
+          "p": 0.9942158219778866
+        },
+        {
+          "x": {
+            "self_consistency": 0.3333333333333333,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.49923672535827235
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 2.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.8857928280744739
+        },
+        {
+          "x": {
+            "self_consistency": 1.0,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9859527236744655
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 0.0
+          },
+          "p": 0.9597244002401532
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 0.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 0.0
+          },
+          "p": 0.9759311204963969
+        },
+        {
+          "x": {
+            "self_consistency": 0.3333333333333333,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 1.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.46151579442419993
+        },
+        {
+          "x": {
+            "self_consistency": 0.3333333333333333,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 4.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.5181273746672799
+        },
+        {
+          "x": {
+            "self_consistency": 1.0,
+            "regex_agree": 0.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.991696597631651
+        },
+        {
+          "x": {
+            "self_consistency": 0.3333333333333333,
+            "regex_agree": 0.0,
+            "regex_absent": 0.0,
+            "grounded": 0.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.03412232635656033
+        },
+        {
+          "x": {
+            "self_consistency": 0.3333333333333333,
+            "regex_agree": 1.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.49923672535827235
+        },
+        {
+          "x": {
+            "self_consistency": 0.6666666666666666,
+            "regex_agree": 0.0,
+            "regex_absent": 0.0,
+            "grounded": 1.0,
+            "competing_numbers": 3.0,
+            "private_page_found": 1.0
+          },
+          "p": 0.9343574747635057
+        }
+      ]
+    },
+    "discovery_post_fetch": {
+      "model": {
+        "feature_order": [
+          "bucket_fine_dining",
+          "bucket_steakhouse_grill",
+          "bucket_bar_lounge",
+          "bucket_hotel",
+          "bucket_event_space",
+          "bucket_fast_casual_cafe",
+          "price_level",
+          "price_missing",
+          "rating",
+          "rating_missing",
+          "log_reviews",
+          "reviews_missing",
+          "name_steakhouse",
+          "name_grill",
+          "name_tavern",
+          "name_hall",
+          "name_club",
+          "name_hotel",
+          "name_pizza",
+          "name_cafe",
+          "name_express",
+          "name_bistro",
+          "has_external_event_link"
+        ],
+        "impute_median": {
+          "bucket_fine_dining": 0.0,
+          "bucket_steakhouse_grill": 0.0,
+          "bucket_bar_lounge": 0.0,
+          "bucket_hotel": 0.0,
+          "bucket_event_space": 0.0,
+          "bucket_fast_casual_cafe": 0.0,
+          "price_level": 2.0,
+          "price_missing": 0.0,
+          "rating": 4.25,
+          "rating_missing": 0.0,
+          "log_reviews": 5.318119993844216,
+          "reviews_missing": 0.0,
+          "name_steakhouse": 0.0,
+          "name_grill": 0.0,
+          "name_tavern": 0.0,
+          "name_hall": 0.0,
+          "name_club": 0.0,
+          "name_hotel": 0.0,
+          "name_pizza": 0.0,
+          "name_cafe": 0.0,
+          "name_express": 0.0,
+          "name_bistro": 0.0,
+          "has_external_event_link": 0.0
+        },
+        "scaler": {
+          "price_level": {
+            "mean": 2.2280701754385963,
+            "std": 0.7402594106631862
+          },
+          "rating": {
+            "mean": 4.199473684210526,
+            "std": 0.4011930499679262
+          },
+          "log_reviews": {
+            "mean": 5.338601979036169,
+            "std": 1.023242277311745
+          }
+        },
+        "coef": [
+          0.5186416372420731,
+          1.0772649461256114,
+          0.6015704339791631,
+          2.962257389333979,
+          2.9850360008816956,
+          -2.3870908614591846,
+          0.6301396818435344,
+          0.05878382210676039,
+          -0.2105520450221081,
+          0.12035571325768245,
+          0.3724809943520048,
+          -0.02241157545773874,
+          0.22166456135056048,
+          -0.3300728477059573,
+          -0.6841241687101653,
+          0.8050732642850257,
+          1.0225809709142997,
+          0.7603063012429798,
+          0.16305050717531328,
+          -0.7491554330856095,
+          0.8159290300853955,
+          0.05593569465595831,
+          3.1647860343516507
+        ],
+        "intercept": -0.15371382244296056,
+        "calibration": null
+      },
+      "rows": [
+        {
+          "x": {
+            "bucket_fine_dining": 1.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": 4.7,
+            "rating_missing": 0.0,
+            "log_reviews": 4.189654742026425,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.5844584071721775
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 1.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 4.0,
+            "price_missing": 0.0,
+            "rating": 3.4,
+            "rating_missing": 0.0,
+            "log_reviews": 4.219507705176107,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.920128499004175
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": 3.9,
+            "rating_missing": 0.0,
+            "log_reviews": 4.007333185232471,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 1.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.33201905820189154
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 1.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": 4.2,
+            "rating_missing": 0.0,
+            "log_reviews": 4.875197323201151,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.05493367084308009
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.5,
+            "rating_missing": 0.0,
+            "log_reviews": 6.030685260261263,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.4369265606161689
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 1.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.7,
+            "rating_missing": 0.0,
+            "log_reviews": 5.993961427306569,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 1.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 1.0
+          },
+          "p": 0.9603021405800228
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 3.6,
+            "rating_missing": 0.0,
+            "log_reviews": 6.668228248417403,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.741223494886917
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 1.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": 4.7,
+            "rating_missing": 0.0,
+            "log_reviews": 6.736966958001855,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 1.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.9753937442144893
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 1.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 3.7,
+            "rating_missing": 0.0,
+            "log_reviews": 3.713572066704308,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.04460153226568352
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.1,
+            "rating_missing": 0.0,
+            "log_reviews": 4.882801922586371,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.3866129929838119
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 1.0,
+            "price_missing": 0.0,
+            "rating": 3.9,
+            "rating_missing": 0.0,
+            "log_reviews": 3.610917912644224,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.15831191311668907
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 1.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 4.0,
+            "price_missing": 0.0,
+            "rating": 4.0,
+            "rating_missing": 0.0,
+            "log_reviews": 3.688879454113936,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.7985767352937441
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 1.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": null,
+            "rating_missing": 1.0,
+            "log_reviews": 3.951243718581428,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.6481321230503848
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 1.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": 3.7,
+            "rating_missing": 0.0,
+            "log_reviews": 4.454347296253507,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.723576299672072
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 3.7,
+            "rating_missing": 0.0,
+            "log_reviews": 6.721425700790643,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.6029208889744997
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 3.7,
+            "rating_missing": 0.0,
+            "log_reviews": 4.174387269895637,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 1.0
+          },
+          "p": 0.9343346152657214
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 1.0,
+            "price_missing": 0.0,
+            "rating": 4.5,
+            "rating_missing": 0.0,
+            "log_reviews": 4.31748811353631,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.15077631566685532
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.5,
+            "rating_missing": 0.0,
+            "log_reviews": 3.258096538021482,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.22047102055227066
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": 4.4,
+            "rating_missing": 0.0,
+            "log_reviews": 4.74493212836325,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.5453842323255781
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 1.0,
+            "price_missing": 0.0,
+            "rating": 4.1,
+            "rating_missing": 0.0,
+            "log_reviews": 3.5263605246161616,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.14105126339207158
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 1.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.8,
+            "rating_missing": 0.0,
+            "log_reviews": 6.6293632534374485,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 1.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.7513398731688111
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": null,
+            "rating_missing": 1.0,
+            "log_reviews": null,
+            "reviews_missing": 1.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 1.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.42368716656217115
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": 4.8,
+            "rating_missing": 0.0,
+            "log_reviews": 3.367295829986474,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 1.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.749279974379092
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 3.9,
+            "rating_missing": 0.0,
+            "log_reviews": 6.79346613258001,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.7191970327194948
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 1.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": 3.7,
+            "rating_missing": 0.0,
+            "log_reviews": 3.6375861597263857,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.9581674523451611
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 1.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": null,
+            "rating_missing": 1.0,
+            "log_reviews": null,
+            "reviews_missing": 1.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.06835784934515195
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 1.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": null,
+            "rating_missing": 1.0,
+            "log_reviews": null,
+            "reviews_missing": 1.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 1.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.03352552438728973
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 1.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": 4.4,
+            "rating_missing": 0.0,
+            "log_reviews": 6.763884908562435,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.09427062562071982
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.1,
+            "rating_missing": 0.0,
+            "log_reviews": 6.941190055068375,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.5714386527774705
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.0,
+            "rating_missing": 0.0,
+            "log_reviews": 4.276666119016055,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 1.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0,
+            "has_external_event_link": 0.0
+          },
+          "p": 0.3290930518137655
+        }
+      ]
+    },
+    "discovery_pre_fetch": {
+      "model": {
+        "feature_order": [
+          "bucket_fine_dining",
+          "bucket_steakhouse_grill",
+          "bucket_bar_lounge",
+          "bucket_hotel",
+          "bucket_event_space",
+          "bucket_fast_casual_cafe",
+          "price_level",
+          "price_missing",
+          "rating",
+          "rating_missing",
+          "log_reviews",
+          "reviews_missing",
+          "name_steakhouse",
+          "name_grill",
+          "name_tavern",
+          "name_hall",
+          "name_club",
+          "name_hotel",
+          "name_pizza",
+          "name_cafe",
+          "name_express",
+          "name_bistro"
+        ],
+        "impute_median": {
+          "bucket_fine_dining": 0.0,
+          "bucket_steakhouse_grill": 0.0,
+          "bucket_bar_lounge": 0.0,
+          "bucket_hotel": 0.0,
+          "bucket_event_space": 0.0,
+          "bucket_fast_casual_cafe": 0.0,
+          "price_level": 2.0,
+          "price_missing": 0.0,
+          "rating": 4.25,
+          "rating_missing": 0.0,
+          "log_reviews": 5.318119993844216,
+          "reviews_missing": 0.0,
+          "name_steakhouse": 0.0,
+          "name_grill": 0.0,
+          "name_tavern": 0.0,
+          "name_hall": 0.0,
+          "name_club": 0.0,
+          "name_hotel": 0.0,
+          "name_pizza": 0.0,
+          "name_cafe": 0.0,
+          "name_express": 0.0,
+          "name_bistro": 0.0
+        },
+        "scaler": {
+          "price_level": {
+            "mean": 2.2280701754385963,
+            "std": 0.7402594106631862
+          },
+          "rating": {
+            "mean": 4.199473684210526,
+            "std": 0.4011930499679262
+          },
+          "log_reviews": {
+            "mean": 5.338601979036169,
+            "std": 1.023242277311745
+          }
+        },
+        "coef": [
+          0.43697310315637117,
+          0.8318228649737768,
+          0.4290081456107145,
+          2.8299500395962256,
+          2.9360876220308794,
+          -2.2846440203430296,
+          0.7095544876689045,
+          -0.09147437692225018,
+          -0.19627548656362426,
+          0.1550025382756845,
+          0.4220575684093598,
+          0.03114944644490504,
+          0.40293516903885834,
+          -0.43186090728132664,
+          -0.3667761696767916,
+          0.7607985233575658,
+          1.0978275842062946,
+          0.7239169907742665,
+          0.00960152954134743,
+          -0.9020689610895741,
+          0.604452717939701,
+          0.32722732323327125
+        ],
+        "intercept": 0.15024975890757078,
+        "calibration": null
+      },
+      "rows": [
+        {
+          "x": {
+            "bucket_fine_dining": 1.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": 4.7,
+            "rating_missing": 0.0,
+            "log_reviews": 4.189654742026425,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.6475653890566762
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 1.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 4.0,
+            "price_missing": 0.0,
+            "rating": 3.4,
+            "rating_missing": 0.0,
+            "log_reviews": 4.219507705176107,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.9315048015152548
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": 3.9,
+            "rating_missing": 0.0,
+            "log_reviews": 4.007333185232471,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 1.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.3774934503332219
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 1.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": 4.2,
+            "rating_missing": 0.0,
+            "log_reviews": 4.875197323201151,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.0668648165142028
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.5,
+            "rating_missing": 0.0,
+            "log_reviews": 6.030685260261263,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.5175121881816316
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 1.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.7,
+            "rating_missing": 0.0,
+            "log_reviews": 5.993961427306569,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 1.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.6039929944853328
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 3.6,
+            "rating_missing": 0.0,
+            "log_reviews": 6.668228248417403,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.768944349913425
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 1.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": 4.7,
+            "rating_missing": 0.0,
+            "log_reviews": 6.736966958001855,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 1.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.9764763618094997
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 1.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 3.7,
+            "rating_missing": 0.0,
+            "log_reviews": 3.713572066704308,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.05847373691185669
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.1,
+            "rating_missing": 0.0,
+            "log_reviews": 4.882801922586371,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.4482610784752821
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 1.0,
+            "price_missing": 0.0,
+            "rating": 3.9,
+            "rating_missing": 0.0,
+            "log_reviews": 3.610917912644224,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.1689636884713109
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 1.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 4.0,
+            "price_missing": 0.0,
+            "rating": 4.0,
+            "rating_missing": 0.0,
+            "log_reviews": 3.688879454113936,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.8458976729193248
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 1.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": null,
+            "rating_missing": 1.0,
+            "log_reviews": 3.951243718581428,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.7078930270984934
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 1.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": 3.7,
+            "rating_missing": 0.0,
+            "log_reviews": 4.454347296253507,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.7697255476523652
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 3.7,
+            "rating_missing": 0.0,
+            "log_reviews": 6.721425700790643,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.6783875115425212
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 3.7,
+            "rating_missing": 0.0,
+            "log_reviews": 4.174387269895637,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.4245292016167813
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 1.0,
+            "price_missing": 0.0,
+            "rating": 4.5,
+            "rating_missing": 0.0,
+            "log_reviews": 4.31748811353631,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.1686692834328879
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.5,
+            "rating_missing": 0.0,
+            "log_reviews": 3.258096538021482,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.2547315027776276
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": 4.4,
+            "rating_missing": 0.0,
+            "log_reviews": 4.74493212836325,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.6334825075700447
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 1.0,
+            "price_missing": 0.0,
+            "rating": 4.1,
+            "rating_missing": 0.0,
+            "log_reviews": 3.5263605246161616,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.15113675336625257
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 1.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.8,
+            "rating_missing": 0.0,
+            "log_reviews": 6.6293632534374485,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 1.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.8029767136494126
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": null,
+            "rating_missing": 1.0,
+            "log_reviews": null,
+            "reviews_missing": 1.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 1.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.5138419651784983
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": 4.8,
+            "rating_missing": 0.0,
+            "log_reviews": 3.367295829986474,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 1.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.7875291026758864
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 3.9,
+            "rating_missing": 0.0,
+            "log_reviews": 6.79346613258001,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.7516157204045308
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 1.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 3.0,
+            "price_missing": 0.0,
+            "rating": 3.7,
+            "rating_missing": 0.0,
+            "log_reviews": 3.6375861597263857,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.9667211022800145
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 1.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": null,
+            "rating_missing": 1.0,
+            "log_reviews": null,
+            "reviews_missing": 1.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.09182987988374447
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 1.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": null,
+            "rating_missing": 1.0,
+            "log_reviews": null,
+            "reviews_missing": 1.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 1.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.039408680418680904
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 1.0,
+            "price_level": null,
+            "price_missing": 1.0,
+            "rating": 4.4,
+            "rating_missing": 0.0,
+            "log_reviews": 6.763884908562435,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.1240423640114774
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 0.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.1,
+            "rating_missing": 0.0,
+            "log_reviews": 6.941190055068375,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 0.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.6550531151998342
+        },
+        {
+          "x": {
+            "bucket_fine_dining": 0.0,
+            "bucket_steakhouse_grill": 0.0,
+            "bucket_bar_lounge": 1.0,
+            "bucket_hotel": 0.0,
+            "bucket_event_space": 0.0,
+            "bucket_fast_casual_cafe": 0.0,
+            "price_level": 2.0,
+            "price_missing": 0.0,
+            "rating": 4.0,
+            "rating_missing": 0.0,
+            "log_reviews": 4.276666119016055,
+            "reviews_missing": 0.0,
+            "name_steakhouse": 0.0,
+            "name_grill": 0.0,
+            "name_tavern": 1.0,
+            "name_hall": 0.0,
+            "name_club": 0.0,
+            "name_hotel": 0.0,
+            "name_pizza": 0.0,
+            "name_cafe": 0.0,
+            "name_express": 0.0,
+            "name_bistro": 0.0
+          },
+          "p": 0.41421745813478583
+        }
+      ]
+    }
+  },
+  "fit_prior": {
+    "model": {
+      "model": "fit_prior",
+      "version": "trained-2026-10-18",
+      "alpha": 5.0,
+      "headcounts": [
+        10,
+        20,
+        30,
+        40,
+        50,
+        75,
+        100,
+        150,
+        200,
+        300
+      ],
+      "global": {
+        "q": [
+          1.0,
+          0.9657534246575342,
+          0.910958904109589,
+          0.8561643835616438,
+          0.7945205479452054,
+          0.5684931506849316,
+          0.4589041095890411,
+          0.3493150684931507,
+          0.2534246575342466,
+          0.08904109589041095
+        ],
+        "n": 146
+      },
+      "buckets": {
+        "fine_dining": {
+          "q": [
+            1.0,
+            0.9299602297834731,
+            0.8243482103402563,
+            0.7187361908970393,
+            0.6120194432169687,
+            0.2529827662395051,
+            0.17079098541758728,
+            0.1208572691117985,
+            0.040874944763588154,
+            0.014361467079098541
+          ],
+          "n": 26
+        },
+        "casual_restaurant": {
+          "q": [
+            1.0,
+            0.9276255707762556,
+            0.8184931506849314,
+            0.7093607305936073,
+            0.532420091324201,
+            0.32808219178082193,
+            0.14315068493150687,
+            0.09155251141552512,
+            0.04223744292237443,
+            0.014840182648401827
+          ],
+          "n": 25
+        },
+        "steakhouse_grill": {
+          "q": [
+            1.0,
+            0.9931506849315067,
+            0.9821917808219177,
+            0.9312328767123287,
+            0.8789041095890411,
+            0.39369863013698636,
+            0.25178082191780826,
+            0.06986301369863014,
+            0.050684931506849315,
+            0.01780821917808219
+          ],
+          "n": 20
+        },
+        "bar_lounge": {
+          "q": [
+            1.0,
+            0.9944763588157313,
+            0.9211224038886433,
+            0.8800265134776845,
+            0.8700839593460009,
+            0.6723376049491825,
+            0.5256296950950066,
+            0.34666372072470175,
+            0.2021652673442333,
+            0.046619531595227574
+          ],
+          "n": 26
+        },
+        "hotel": {
+          "q": [
+            1.0,
+            0.9940954180444024,
+            0.9846480869154464,
+            0.9752007557864902,
+            0.9645725082664147,
+            0.8911195087387813,
+            0.8032593292394898,
+            0.6809163911195087,
+            0.5954180444024563,
+            0.22224846480869154
+          ],
+          "n": 24
+        },
+        "event_space": {
+          "q": [
+            1.0,
+            0.9940954180444024,
+            0.9846480869154464,
+            0.9752007557864902,
+            0.9645725082664147,
+            0.8911195087387813,
+            0.8722248464808691,
+            0.7843646669815777,
+            0.5954180444024563,
+            0.22224846480869154
+          ],
+          "n": 24
+        },
+        "fast_casual_cafe": {
+          "q": [
+            1.0,
+            0.8047945205479451,
+            0.7591324200913242,
+            0.7134703196347032,
+            0.6621004566210046,
+            0.4737442922374429,
+            0.3824200913242009,
+            0.2910958904109589,
+            0.21118721461187215,
+            0.07420091324200913
+          ],
+          "n": 1
+        }
+      },
+      "note": "q is conditional on a published room size: venues that host events but publish no number are not counted.",
+      "trained_on": {
+        "venues": 146
+      },
+      "data_sha256": "6cf475e8fa6ade74350d2871446105ad176aa29bed4ba34268a3fae13fe6bd7a",
+      "git_sha": "fdfddcec2901aa4fb991a9297f1a8bd2f9672a24",
+      "seed": 451
+    },
+    "points": [
+      {
+        "bucket": "fine_dining",
+        "h": 5,
+        "q": 1.0
+      },
+      {
+        "bucket": "fine_dining",
+        "h": 10,
+        "q": 1.0
+      },
+      {
+        "bucket": "fine_dining",
+        "h": 15,
+        "q": 0.9649801148917365
+      },
+      {
+        "bucket": "fine_dining",
+        "h": 30,
+        "q": 0.8243482103402563
+      },
+      {
+        "bucket": "fine_dining",
+        "h": 42,
+        "q": 0.6973928413610252
+      },
+      {
+        "bucket": "fine_dining",
+        "h": 60,
+        "q": 0.4684047724259832
+      },
+      {
+        "bucket": "fine_dining",
+        "h": 100,
+        "q": 0.17079098541758728
+      },
+      {
+        "bucket": "fine_dining",
+        "h": 120,
+        "q": 0.15081749889527177
+      },
+      {
+        "bucket": "fine_dining",
+        "h": 250,
+        "q": 0.02761820592134335
+      },
+      {
+        "bucket": "fine_dining",
+        "h": 300,
+        "q": 0.014361467079098541
+      },
+      {
+        "bucket": "fine_dining",
+        "h": 500,
+        "q": 0.014361467079098541
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 5,
+        "q": 1.0
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 10,
+        "q": 1.0
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 15,
+        "q": 0.9638127853881278
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 30,
+        "q": 0.8184931506849314
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 42,
+        "q": 0.673972602739726
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 60,
+        "q": 0.45068493150684935
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 100,
+        "q": 0.14315068493150687
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 120,
+        "q": 0.12251141552511417
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 250,
+        "q": 0.028538812785388126
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 300,
+        "q": 0.014840182648401827
+      },
+      {
+        "bucket": "casual_restaurant",
+        "h": 500,
+        "q": 0.014840182648401827
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 5,
+        "q": 1.0
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 10,
+        "q": 1.0
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 15,
+        "q": 0.9965753424657533
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 30,
+        "q": 0.9821917808219177
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 42,
+        "q": 0.9207671232876712
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 60,
+        "q": 0.6848219178082192
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 100,
+        "q": 0.25178082191780826
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 120,
+        "q": 0.179013698630137
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 250,
+        "q": 0.03424657534246575
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 300,
+        "q": 0.01780821917808219
+      },
+      {
+        "bucket": "steakhouse_grill",
+        "h": 500,
+        "q": 0.01780821917808219
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 5,
+        "q": 1.0
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 10,
+        "q": 1.0
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 15,
+        "q": 0.9972381794078656
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 30,
+        "q": 0.9211224038886433
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 42,
+        "q": 0.8780380026513478
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 60,
+        "q": 0.7909854175872735
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 100,
+        "q": 0.5256296950950066
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 120,
+        "q": 0.45404330534688464
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 250,
+        "q": 0.12439239946973044
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 300,
+        "q": 0.046619531595227574
+      },
+      {
+        "bucket": "bar_lounge",
+        "h": 500,
+        "q": 0.046619531595227574
+      },
+      {
+        "bucket": "hotel",
+        "h": 5,
+        "q": 1.0
+      },
+      {
+        "bucket": "hotel",
+        "h": 10,
+        "q": 1.0
+      },
+      {
+        "bucket": "hotel",
+        "h": 15,
+        "q": 0.9970477090222012
+      },
+      {
+        "bucket": "hotel",
+        "h": 30,
+        "q": 0.9846480869154464
+      },
+      {
+        "bucket": "hotel",
+        "h": 42,
+        "q": 0.9730751062824752
+      },
+      {
+        "bucket": "hotel",
+        "h": 60,
+        "q": 0.9351913084553614
+      },
+      {
+        "bucket": "hotel",
+        "h": 100,
+        "q": 0.8032593292394898
+      },
+      {
+        "bucket": "hotel",
+        "h": 120,
+        "q": 0.7543221539914974
+      },
+      {
+        "bucket": "hotel",
+        "h": 250,
+        "q": 0.4088332546055739
+      },
+      {
+        "bucket": "hotel",
+        "h": 300,
+        "q": 0.22224846480869154
+      },
+      {
+        "bucket": "hotel",
+        "h": 500,
+        "q": 0.22224846480869154
+      },
+      {
+        "bucket": "event_space",
+        "h": 5,
+        "q": 1.0
+      },
+      {
+        "bucket": "event_space",
+        "h": 10,
+        "q": 1.0
+      },
+      {
+        "bucket": "event_space",
+        "h": 15,
+        "q": 0.9970477090222012
+      },
+      {
+        "bucket": "event_space",
+        "h": 30,
+        "q": 0.9846480869154464
+      },
+      {
+        "bucket": "event_space",
+        "h": 42,
+        "q": 0.9730751062824752
+      },
+      {
+        "bucket": "event_space",
+        "h": 60,
+        "q": 0.9351913084553614
+      },
+      {
+        "bucket": "event_space",
+        "h": 100,
+        "q": 0.8722248464808691
+      },
+      {
+        "bucket": "event_space",
+        "h": 120,
+        "q": 0.8370807746811525
+      },
+      {
+        "bucket": "event_space",
+        "h": 250,
+        "q": 0.4088332546055739
+      },
+      {
+        "bucket": "event_space",
+        "h": 300,
+        "q": 0.22224846480869154
+      },
+      {
+        "bucket": "event_space",
+        "h": 500,
+        "q": 0.22224846480869154
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 5,
+        "q": 1.0
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 10,
+        "q": 1.0
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 15,
+        "q": 0.9023972602739725
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 30,
+        "q": 0.7591324200913242
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 42,
+        "q": 0.7031963470319634
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 60,
+        "q": 0.58675799086758
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 100,
+        "q": 0.3824200913242009
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 120,
+        "q": 0.3458904109589041
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 250,
+        "q": 0.14269406392694065
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 300,
+        "q": 0.07420091324200913
+      },
+      {
+        "bucket": "fast_casual_cafe",
+        "h": 500,
+        "q": 0.07420091324200913
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 5,
+        "q": 1.0
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 10,
+        "q": 1.0
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 15,
+        "q": 0.9828767123287672
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 30,
+        "q": 0.910958904109589
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 42,
+        "q": 0.8438356164383561
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 60,
+        "q": 0.7041095890410959
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 100,
+        "q": 0.4589041095890411
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 120,
+        "q": 0.41506849315068495
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 250,
+        "q": 0.17123287671232879
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 300,
+        "q": 0.08904109589041095
+      },
+      {
+        "bucket": "unknown_bucket",
+        "h": 500,
+        "q": 0.08904109589041095
+      }
+    ]
+  }
+}

@@ -137,15 +137,19 @@ async function main() {
   const tokens = { prompt: 0, completion: 0, reasoning: 0, calls: 0 };
   // Reasoning tokens are charged as output on top of completion tokens: an
   // overestimate if xAI already counts them in completion_tokens.
-  const onUsage = (u: XaiUsage) => {
+  const spentAtStart = budget.spent;
+  // One usage callback per venue, so a venue's cost is its own calls only
+  // (venues run four at a time against one shared ledger).
+  const usageFor = (venueCost: { usd: number }) => (u: XaiUsage) => {
     tokens.prompt += u.promptTokens;
     tokens.completion += u.completionTokens;
     tokens.reasoning += u.reasoningTokens;
     tokens.calls += 1;
-    budget.charge(
+    const usd =
       u.promptTokens * priceIn +
-        (u.completionTokens + u.reasoningTokens) * priceOut,
-    );
+      (u.completionTokens + u.reasoningTokens) * priceOut;
+    venueCost.usd += usd;
+    budget.charge(usd);
   };
 
   const venues = readVenueIndex().filter((v) => v.in_dataset === "1");
@@ -195,9 +199,9 @@ async function main() {
         status = "aborted_budget";
         throw err;
       }
-      const spentBefore = budget.spent;
+      const venueCost = { usd: 0 };
       const extraction = await extractWithSelfConsistency(v.name, input, {
-        onUsage,
+        onUsage: usageFor(venueCost),
       });
       const successfulReads = extraction?.successfulReads ?? 0;
       const failed = successfulReads < 2;
@@ -234,7 +238,7 @@ async function main() {
       writeJsonAtomic(cacheFile(v.venue_id), {
         venue,
         rooms,
-        usd: budget.spent - spentBefore,
+        usd: venueCost.usd,
       } satisfies Cached);
     }),
   );
@@ -272,7 +276,7 @@ async function main() {
   manifest.counts.reasoning_tokens_this_run = tokens.reasoning;
   manifest.spend.xai_usd_total = Number(budget.spent.toFixed(4));
   manifest.spend.xai_usd_this_run = Number(
-    cached.reduce((s, c) => s + c.usd, 0).toFixed(4),
+    (budget.spent - spentAtStart).toFixed(4),
   );
   manifest.outputs.push(
     evalDir("extractions.jsonl"),

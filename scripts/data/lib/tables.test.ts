@@ -5,6 +5,8 @@ import {
   confidenceRow,
   discoveryRow,
   LeakageError,
+  v0Prior,
+  v0TrustWeight,
   type VenueLabel,
 } from "./tables";
 
@@ -158,5 +160,32 @@ describe("discoveryRow", () => {
       row.price_missing,
     ]).toEqual([1, 1, 1]);
     expect(row.name_hotel).toBe(1);
+  });
+});
+
+describe("baseline columns", () => {
+  it("maps rooms to v0 tiers by the v0 rules", () => {
+    expect(v0TrustWeight(features)).toBe(0.9);
+    expect(v0TrustWeight({ ...features, regex_status: "absent" })).toBe(0.6);
+    expect(v0TrustWeight({ ...features, private_page_found: false })).toBe(0.3);
+  });
+
+  it("scores the v0 discovery prior from Google fields", () => {
+    const banquet = v0Prior(
+      { name: "Grand Hall", bucket: "event_space", website: "https://g.com" },
+      {
+        google_match: "matched",
+        primary_type: "banquet_hall",
+        types: "banquet_hall",
+        display_name: "Grand Hall",
+        price_level: "2",
+      },
+    );
+    const cafe = v0Prior(
+      { name: "Bean Cafe", bucket: "fast_casual_cafe", website: "" },
+      { google_match: "none" },
+    );
+    expect(banquet).toBeGreaterThan(0.9);
+    expect(cafe).toBeLessThan(0.2);
   });
 });

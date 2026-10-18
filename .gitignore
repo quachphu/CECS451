@@ -63,4 +63,6 @@ __pycache__/
 /eval/fsq_raw/
 /eval/**/*.parquet
 /eval/.spend/
+# Output of the offline dry run (npm run data:dryrun).
+/.dryrun/
 /ml/.venv/

@@ -191,7 +191,7 @@ async function upsertVenueDraft(draft: VenueDraft) {
         evidence_quote: room.evidenceQuote,
         evidence_url: room.evidenceUrl,
         capacity_confidence: room.confidence,
-        confidence_features: featureLog(room.confidenceFeatures),
+        confidence_features: featureLog(room.confidenceSource, room.confidenceFeatures),
       }))
     );
     // A venue with no rooms never appears in search, so this must not fail

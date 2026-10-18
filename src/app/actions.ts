@@ -383,7 +383,7 @@ export async function confirmVenueDetailAction(formData: FormData): Promise<Acti
     confirmedMaxCapacity != null && roomId
       ? await supabase
           .from("venue_rooms")
-          .select("max_capacity, capacity_confidence, capacity_trust")
+          .select("max_capacity, capacity_confidence, capacity_trust, confidence_features")
           .eq("id", roomId)
           .eq("venue_id", venueId)
           .maybeSingle()
@@ -419,16 +419,7 @@ export async function confirmVenueDetailAction(formData: FormData): Promise<Acti
         // A human phoned the venue: set, not scored (see confidence.ts).
         capacity_confidence: PLANNER_CONFIDENCE,
         is_estimate: false,
-        confidence_features: featureLog({
-          source: "planner",
-          agreementSpread: null,
-          privateDiningPageFound: false,
-          grounded: false,
-          competingCandidates: 0,
-          hasRoomHint: false,
-          renderedWithJs: false,
-          category: "",
-        }),
+        confidence_features: featureLog("planner", null),
       })
       .eq("id", roomId)
       .eq("venue_id", venueId);

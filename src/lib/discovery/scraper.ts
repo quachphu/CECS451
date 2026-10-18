@@ -245,6 +245,9 @@ export function pickMenuUrl(links: Array<{ href: string; text: string }>, baseUr
 }
 
 /** Visible text and links of an HTML page, exactly as the scraper reads it (shared with the offline snapshots). */
+const BLOCK_ELEMENTS =
+  "address, article, aside, blockquote, dd, div, dl, dt, figcaption, figure, form, h1, h2, h3, h4, h5, h6, header, li, main, ol, p, pre, section, table, td, th, tr, ul, option, button, label";
+
 export function textFromHtml(html: string): { text: string; links: Array<{ href: string; text: string }> } {
   const $ = cheerio.load(html);
   const links: Array<{ href: string; text: string }> = [];
@@ -254,6 +257,12 @@ export function textFromHtml(html: string): { text: string; links: Array<{ href:
   });
 
   $("script, style, nav, footer, noscript, iframe, template").remove();
+  // Block elements end a word: without this, "<h1>For sale</h1><p>Buy</p>"
+  // reads as "For saleBuy" and phrase checks (parked domains, capacities) miss.
+  $("br, hr").replaceWith(" ");
+  $(BLOCK_ELEMENTS).each((_, el) => {
+    $(el).prepend(" ").append(" ");
+  });
   // Defense in depth: some sites embed literal HTML strings inside text
   // nodes (e.g. malformed analytics snippets) that cheerio's own tag
   // stripping won't catch since they aren't real child elements.

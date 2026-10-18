@@ -1,82 +1,55 @@
 /**
- * Capacity confidence: the probability that a stored room capacity is right.
+ * Capacity confidence: P(a room's stated capacity is within 10% of the truth).
  *
- * A logistic model over evidence features — the same form Platt scaling uses
- * to turn a score into a probability [P6], and the model class
- * Niculescu-Mizil & Caruana found well calibrated on small data [P6]. The
- * shipped coefficients (src/data/confidence-model.json, version
- * "placeholder-0") are hand-set to roughly reproduce the old tier weights;
- * scripts/train_confidence.py refits them from labelled data with
- * scikit-learn's LogisticRegression [D9] and reports Expected Calibration Error
- * [P4, P5].
+ * Logistic regression [D9] trained offline by ml/train_confidence.py on rooms
+ * the extraction model read, labeled by a teacher model and checked by people,
+ * and exported to src/data/confidence-model.json. Its features come from
+ * features.ts, the same function that built the training rows, so training
+ * and serving cannot drift apart.
  *
- * Computed once, at write time (buildVenueDraft), and stored in
- * venue_rooms.capacity_confidence — the search path does no inference.
+ * Scored once at write time (buildVenueDraft) and stored with the model
+ * version in venue_rooms.capacity_confidence / confidence_features; the search
+ * path does no inference. Only a room whose figure is the extraction model's
+ * own modal read gets a score, since that is what each training row measured.
+ * Regex-only figures, estimates and rooms showing a different figure keep the
+ * v0 tier weight.
+ *
+ * While the model file is still a placeholder, no room is scored: ranking uses
+ * the v0 tier weights and the UI does not show "% likely to fit".
  */
-import model from "@/data/confidence-model.json";
-import { categoryBucket } from "@/lib/category-bucket";
+import modelJson from "@/data/confidence-model.json";
+import { encodeConfidenceFeatures, type ConfidenceFeatures } from "@/lib/discovery/features";
+import { loadTrainedConfidenceModel, scoreLogistic, type LogisticModel } from "@/lib/discovery/model-scoring";
 
-export type ConfidenceSource = "regex" | "llm" | "both" | "estimate" | "planner";
+export type { ConfidenceFeatures };
 
-export type ConfidenceFeatures = {
-  /** How the figure was obtained. */
-  source: ConfidenceSource;
-  /** |regex − llm| / max(regex, llm) when both reads produced a figure for this room. */
-  agreementSpread: number | null;
-  privateDiningPageFound: boolean;
-  /** The figure is backed by a sentence verified to be on the page. */
-  grounded: boolean;
-  /** Other plausible capacity figures on the site that this room didn't use. */
-  competingCandidates: number;
-  /** The page attached a room name to the figure. */
-  hasRoomHint: boolean;
-  renderedWithJs: boolean;
-  category: string;
-};
+/** How a stored figure was obtained, recorded with every room. */
+export type ConfidenceSource = "llm" | "both" | "regex" | "estimate" | "planner";
 
-export type ConfidenceModel = {
-  version: string;
-  intercept: number;
-  weights: Record<string, number>;
-};
-
-export const CONFIDENCE_MODEL: ConfidenceModel = model;
+/** The trained model, or null while src/data/confidence-model.json is a placeholder. */
+export const TRAINED_CONFIDENCE_MODEL: LogisticModel | null = loadTrainedConfidenceModel(modelJson);
 
 /** Planner confirmations are set to this directly rather than scored. */
 export const PLANNER_CONFIDENCE = 0.98;
 
+/** P(capacity is right), rounded to 3 decimals for storage; null without a trained model or features. */
+export function scoreRoomConfidence(
+  features: ConfidenceFeatures | null,
+  model: LogisticModel | null = TRAINED_CONFIDENCE_MODEL
+): number | null {
+  if (!model || !features) return null;
+  return Math.round(scoreLogistic(model, encodeConfidenceFeatures(features)) * 1000) / 1000;
+}
+
 /**
- * One-hot/numeric encoding shared with scripts/train_confidence.py — keep the
- * two in step. Unknown keys simply have weight 0.
+ * What venue_rooms.confidence_features stores: the source, the encoded
+ * features when the room has them, and the model version that scored it
+ * ("none" when no trained model was loaded).
  */
-export function encodeConfidenceFeatures(f: ConfidenceFeatures): Record<string, number> {
-  return {
-    [`source=${f.source}`]: 1,
-    agreementSpread: f.agreementSpread ?? 0,
-    privateDiningPageFound: Number(f.privateDiningPageFound),
-    grounded: Number(f.grounded),
-    competingCandidates: f.competingCandidates,
-    hasRoomHint: Number(f.hasRoomHint),
-    renderedWithJs: Number(f.renderedWithJs),
-    [`category=${categoryBucket(f.category)}`]: 1,
-  };
-}
-
-function sigmoid(z: number): number {
-  return 1 / (1 + Math.exp(-z));
-}
-
-/** σ(intercept + w·x), rounded to 3 decimals for storage. */
-export function scoreConfidence(f: ConfidenceFeatures, m: ConfidenceModel = CONFIDENCE_MODEL): number {
-  const x = encodeConfidenceFeatures(f);
-  const z = Object.entries(x).reduce((sum, [name, value]) => sum + (m.weights[name] ?? 0) * value, m.intercept);
-  return Math.round(sigmoid(z) * 1000) / 1000;
-}
-
-/** The feature log persisted to venue_rooms.confidence_features, tagged with the model version. */
 export function featureLog(
-  f: ConfidenceFeatures,
-  m: ConfidenceModel = CONFIDENCE_MODEL
+  source: ConfidenceSource,
+  features: ConfidenceFeatures | null,
+  model: LogisticModel | null = TRAINED_CONFIDENCE_MODEL
 ): Record<string, string | number | boolean | null> {
-  return { ...f, modelVersion: m.version };
+  return { source, ...(features ? encodeConfidenceFeatures(features) : {}), modelVersion: model?.version ?? "none" };
 }

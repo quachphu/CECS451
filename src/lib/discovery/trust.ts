@@ -1,7 +1,8 @@
 import type { CandidateVenue } from "@/lib/discovery/places";
-import { scoreConfidence, type ConfidenceFeatures } from "@/lib/discovery/confidence";
+import { scoreRoomConfidence, type ConfidenceFeatures, type ConfidenceSource } from "@/lib/discovery/confidence";
+import { roomConfidenceFeatures } from "@/lib/discovery/features";
 import { findEvidenceUrl } from "@/lib/discovery/grounding";
-import type { LlmExtractedRoom, LlmExtraction } from "@/lib/discovery/llm-extract";
+import { buildLlmInput, type LlmExtractedRoom, type LlmExtraction } from "@/lib/discovery/llm-extract";
 import { MIN_PLAUSIBLE_CAPACITY, type CapacityCandidate, type ScrapedSignals } from "@/lib/discovery/scraper";
 import type { RoomStyle, TrustLevel } from "@/lib/supabase/types";
 
@@ -18,34 +19,21 @@ export type DraftRoom = {
   evidenceQuote: string | null;
   /** The page that sentence was read on. */
   evidenceUrl: string | null;
-  /** P(capacity is right), scored at write time — see confidence.ts. */
-  confidence: number;
-  /** What `confidence` was computed from; persisted for offline refitting. */
-  confidenceFeatures: ConfidenceFeatures;
+  /** P(capacity is right) from the trained model, scored at write time; null when unscored (see confidence.ts). */
+  confidence: number | null;
+  /** How the figure was obtained. */
+  confidenceSource: ConfidenceSource;
+  /** The features `confidence` was computed from (LLM rooms only); persisted for refitting. */
+  confidenceFeatures: ConfidenceFeatures | null;
 };
-
-type RoomEvidence = Pick<
-  ConfidenceFeatures,
-  "source" | "agreementSpread" | "grounded" | "competingCandidates" | "hasRoomHint"
->;
-type PageContext = Pick<ConfidenceFeatures, "privateDiningPageFound" | "renderedWithJs" | "category">;
 
 function scored(
-  room: Omit<DraftRoom, "confidence" | "confidenceFeatures">,
-  evidence: RoomEvidence,
-  page: PageContext
+  room: Omit<DraftRoom, "confidence" | "confidenceSource" | "confidenceFeatures">,
+  source: ConfidenceSource,
+  features: ConfidenceFeatures | null = null
 ): DraftRoom {
-  const confidenceFeatures: ConfidenceFeatures = { ...evidence, ...page };
-  return { ...room, confidence: scoreConfidence(confidenceFeatures), confidenceFeatures };
+  return { ...room, confidence: scoreRoomConfidence(features), confidenceSource: source, confidenceFeatures: features };
 }
-
-const ESTIMATE_EVIDENCE: RoomEvidence = {
-  source: "estimate",
-  agreementSpread: null,
-  grounded: false,
-  competingCandidates: 0,
-  hasRoomHint: false,
-};
 
 export type VenueDraft = {
   placeSourceId: string;
@@ -199,14 +187,20 @@ function candidatesOf(signals: ScrapedSignals): CapacityCandidate[] {
  *  - regex candidates only, on a private-dining page → likely (a pattern match
  *    alone no longer earns verified); without a private-dining page → unverified.
  */
-function roomsFromEvidence(
-  signals: ScrapedSignals,
-  llmRooms: LlmExtractedRoom[],
-  style: RoomStyle,
-  page: PageContext
-): DraftRoom[] | null {
+function roomsFromEvidence(signals: ScrapedSignals, llm: LlmExtraction | null, style: RoomStyle): DraftRoom[] | null {
   const candidates = candidatesOf(signals);
   const pages = signals.pages ?? [];
+  const llmRooms: LlmExtractedRoom[] = llm?.rooms ?? [];
+  const llmInput = llm?.inputText ?? buildLlmInput(signals.privateDiningText ?? "", signals.combinedText);
+  // The model's features describe its own modal figure; a room showing another figure is not scored.
+  const features = (room: LlmExtractedRoom, shown: number): ConfidenceFeatures | null =>
+    shown === room.maxCapacity
+      ? roomConfidenceFeatures(
+          { capacity: room.maxCapacity, grounded: Boolean(room.evidenceQuote), selfConsistency: room.selfConsistency ?? null },
+          llmInput,
+          signals.privateDiningPageFound
+        )
+      : null;
 
   if (llmRooms.length > 0) {
     return llmRooms.map((room): DraftRoom => {
@@ -237,14 +231,8 @@ function roomsFromEvidence(
             evidenceQuote: room.evidenceQuote ?? (agreeing.sentence || null),
             evidenceUrl: evidenceUrl ?? agreeing.url ?? null,
           },
-          {
-            source: "both",
-            agreementSpread: capacitySpread(agreeing.value, room.maxCapacity),
-            grounded: true,
-            competingCandidates: Math.max(0, candidates.length - 1),
-            hasRoomHint: true,
-          },
-          page
+          "both",
+          features(room, agreeing.value)
         );
       }
 
@@ -272,14 +260,7 @@ function roomsFromEvidence(
             evidenceQuote: conflicting.sentence || null,
             evidenceUrl: conflicting.url ?? null,
           },
-          {
-            source: "both",
-            agreementSpread: capacitySpread(conflicting.value, room.maxCapacity),
-            grounded: true,
-            competingCandidates: Math.max(0, candidates.length - 1),
-            hasRoomHint: Boolean(conflicting.roomHint),
-          },
-          page
+          "both"
         );
       }
 
@@ -296,14 +277,8 @@ function roomsFromEvidence(
           evidenceQuote: room.evidenceQuote ?? null,
           evidenceUrl,
         },
-        {
-          source: "llm",
-          agreementSpread: null,
-          grounded: Boolean(room.evidenceQuote),
-          competingCandidates: candidates.length,
-          hasRoomHint: true,
-        },
-        page
+        "llm",
+        features(room, room.maxCapacity)
       );
     });
   }
@@ -329,14 +304,7 @@ function roomsFromEvidence(
             evidenceQuote: c.sentence || null,
             evidenceUrl: c.url ?? null,
           },
-          {
-            source: "regex",
-            agreementSpread: null,
-            grounded: true,
-            competingCandidates: candidates.length - picked.length,
-            hasRoomHint: Boolean(c.roomHint),
-          },
-          page
+          "regex"
         )
     );
   }
@@ -394,8 +362,7 @@ export function buildVenueDraft(
             evidenceQuote: null,
             evidenceUrl: null,
           },
-          ESTIMATE_EVIDENCE,
-          { privateDiningPageFound: false, renderedWithJs: false, category: candidate.category }
+          "estimate"
         ),
       ],
       // Google Places can have a photo for a venue even with no website
@@ -411,13 +378,7 @@ export function buildVenueDraft(
 
   const hasCapacityNumbers = candidatesOf(signals).length > 0;
 
-  const page: PageContext = {
-    privateDiningPageFound: signals.privateDiningPageFound,
-    renderedWithJs: signals.renderedWithJs,
-    category: candidate.category,
-  };
-
-  const rooms: DraftRoom[] = roomsFromEvidence(signals, llm?.rooms ?? [], style, page) ?? [
+  const rooms: DraftRoom[] = roomsFromEvidence(signals, llm, style) ?? [
     scored(
       {
         roomName: signals.privateDiningPageFound
@@ -433,8 +394,7 @@ export function buildVenueDraft(
         evidenceQuote: null,
         evidenceUrl: null,
       },
-      ESTIMATE_EVIDENCE,
-      page
+      "estimate"
     ),
   ];
 

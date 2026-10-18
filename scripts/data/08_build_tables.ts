@@ -38,6 +38,7 @@ import {
   DISCOVERY_COLUMNS,
   discoveryRow,
   type VenueLabel,
+  v0Prior,
 } from "./lib/tables";
 import { loadSnapshot, readVenueIndex } from "./lib/venue-index";
 
@@ -173,6 +174,12 @@ function main() {
       label_source: label.source,
       y: label.hosts === "yes" ? 1 : 0,
       ...features,
+      v0_prior: Number(
+        v0Prior(
+          { name: v.name, bucket: v.bucket as Bucket, website: v.website },
+          google.get(v.venue_id),
+        ).toFixed(6),
+      ),
     });
   }
   const discTrain = discRows.filter((r) => r.split === "train");

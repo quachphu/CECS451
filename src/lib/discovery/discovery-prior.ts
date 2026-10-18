@@ -1,22 +1,22 @@
 /**
  * Discovery prior: P(a candidate venue hosts private events), from metadata we
- * already have before fetching anything — Google Places types and price level
- * [D3], or OSM amenity/cuisine tags [D10], whether a website exists, and name
- * keywords.
+ * already have before fetching anything. Used only to order candidates:
+ * discovery order is proximity and place type, so in a dense area the
+ * per-run candidate cap and the render/LLM budgets were spent on whatever
+ * happened to be nearest. Sorting by this prior first spends them on the
+ * likeliest venues. Nothing is persisted [D3b].
  *
- * Used only to order candidates. Discovery order is proximity and place type,
- * not private-dining capability, so in a dense area the per-run candidate cap
- * and the render/LLM budgets were spent on whatever happened to be nearest
- * (pizza counters included). Sorting by this prior first spends them on the
- * likeliest venues. Nothing is persisted, so no Places content is stored
- * beyond what discovery already stored [D3b].
- *
- * Logistic over the features below; placeholder weights in
- * src/data/discovery-prior.json, refittable with
- * `python3 scripts/train_confidence.py --target prior` from
- * hosts_private_events labels (LogisticRegression [D9]).
+ * Two versions:
+ *  - trained (src/data/discovery-prior.json from ml/train_discovery.py): the
+ *    "pre_fetch" logistic model over features.ts discoveryFeatures (bucket,
+ *    Google price level, rating, review count, name keywords);
+ *  - v0 (V0_PRIOR_MODEL below): hand-set weights, used while the file is a
+ *    placeholder and kept as the baseline the trained prior is compared to.
  */
-import prior from "@/data/discovery-prior.json";
+import priorJson from "@/data/discovery-prior.json";
+import { bucketFromGoogle, bucketFromText, REFERENCE_BUCKET } from "@/lib/discovery/category-buckets";
+import { discoveryFeatures } from "@/lib/discovery/features";
+import { loadTrainedDiscoveryPrior, scoreLogistic, type DiscoveryPriorModel } from "@/lib/discovery/model-scoring";
 import type { CandidateVenue } from "@/lib/discovery/places";
 
 export const PRIOR_KINDS = [
@@ -41,8 +41,38 @@ export const PRIOR_NAME_KEYWORDS = [
   "cafe",
 ] as const;
 
-export type DiscoveryPriorModel = { version: string; intercept: number; weights: Record<string, number> };
-export const DISCOVERY_PRIOR_MODEL: DiscoveryPriorModel = prior;
+export type V0PriorModel = { version: string; intercept: number; weights: Record<string, number> };
+
+/** The hand-set v0 prior: ordering before training, and the baseline in eval. */
+export const V0_PRIOR_MODEL: V0PriorModel = {
+  version: "placeholder-0",
+  intercept: -1.2,
+  weights: {
+    "kind=banquet": 3.0,
+    "kind=hotel": 1.4,
+    "kind=steakhouse": 1.1,
+    "kind=restaurant": 0.5,
+    "kind=bar": 0.3,
+    "kind=night_club": 0.4,
+    "kind=cafe": -0.8,
+    "kind=fast_food": -2.0,
+    priceLevel: 0.3,
+    priceLevelMissing: -0.1,
+    hasWebsite: 0.8,
+    "name=steakhouse": 0.4,
+    "name=grill": 0.2,
+    "name=tavern": 0.3,
+    "name=hall": 0.5,
+    "name=club": 0.2,
+    "name=hotel": 0.6,
+    "name=pizza": -0.6,
+    "name=express": -0.9,
+    "name=cafe": -0.5,
+  },
+};
+
+/** The trained prior, or null while src/data/discovery-prior.json is a placeholder. */
+export const TRAINED_DISCOVERY_PRIOR: DiscoveryPriorModel | null = loadTrainedDiscoveryPrior(priorJson);
 
 const KIND_PATTERNS: Record<(typeof PRIOR_KINDS)[number], RegExp> = {
   banquet: /banquet|event[_\s-]*(venue|hall|space)|events_venue|wedding_venue|convention|conference/,
@@ -55,7 +85,7 @@ const KIND_PATTERNS: Record<(typeof PRIOR_KINDS)[number], RegExp> = {
   fast_food: /fast[_\s-]*food|meal_takeaway|sandwich|hamburger|pizza_delivery|food_court/,
 };
 
-/** Shared with scripts/train_confidence.py (--target prior); keep the two in step. */
+/** v0 features (kind, price, website, name keywords). */
 export function encodePriorFeatures(
   c: Pick<CandidateVenue, "name" | "category" | "website" | "priceLevelGoogle" | "types" | "cuisine">
 ): Record<string, number> {
@@ -71,13 +101,39 @@ export function encodePriorFeatures(
   return x;
 }
 
+/** The v0 hand-set prior. */
 export function scorePrivateEventPrior(
   candidate: Pick<CandidateVenue, "name" | "category" | "website" | "priceLevelGoogle" | "types" | "cuisine">,
-  model: DiscoveryPriorModel = DISCOVERY_PRIOR_MODEL
+  model: V0PriorModel = V0_PRIOR_MODEL
 ): number {
   const x = encodePriorFeatures(candidate);
   const z = Object.entries(x).reduce((sum, [k, v]) => sum + (model.weights[k] ?? 0) * v, model.intercept);
   return 1 / (1 + Math.exp(-z));
+}
+
+type PriorCandidate = Pick<
+  CandidateVenue,
+  "name" | "category" | "website" | "priceLevelGoogle" | "types" | "cuisine" | "primaryType" | "rating" | "userRatingCount"
+>;
+
+/** The candidate's bucket as training saw it: Google types first, then the category or cuisine text. */
+export function candidateBucket(c: Pick<CandidateVenue, "category" | "types" | "cuisine" | "primaryType">) {
+  return bucketFromGoogle(c.primaryType ?? null, c.types ?? []) ?? bucketFromText(c.cuisine) ?? bucketFromText(c.category) ?? REFERENCE_BUCKET;
+}
+
+/** P(hosts private events): the trained pre-fetch model when loaded, else the v0 prior. */
+export function discoveryPriorScore(candidate: PriorCandidate, trained: DiscoveryPriorModel | null = TRAINED_DISCOVERY_PRIOR): number {
+  if (!trained) return scorePrivateEventPrior(candidate);
+  return scoreLogistic(
+    trained.pre_fetch,
+    discoveryFeatures({
+      bucket: candidateBucket(candidate),
+      name: candidate.name,
+      priceLevel: candidate.priceLevelGoogle ?? null,
+      rating: candidate.rating ?? null,
+      userRatingCount: candidate.userRatingCount ?? null,
+    })
+  );
 }
 
 /**
@@ -85,11 +141,12 @@ export function scorePrivateEventPrior(
  * order. Candidates without a website stay in the list — they're still
  * drafted, as before — they just sort later.
  */
-export function orderByPrior<
-  T extends Pick<CandidateVenue, "name" | "category" | "website" | "priceLevelGoogle" | "types" | "cuisine">,
->(candidates: T[]): T[] {
+export function orderByPrior<T extends PriorCandidate>(
+  candidates: T[],
+  trained: DiscoveryPriorModel | null = TRAINED_DISCOVERY_PRIOR
+): T[] {
   return candidates
-    .map((candidate, index) => ({ candidate, index, prior: scorePrivateEventPrior(candidate) }))
+    .map((candidate, index) => ({ candidate, index, prior: discoveryPriorScore(candidate, trained) }))
     .sort((a, b) => b.prior - a.prior || a.index - b.index)
     .map(({ candidate }) => candidate);
 }
