@@ -55,6 +55,9 @@ const GOOGLE_FIELD_MASK = [
 // (Times Square) from being represented by 20 pizza counters.
 const GOOGLE_MAX_PER_TYPE = 20;
 
+// Discovery waits on these requests; a stalled one counts as no results for that type.
+const GOOGLE_TIMEOUT_MS = 10_000;
+
 const PRICE_LEVEL_TO_NUMBER: Record<string, number> = {
   PRICE_LEVEL_FREE: 0,
   PRICE_LEVEL_INEXPENSIVE: 1,
@@ -89,6 +92,7 @@ async function discoverViaGooglePlaces(origin: LatLng, radiusMeters: number, api
       try {
         const res = await fetch("https://places.googleapis.com/v1/places:searchNearby", {
           method: "POST",
+          signal: AbortSignal.timeout(GOOGLE_TIMEOUT_MS),
           headers: {
             "Content-Type": "application/json",
             "X-Goog-Api-Key": apiKey,

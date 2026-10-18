@@ -47,6 +47,8 @@ export async function GET(request: NextRequest) {
 
     const res = await fetch(url, {
       headers: { "User-Agent": "private-dining-finder/0.1 (event-planning research tool)" },
+      // Suggestions are only useful while the user is typing.
+      signal: AbortSignal.timeout(5_000),
     });
     if (!res.ok) return NextResponse.json([]);
 
