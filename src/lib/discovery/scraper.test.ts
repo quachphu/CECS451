@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractDietaryNotes, pickMenuUrl } from "@/lib/discovery/scraper";
+import { extractDietaryNotes, pickMenuUrl, textFromHtml } from "@/lib/discovery/scraper";
 
 describe("extractDietaryNotes", () => {
   it("catches common accommodations mentioned on the page", () => {
@@ -68,5 +68,18 @@ describe("pickMenuUrl", () => {
 
   it("survives malformed hrefs without throwing", () => {
     expect(pickMenuUrl([{ href: "javascript:void(0)", text: "Menu" }], base)).toBeNull();
+  });
+});
+
+describe("textFromHtml", () => {
+  it("keeps a word break between block elements", () => {
+    const { text } = textFromHtml("<body><h1>This domain is for sale</h1><p>Buy it</p><ul><li>Seats 40</li><li>guests</li></ul>a<br>b</body>");
+    expect(text).toBe("This domain is for sale Buy it Seats 40 guests a b");
+  });
+
+  it("does not split words inside inline elements", () => {
+    expect(textFromHtml("<body><p>The <b>Garden</b> Room seat<span>s</span> 40.</p></body>").text).toBe(
+      "The Garden Room seats 40."
+    );
   });
 });

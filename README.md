@@ -95,26 +95,28 @@ Steps 1 to 10 describe one search; the lower panel shows what happens after it. 
 | Framework | Next.js 16 (App Router, Server Components, Server Actions), React 19, TypeScript |
 | UI | Tailwind CSS 4, shadcn/ui, Leaflet (2D map), MapLibre GL (3D map) |
 | Database | Supabase: Postgres 17, row-level security, Realtime |
-| Language model | xAI Grok `grok-4.5` over HTTPS, temperature 0, JSON-schema structured output |
+| Language model | xAI Grok (`XAI_MODEL`, default `grok-4.7`) over HTTPS, JSON-schema structured output |
 | Venue data | Google Places API (New), OpenStreetMap Overpass |
 | Page rendering | Firecrawl v2, used only for JavaScript-rendered pages |
 | Routing and geocoding | OpenRouteService Matrix, Nominatim, Photon |
 | Testing | Vitest, Playwright |
-| Offline modelling | Python, scikit-learn (training and metric cross-checks) |
+| Offline training | Python, scikit-learn, DuckDB (Foursquare OS Places), Claude `claude-sonnet-5-5` as the labeling teacher (Message Batches API) |
 
 ### Project structure
 
 ```
 CECS451/
 ├── architecture/              Architecture diagram (.excalidraw, .png) and screenshots
-├── eval/                      Offline evaluation: metrics, baselines, label templates
+├── eval/                      Training data, review tool, data card, metrics and baselines
+├── ml/                        Python: teacher labeling helpers, model training, evaluation
 ├── public/                    Static assets (curated venue photos)
 ├── scripts/
 │   ├── seed.ts                Load the curated venues, then look up their photos
 │   ├── backfill-photos.ts     Add Google photos to venues without one
 │   ├── test-scenarios.ts      Run the three reference searches
-│   ├── eval-*.ts              Page snapshots, extraction scores, NDCG@5, Cohen's kappa
-│   ├── train_confidence.py    Fit the logistic models from labelled data
+│   ├── data/                  Training pipeline Steps 1-8 (sample, enrich, snapshot,
+│   │                          student, teacher, review, tables) and the offline dry run
+│   ├── eval-ranking.ts        NDCG@5 for each ranking method
 │   ├── verify-*.ts            Checks against the live external services
 │   └── loadtest-density.ts    Cold-discovery timing in a dense area
 ├── src/
@@ -134,12 +136,13 @@ CECS451/
 │       ├── corroboration.ts   Review rule for planner confirmations
 │       └── supabase/          Database clients and types
 ├── supabase/migrations/       Database schema, 0001 to 0011
-└── NOTES-ai-core.md           Design decisions, verification and references
+├── NOTES-ai-core.md           Design decisions, verification and references
+└── NOTES-training.md          Training pipeline: procedure, budgets, decisions, status
 ```
 
 ## 5. AI algorithms
 
-The system combines three language-model tasks with four small, interpretable models. Model coefficients are stored as JSON in `src/data/` and can be refitted from labelled data.
+The system combines three language-model tasks with four small, interpretable models. The three learned models are trained offline (`ml/`, see [`NOTES-training.md`](NOTES-training.md)) and exported as JSON to `src/data/`. Until a model file holds a trained model, the app uses the v0 behaviour described under each model.
 
 ### 5.1 Components
 
@@ -153,14 +156,14 @@ The system combines three language-model tasks with four small, interpretable mo
 | Ranking | Expected utility | Order venues by the expected value of contacting them |
 | Dietary roster | LLM, structured output | Summarise guests' messages into per-person needs |
 
-All language-model calls use xAI Grok `grok-4.5` at temperature 0 with a strict JSON schema. Each call has an input limit, a timeout and a non-model fallback, so the application keeps working when the model is unavailable.
+All language-model calls use xAI Grok (`XAI_MODEL`, default `grok-4.7`) with a strict JSON schema. Query parsing and the dietary roster run at temperature 0; capacity extraction makes three reads at temperature 0.7 (Section 5.2). Each call has an input limit, a timeout and a non-model fallback, so the application keeps working when the model is unavailable.
 
 ### 5.2 Capacity extraction
 
 Each venue's capacity is read by two independent readers.
 
 - **Regex reader.** It matches phrases such as "seats 40" or "up to 120 guests". For each match it records the surrounding sentence and the nearest room name. Values below 6 and reservation phrases ("table for 2") are discarded.
-- **LLM reader.** It reads the private-dining page (up to 12,000 characters) and returns each room with its capacity and an `evidenceQuote`: the exact sentence that states the capacity.
+- **LLM reader.** It reads the private-dining page (up to 12,000 characters) three times in parallel at temperature 0.7 and returns each room with its capacity and an `evidenceQuote`: the exact sentence that states the capacity. A room's capacity is the most common answer across the reads; its **self-consistency** is the share of reads within 10% of that answer (Wang et al., 2022).
 
 The private-dining page is read before the homepage, because homepage figures usually describe the main dining room rather than a private space.
 
@@ -186,23 +189,21 @@ Answers that fail either condition are discarded. The approach follows the citat
 
 ### 5.5 Capacity confidence
 
-Each room receives a confidence score from a logistic model:
+A room read by the LLM receives a confidence score, P(the capacity is within 10% of the truth), from a logistic model:
 
 ```
 confidence = σ(b + Σ wᵢ xᵢ),    σ(z) = 1 / (1 + e^(−z))
 ```
 
-The features `xᵢ` are:
+The features `xᵢ`, computed by one function (`src/lib/discovery/features.ts`) for both training and the app, are:
 
-- which readers produced the figure;
-- the spread between their readings;
-- whether a private-dining page was found;
-- the number of competing figures;
-- whether a room name was attached;
-- whether the page required JavaScript rendering;
-- the venue category.
+- self-consistency across the three reads;
+- whether the regex reader agrees (within 20%), disagrees, or found no figure;
+- whether the evidence quote passed grounding;
+- the number of distinct capacity figures on the page;
+- whether a private-dining page was found.
 
-The feature vector is stored with each room so the model can be refitted (`scripts/train_confidence.py`). Calibration is measured with Expected Calibration Error (Guo et al., 2017).
+The model is trained offline on about 500 venues: the LLM's rooms are labeled by a second model (Claude) that reads the same pages, and people check a gold sample of 130 venues (`NOTES-training.md`). C is chosen by grouped cross-validation on log loss, and calibration is reported as Expected Calibration Error (Guo et al., 2017). The score is computed once, when a venue is saved, and stored with the model version. Rooms read by regex only, estimates, and rooms showing a figure other than the LLM's keep their v0 tier weight (verified 0.9, likely 0.6, ai_extracted 0.45, unverified 0.3). Until a trained model is loaded, every room uses its tier weight and the app does not show "% likely to fit".
 
 ### 5.6 Discovery prior
 
@@ -212,7 +213,7 @@ Each search is limited to 10 Firecrawl renders and 12 LLM reads. Before this bud
 P(hosts private events) = σ(b + w · features)
 ```
 
-The features are the Google place type (banquet hall, hotel, steakhouse, fast food and others), price level, presence of a website, and keywords in the name. Candidates are processed in descending order of this probability.
+The trained prior's features are the category bucket (from Google's place types), price level, rating, log review count (each with a missing flag) and keywords in the name. Candidates are processed in descending order of this probability. Until it is trained, a hand-set v0 prior over place type, price level, website and name keywords is used.
 
 ### 5.7 Expected-utility ranking
 
@@ -225,7 +226,7 @@ U     = 0.5 · commute score + 0.35 · capacity fit + 0.15 · style match
 score = pFit · U − (1 − pFit) · λ          λ = 0.25
 ```
 
-`q` is the base rate at which a venue of the given category has a space for `h` guests, modelled as a logistic curve in `h`. `λ` is the cost of contacting a venue that turns out not to fit.
+`q` is the base rate at which a venue of the given category has a space for `h` guests. The trained fit prior is a table per category bucket and headcount, shrunk toward the overall rate (α = 5), made non-increasing in `h` and interpolated linearly; until it is trained, a hand-set logistic curve in `h` is used. `λ` is the cost of contacting a venue that turns out not to fit.
 
 Venues with `pFit < 0.2` are excluded, as are rooms that are too small with confidence of 0.85 or more. Ties are broken by `pFit`, then commute time, then name. This follows the maximum expected utility principle (Russell and Norvig, ch. 16): an unconfirmed estimate contributes utility only in proportion to the belief that it is correct.
 
@@ -240,17 +241,17 @@ Venues with `pFit < 0.2` are excluded, as are rooms that are too small with conf
 
 ### 5.9 Evaluation
 
-The `eval/` harness compares the original logic, the regex reader alone, the LLM reader alone and the combined system.
+The training pipeline (`scripts/data/`, `ml/`, described in [`eval/README.md`](eval/README.md)) reports, on held-out gold venues and separately on LA (a city never trained on):
 
 | Metric | Measures |
 | --- | --- |
-| Capacity accuracy; precision, recall and F1 | Extraction quality |
-| Grounding rejection rate | Share of model answers without support on the page |
-| Expected Calibration Error (10 bins) | Agreement between confidence and observed accuracy |
-| NDCG@5, gain 2^rel − 1 | Ranking quality against human judgments |
-| Cohen's kappa | Agreement between two annotators |
+| Room precision, recall, F1 and invented-number rate | Extraction quality: v0 regex maximum, regex candidates, one LLM read, and the shipped three-read grounded extraction |
+| Log loss, Brier score, ROC AUC, ECE (equal-width and equal-mass) | Confidence model against the v0 tier weights, an evidence lookup table and a constant |
+| AUC and yield@10/25 | Discovery prior against the v0 prior and random order |
+| Cohen's kappa | Agreement between two reviewers |
+| NDCG@5, gain 2^rel − 1 | Ranking quality against human judgments (`scripts/eval-ranking.ts`) |
 
-Metric implementations are cross-checked against scikit-learn. See [`eval/README.md`](eval/README.md) for the labelling workflow.
+Metric implementations are cross-checked against scikit-learn, and the TypeScript model scoring is checked against scikit-learn's `predict_proba` to 1e-6. `npm run data:dryrun` runs the whole pipeline offline on synthetic data.
 
 ## 6. Getting started
 
@@ -319,11 +320,11 @@ npm run build && npm run start       # production build
 | `npm run lint` | ESLint |
 | `npm run test:scenarios` | Run the three reference searches |
 | `npm run photos:backfill` | Add Google photos to venues without one |
-| `npm run eval:snapshot -- eval/urls.csv` | Snapshot venue pages for evaluation (respects robots.txt) |
-| `npm run eval:extraction` | Score the extraction systems against labels |
 | `npm run eval:ranking` | NDCG@5 for each ranking method |
-| `npm run eval:agreement` | Cohen's kappa between two annotators |
-| `python3 scripts/train_confidence.py` | Refit the confidence model and report ECE (requires `pip install -r requirements-dev.txt`) |
+| `npm run data:dryrun` | Run the whole training pipeline offline on synthetic data |
+| `python3 -m pytest ml/tests` | Python tests (requires `pip install -r ml/requirements.txt`) |
+
+The training pipeline's steps are listed in [`eval/README.md`](eval/README.md).
 
 The scripts in `scripts/verify-*.ts` and `scripts/loadtest-density.ts` call the live external services and use API credits. Run them with `npx tsx scripts/<name>.ts`. Scripts that import server modules need `node --conditions=react-server --import tsx scripts/<name>.ts`.
 
@@ -340,8 +341,8 @@ The scripts in `scripts/verify-*.ts` and `scripts/loadtest-density.ts` call the 
 
 ### Limitations
 
-- **Untrained models.** The confidence model, discovery prior and category base rates use hand-set coefficients (`placeholder-0`). Until they are fitted, categories with generous base rates, such as hotels, can rank slightly too high.
-- **No accuracy figures yet.** The evaluation harness is implemented and tested, but no labelled dataset exists.
+- **Untrained models.** The training pipeline is built and tested end to end on synthetic data, but has not yet run on real venues. Until it does, the app uses the v0 tier weights, the hand-set discovery prior and the hand-set base rates, and hides "% likely to fit".
+- **No accuracy figures yet.** They come from the pipeline's first real run (`eval/results/summary.md`).
 - **Strict grounding.** Exact quote matching rejects correct answers that paraphrase the page, which lowers recall.
 - **First-search latency.** In an area with no cached venues, verifying figures with the model can make the first search slower: about 15 s instead of 6 s in simulation. Later searches use the 30-day cache.
 - **Authentication.** Workspaces are shared through a team code, which is not suitable for production use.
@@ -353,9 +354,9 @@ The scripts in `scripts/verify-*.ts` and `scripts/loadtest-density.ts` call the 
 
 | Priority | Task |
 | --- | --- |
-| High | Label about 100 venue pages with two annotators and report Cohen's kappa |
-| High | Report extraction F1, grounding rejection rate and NDCG@5 against the baselines |
-| Medium | Fit the confidence model, discovery prior and base rates; report ECE before and after |
+| High | Run the training pipeline on real venues (network access to xAI, Firecrawl, Hugging Face and venue sites) |
+| High | Review the 130 gold venues (four reviewers) and pass the teacher quality gate |
+| High | Ship the trained models and report extraction F1, calibration and NDCG@5 against the baselines |
 | Medium | Reduce first-search latency by capping verification reads or raising model concurrency |
 | Medium | Accept paraphrased evidence through an entailment check behind the exact match |
 | Low | Separate event links from workspace codes and add authentication |
@@ -366,6 +367,8 @@ The scripts in `scripts/verify-*.ts` and `scripts/loadtest-density.ts` call the 
 
 - Gao et al., *Enabling Large Language Models to Generate Text with Citations* (ALCE), EMNLP 2023
 - Guo et al., *On Calibration of Modern Neural Networks*, ICML 2017
+- Wang et al., *Self-Consistency Improves Chain of Thought Reasoning in Language Models*, 2022
+- Niculescu-Mizil and Caruana, *Predicting Good Probabilities with Supervised Learning*, ICML 2005
 - Russell and Norvig, *Artificial Intelligence: A Modern Approach*, 4th ed., ch. 16
 - Järvelin and Kekäläinen, *Cumulated Gain-Based Evaluation of IR Techniques*, ACM TOIS 2002
 - Cohen, *A Coefficient of Agreement for Nominal Scales*, 1960

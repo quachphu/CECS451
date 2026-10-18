@@ -6,6 +6,9 @@ import type { CommuteResult } from "@/lib/geo/commute";
 import type { RankedVenue, SearchCriteria, VenueWithRelations } from "@/lib/ranking";
 import type { RoomStyle, TrustLevel, VenueRoomRow } from "@/lib/supabase/types";
 
+// v0 discovery prior: the hand-set weights that ordered candidates before the trained prior.
+export { V0_PRIOR_MODEL as V0_DISCOVERY_PRIOR_MODEL } from "@/lib/discovery/discovery-prior";
+
 // ---------------------------------------------------------------------------
 // v0 extraction: the original "largest regex number" capacity logic.
 

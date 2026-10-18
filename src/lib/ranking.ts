@@ -1,5 +1,8 @@
-import fitPriors from "@/data/fit-priors.json";
+import fitPriorJson from "@/data/fit-priors.json";
 import { categoryBucket, type CategoryBucket } from "@/lib/category-bucket";
+import { bucketFromText, REFERENCE_BUCKET } from "@/lib/discovery/category-buckets";
+import { TRAINED_CONFIDENCE_MODEL } from "@/lib/discovery/confidence";
+import { fitPrior, loadTrainedFitPrior, type FitPriorModel, type LogisticModel } from "@/lib/discovery/model-scoring";
 import { CAPACITY_TRUST_REASONS, PRICE_TRUST_QUALIFIERS } from "@/lib/trust-labels";
 import type { CommuteMode, CommuteResult } from "@/lib/geo/commute";
 import type { RoomStyle, TrustLevel, VenuePhotoRow, VenueRoomRow, VenueRow } from "@/lib/supabase/types";
@@ -68,22 +71,50 @@ const STRONG_EVIDENCE = 0.85;
 /** Capacity fit credited to an estimate room, whose number is ignored. */
 const NEUTRAL_FIT = 0.5;
 
-type FitPrior = { h50: number; scale: number };
-const PRIORS = fitPriors as { floor: number; ceil: number; buckets: Record<CategoryBucket, FitPrior> };
+/**
+ * The v0 fit prior, used until a trained table ships: logistic in headcount,
+ * q(h) = 1 / (1 + exp((h - h50) / scale)), clamped to [floor, ceil].
+ */
+const V0_FIT_PRIOR: { floor: number; ceil: number; buckets: Record<CategoryBucket, { h50: number; scale: number }> } = {
+  floor: 0.02,
+  ceil: 0.95,
+  buckets: {
+    banquet: { h50: 300, scale: 120 },
+    hotel: { h50: 150, scale: 60 },
+    club: { h50: 120, scale: 50 },
+    bar: { h50: 60, scale: 25 },
+    restaurant: { h50: 40, scale: 20 },
+    other: { h50: 40, scale: 20 },
+  },
+};
+
+/** The trained q(bucket, headcount) table, or null while src/data/fit-priors.json is a placeholder. */
+export const TRAINED_FIT_PRIOR: FitPriorModel | null = loadTrainedFitPrior(fitPriorJson);
 
 /**
  * q: the base rate that a venue of this category has a private space holding
- * `headcount` guests, from src/data/fit-priors.json (placeholder constants).
+ * `headcount` guests. The trained table (ml/build_fit_prior.py) is conditional
+ * on the venue publishing a room size; until it ships, the v0 curve above.
  */
-export function priorFit(category: string, headcount: number): number {
-  const { h50, scale } = PRIORS.buckets[categoryBucket(category)];
+export function priorFit(category: string, headcount: number, trained: FitPriorModel | null = TRAINED_FIT_PRIOR): number {
+  if (trained) return fitPrior(trained, bucketFromText(category) ?? REFERENCE_BUCKET, headcount);
+  const { h50, scale } = V0_FIT_PRIOR.buckets[categoryBucket(category)];
   const q = 1 / (1 + Math.exp((headcount - h50) / scale));
-  return Math.min(PRIORS.ceil, Math.max(PRIORS.floor, q));
+  return Math.min(V0_FIT_PRIOR.ceil, Math.max(V0_FIT_PRIOR.floor, q));
 }
 
-/** How much a room's capacity figure is believed; old rows fall back to the tier weight. */
-export function capacityBelief(room: Pick<VenueRoomRow, "capacity_confidence" | "capacity_trust">): number {
-  return room.capacity_confidence ?? TRUST_WEIGHT[room.capacity_trust];
+/**
+ * How much a room's capacity figure is believed: the stored score when the
+ * loaded trained model produced it, otherwise the v0 tier weight (rows scored
+ * by an older or placeholder model, regex-only figures, estimates).
+ */
+export function capacityBelief(
+  room: Pick<VenueRoomRow, "capacity_confidence" | "capacity_trust" | "confidence_features">,
+  model: LogisticModel | null = TRAINED_CONFIDENCE_MODEL
+): number {
+  if (model && room.capacity_confidence != null && room.confidence_features?.modelVersion === model.version)
+    return room.capacity_confidence;
+  return TRUST_WEIGHT[room.capacity_trust];
 }
 
 type RoomChoice = { room: VenueRoomRow; fits: boolean };
@@ -113,9 +144,8 @@ function chooseRoom(rooms: VenueRoomRow[], headcount: number): RoomChoice | null
  * probability p, otherwise fall back to the base rate q. An estimate room's
  * number carries no information, so it's q alone.
  */
-function probabilityOfFit(room: VenueRoomRow, fits: boolean, q: number): number {
+function probabilityOfFit(room: VenueRoomRow, fits: boolean, q: number, p: number): number {
   if (room.is_estimate) return q;
-  const p = capacityBelief(room);
   return p * (fits ? 1 : 0) + (1 - p) * q;
 }
 
@@ -131,7 +161,8 @@ function buildReasons(
   pFit: number,
   commuteMinutes: number,
   criteria: SearchCriteria,
-  commuteEstimated: boolean
+  commuteEstimated: boolean,
+  showFitProbability: boolean
 ): string[] {
   const reasons: string[] = [];
   const modeLabel = criteria.commuteMode === "walk" ? "walk" : "drive";
@@ -149,7 +180,7 @@ function buildReasons(
     reasons.push(`Fits ${criteria.headcount} in ${room.room_name} (up to ${room.max_capacity}${room.min_capacity ? ` from ${room.min_capacity}` : ""})`);
   }
 
-  reasons.push(`About ${Math.round(pFit * 100)}% likely to fit your group`);
+  if (showFitProbability) reasons.push(`About ${Math.round(pFit * 100)}% likely to fit your group`);
 
   reasons.push(CAPACITY_TRUST_REASONS[room.capacity_trust]);
 
@@ -190,8 +221,13 @@ function buildReasons(
 export function rankVenues(
   criteria: SearchCriteria,
   venues: VenueWithRelations[],
-  commutes: Map<string, CommuteResult>
+  commutes: Map<string, CommuteResult>,
+  options: { confidenceModel?: LogisticModel | null; showFitProbability?: boolean } = {}
 ): RankedVenue[] {
+  const model = options.confidenceModel === undefined ? TRAINED_CONFIDENCE_MODEL : options.confidenceModel;
+  // "% likely to fit" is shown only when a trained confidence model is loaded.
+  const showFitProbability = options.showFitProbability ?? model != null;
+  const belief = (room: VenueRoomRow) => capacityBelief(room, model);
   const ranked: RankedVenue[] = [];
 
   for (const venue of venues) {
@@ -206,10 +242,10 @@ export function rankVenues(
     const { room: bestRoom, fits } = choice;
 
     // Strong evidence it doesn't fit: the venue's own (believed) figure is too small.
-    if (!fits && !bestRoom.is_estimate && capacityBelief(bestRoom) >= STRONG_EVIDENCE) continue;
+    if (!fits && !bestRoom.is_estimate && belief(bestRoom) >= STRONG_EVIDENCE) continue;
 
     const q = priorFit(venue.category, criteria.headcount);
-    const pFit = probabilityOfFit(bestRoom, fits, q);
+    const pFit = probabilityOfFit(bestRoom, fits, q, belief(bestRoom));
     if (pFit < MIN_PFIT) continue;
 
     const commuteScoreValue = Math.max(0, 1 - commuteMinutes / criteria.maxCommuteMinutes);
@@ -231,7 +267,7 @@ export function rankVenues(
       commuteEstimated: commute.estimated,
       score,
       pFit,
-      reasons: buildReasons(venue, bestRoom, fits, pFit, commuteMinutes, criteria, commute.estimated),
+      reasons: buildReasons(venue, bestRoom, fits, pFit, commuteMinutes, criteria, commute.estimated, showFitProbability),
     });
   }
 

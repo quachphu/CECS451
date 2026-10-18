@@ -88,7 +88,8 @@ export type ScrapedPage = {
  */
 export const CHUNK_SEPARATOR = " \n ";
 
-const PRIVATE_DINING_KEYWORDS =
+/** Links and pages about private dining / events. Exported so offline snapshots pick pages by the same rule. */
+export const PRIVATE_DINING_KEYWORDS =
   /private\s*(dining|event)s?|group\s*(dining|event|booking)s?|banquet|meetings?\s*(&|and)?\s*events|weddings?|celebrations|book\s*(an\s*)?event|buyouts?/i;
 
 const CAPACITY_PATTERN = /(?:up\s*to|seats?|accommodat(?:es|ing)|hold[s]?|for)\s*(\d{1,4})\s*(?:guests?|people|persons?|pax)/gi;
@@ -243,7 +244,11 @@ export function pickMenuUrl(links: Array<{ href: string; text: string }>, baseUr
   return (candidates.find((c) => c.isPdf) ?? candidates[0]).url;
 }
 
-function textFromHtml(html: string): { text: string; links: Array<{ href: string; text: string }> } {
+/** Visible text and links of an HTML page, exactly as the scraper reads it (shared with the offline snapshots). */
+const BLOCK_ELEMENTS =
+  "address, article, aside, blockquote, dd, div, dl, dt, figcaption, figure, form, h1, h2, h3, h4, h5, h6, header, li, main, ol, p, pre, section, table, td, th, tr, ul, option, button, label";
+
+export function textFromHtml(html: string): { text: string; links: Array<{ href: string; text: string }> } {
   const $ = cheerio.load(html);
   const links: Array<{ href: string; text: string }> = [];
   $("a[href]").each((_, el) => {
@@ -252,6 +257,12 @@ function textFromHtml(html: string): { text: string; links: Array<{ href: string
   });
 
   $("script, style, nav, footer, noscript, iframe, template").remove();
+  // Block elements end a word: without this, "<h1>For sale</h1><p>Buy</p>"
+  // reads as "For saleBuy" and phrase checks (parked domains, capacities) miss.
+  $("br, hr").replaceWith(" ");
+  $(BLOCK_ELEMENTS).each((_, el) => {
+    $(el).prepend(" ").append(" ");
+  });
   // Defense in depth: some sites embed literal HTML strings inside text
   // nodes (e.g. malformed analytics snippets) that cheerio's own tag
   // stripping won't catch since they aren't real child elements.

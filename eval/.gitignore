@@ -1,14 +1,12 @@
 # Page text from venue sites is never committed (copyright, and it goes stale).
 snapshots/
-# Derived from Google Places / OSM candidate data — not long-lived storage of
-# Places content (Maps Platform terms [D3b]).
-candidates.jsonl
+# Places-derived venue data for the ranking evaluation (Maps Platform terms [D3b]).
 ranking-venues.json
-# Generated outputs
-features.jsonl
-results.json
 ranking-results.json
-# Filled-in label/judgment files can hold venue page quotes; commit the templates only.
-labels.csv
+# Filled-in judgments; commit the template only.
 ranking-judgments.csv
-urls.csv
+
+# Review sheets carry page text from venue sites.
+review/sheets/
+# Per-item caches for resumable runs.
+.cache/

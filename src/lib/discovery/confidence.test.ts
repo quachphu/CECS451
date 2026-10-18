@@ -1,71 +1,70 @@
 import { describe, expect, it } from "vitest";
 import {
-  CONFIDENCE_MODEL,
-  encodeConfidenceFeatures,
   featureLog,
-  scoreConfidence,
+  scoreRoomConfidence,
+  TRAINED_CONFIDENCE_MODEL,
   type ConfidenceFeatures,
 } from "@/lib/discovery/confidence";
+import { CONFIDENCE_FEATURE_ORDER } from "@/lib/discovery/features";
+import { loadModel } from "@/lib/discovery/model-scoring";
 import { buildVenueDraft } from "@/lib/discovery/trust";
 import type { CandidateVenue } from "@/lib/discovery/places";
 import type { ScrapedSignals } from "@/lib/discovery/scraper";
+import { capacityBelief } from "@/lib/ranking";
 
-const base: ConfidenceFeatures = {
-  source: "regex",
-  agreementSpread: null,
-  privateDiningPageFound: true,
+const features: ConfidenceFeatures = {
+  self_consistency: 1,
+  regex_status: "agree",
   grounded: true,
-  competingCandidates: 0,
-  hasRoomHint: false,
-  renderedWithJs: false,
-  category: "restaurant",
+  competing_numbers: 2,
+  private_page_found: true,
 };
 
-describe("placeholder-0 confidence model", () => {
-  it("is the placeholder version until refit", () => {
-    expect(CONFIDENCE_MODEL.version).toBe("placeholder-0");
+const order = [...CONFIDENCE_FEATURE_ORDER];
+const toy = loadModel(
+  {
+    feature_order: order,
+    impute_median: Object.fromEntries(order.map((f) => [f, 0])),
+    scaler: { self_consistency: { mean: 0.8, std: 0.2 }, competing_numbers: { mean: 3, std: 2 } },
+    coef: [1, 0.5, 0, 1, -0.2, 0.3],
+    intercept: -0.4,
+    calibration: null,
+  },
+  "toy",
+  "trained-toy"
+);
+
+describe("confidence model guard", () => {
+  it("ships as a placeholder, so no room is scored", () => {
+    expect(TRAINED_CONFIDENCE_MODEL).toBeNull();
+    expect(scoreRoomConfidence(features)).toBeNull();
+    expect(featureLog("llm", features)).toMatchObject({ source: "llm", self_consistency: 1, regex_agree: 1, modelVersion: "none" });
   });
 
-  it.each([
-    ["planner", { ...base, source: "planner" as const, privateDiningPageFound: false, grounded: false }, 0.98],
-    ["regex + LLM agree", { ...base, source: "both" as const, agreementSpread: 0.05, hasRoomHint: true }, 0.9],
-    ["grounded LLM", { ...base, source: "llm" as const, hasRoomHint: true }, 0.7],
-    ["regex only", base, 0.6],
-    [
-      "category estimate",
-      { ...base, source: "estimate" as const, privateDiningPageFound: false, grounded: false },
-      0.2,
-    ],
-  ])("roughly reproduces the old tier weight for %s", (_label, features, target) => {
-    expect(scoreConfidence(features)).toBeCloseTo(target, 1);
-  });
-
-  it("drops a disagreeing pair well below an agreeing one", () => {
-    const agree = scoreConfidence({ ...base, source: "both", agreementSpread: 0.05, hasRoomHint: true });
-    const disagree = scoreConfidence({ ...base, source: "both", agreementSpread: 0.55, hasRoomHint: true });
-    expect(disagree).toBeLessThan(agree - 0.25);
-  });
-
-  it("stays a probability", () => {
-    const extreme = scoreConfidence({ ...base, competingCandidates: 500 });
-    expect(extreme).toBeGreaterThanOrEqual(0);
-    expect(extreme).toBeLessThanOrEqual(1);
-  });
-
-  it("encodes one-hot source and category buckets", () => {
-    expect(encodeConfidenceFeatures({ ...base, category: "banquet_hall" })).toMatchObject({
-      "source=regex": 1,
-      "category=banquet": 1,
-      privateDiningPageFound: 1,
-    });
-  });
-
-  it("logs the model version with the features", () => {
-    expect(featureLog(base)).toMatchObject({ source: "regex", modelVersion: "placeholder-0" });
+  it("scores with a trained model and logs its version", () => {
+    // z = -0.4 + 1*(1-0.8)/0.2 + 0.5 + 1 + (-0.2)*(2-3)/2 + 0.3 = 2.5
+    expect(scoreRoomConfidence(features, toy)).toBeCloseTo(1 / (1 + Math.exp(-2.5)), 3);
+    expect(scoreRoomConfidence(null, toy)).toBeNull();
+    expect(featureLog("regex", null, toy)).toEqual({ source: "regex", modelVersion: "trained-toy" });
   });
 });
 
-describe("drafts carry write-time confidence", () => {
+describe("capacityBelief", () => {
+  const row = (version: string | null) => ({
+    capacity_confidence: 0.42,
+    capacity_trust: "verified" as const,
+    confidence_features: version ? { modelVersion: version } : null,
+  });
+
+  it("uses a stored score only when the loaded trained model produced it", () => {
+    expect(capacityBelief(row("trained-toy"), toy)).toBe(0.42);
+    expect(capacityBelief(row("trained-older"), toy)).toBe(0.9);
+    expect(capacityBelief(row("placeholder-0"), toy)).toBe(0.9);
+    expect(capacityBelief(row("trained-toy"), null)).toBe(0.9);
+  });
+});
+
+describe("drafts record how each figure was obtained", () => {
   const venue: CandidateVenue = {
     placeSourceId: "osm-1",
     name: "Test",
@@ -75,6 +74,7 @@ describe("drafts carry write-time confidence", () => {
     category: "restaurant",
     website: "https://example.com",
   };
+  const page = "Private dining. The Garden Room holds 40 guests. Tables for 2 to 6 people.";
   const signals = (overrides: Partial<ScrapedSignals>): ScrapedSignals => ({
     privateDiningPageFound: true,
     scrapedUrls: ["https://example.com"],
@@ -86,42 +86,36 @@ describe("drafts carry write-time confidence", () => {
     menuUrl: null,
     dietaryNotes: null,
     renderedWithJs: false,
-    combinedText: "",
+    combinedText: page,
     ...overrides,
   });
+  const llm = (maxCapacity: number) => ({
+    rooms: [{ roomName: "Garden Room", maxCapacity, minCapacity: null, evidenceQuote: "holds 40 guests", selfConsistency: 2 / 3 }],
+    minSpendUsd: null,
+    dietaryNotes: null,
+    hostsPrivateEvents: true,
+    inputText: page,
+  });
 
-  it("orders agreement > regex-only > estimate", () => {
-    const agree = buildVenueDraft(venue, signals({ capacityNumbers: [40] }), {
-      rooms: [{ roomName: "Room", maxCapacity: 40, minCapacity: null, evidenceQuote: "holds 40 guests" }],
-      minSpendUsd: null,
-      dietaryNotes: null,
-      hostsPrivateEvents: true,
-    }).rooms[0];
+  it("gives an LLM room the features of its own read", () => {
+    const [room] = buildVenueDraft(venue, signals({ capacityNumbers: [40] }), llm(40)).rooms;
+    expect(room.confidenceSource).toBe("both");
+    expect(room.confidenceFeatures).toEqual({
+      self_consistency: 2 / 3,
+      regex_status: "agree",
+      grounded: true,
+      competing_numbers: 1,
+      private_page_found: true,
+    });
+    expect(room.confidence).toBeNull(); // placeholder model
+  });
+
+  it("leaves a room showing another figure, regex-only rooms and estimates unscored", () => {
+    const conflicting = buildVenueDraft(venue, signals({ capacityNumbers: [90] }), llm(40)).rooms[0];
     const regexOnly = buildVenueDraft(venue, signals({ capacityNumbers: [40] })).rooms[0];
     const estimate = buildVenueDraft({ ...venue, website: undefined }, null).rooms[0];
-
-    expect(agree.confidenceFeatures.source).toBe("both");
-    expect(agree.confidence).toBeGreaterThan(regexOnly.confidence);
-    expect(regexOnly.confidence).toBeGreaterThan(estimate.confidence);
-    expect(estimate.confidenceFeatures.source).toBe("estimate");
-  });
-});
-
-describe("TypeScript/Python feature parity", () => {
-  it("train_confidence.py encodes exactly the features the model and encoder use", async () => {
-    const { readFileSync } = await import("node:fs");
-    const py = readFileSync(new URL("../../../scripts/train_confidence.py", import.meta.url), "utf8");
-    const list = (name: string) =>
-      Array.from(py.match(new RegExp(`^${name} = \\[(.*)\\]$`, "m"))![1].matchAll(/"([^"]+)"/g), (m) => m[1]);
-    const { CATEGORY_BUCKETS } = await import("@/lib/category-bucket");
-
-    const pyNames = [
-      ...list("SOURCES").map((s) => `source=${s}`),
-      ...list("NUMERIC"),
-      ...list("BUCKETS").map((b) => `category=${b}`),
-    ];
-    expect(new Set(pyNames)).toEqual(new Set(Object.keys(CONFIDENCE_MODEL.weights)));
-    expect(list("BUCKETS")).toEqual([...CATEGORY_BUCKETS]);
-    for (const key of Object.keys(encodeConfidenceFeatures(base))) expect(pyNames).toContain(key);
+    expect([conflicting.confidenceSource, conflicting.confidenceFeatures]).toEqual(["both", null]);
+    expect([regexOnly.confidenceSource, regexOnly.confidenceFeatures]).toEqual(["regex", null]);
+    expect([estimate.confidenceSource, estimate.confidenceFeatures]).toEqual(["estimate", null]);
   });
 });

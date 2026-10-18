@@ -13,7 +13,7 @@ export const CORROBORATION_DIFFERENCE = 0.5;
  * or the wrong room) waits instead of overwriting the shared catalog.
  */
 export function confirmationStatus(
-  room: Pick<VenueRoomRow, "max_capacity" | "capacity_confidence" | "capacity_trust"> | null,
+  room: Pick<VenueRoomRow, "max_capacity" | "capacity_confidence" | "capacity_trust" | "confidence_features"> | null,
   confirmedMaxCapacity: number | null
 ): ConfirmationStatus {
   if (!room || confirmedMaxCapacity == null || room.max_capacity <= 0) return "accepted";

@@ -29,6 +29,10 @@ export type CandidateVenue = {
   types?: string[];
   /** OSM `cuisine` tag (e.g. "pizza", "steak_house"); runtime only, for the discovery prior. */
   cuisine?: string;
+  /** Google's primary type, rating and review count; runtime only, for the trained discovery prior (features.ts). */
+  primaryType?: string;
+  rating?: number;
+  userRatingCount?: number;
 };
 
 const GOOGLE_TYPES = ["restaurant", "bar", "banquet_hall", "night_club"] as const;
@@ -48,6 +52,9 @@ const GOOGLE_FIELD_MASK = [
   "places.photos",
   // For the discovery prior only (src/lib/discovery/discovery-prior.ts).
   "places.types",
+  "places.primaryType",
+  "places.rating",
+  "places.userRatingCount",
 ].join(",");
 
 // searchNearby caps a single response at 20 places, so each venue type is
@@ -76,6 +83,9 @@ type GooglePlace = {
   priceLevel?: string;
   photos?: Array<{ name?: string }>;
   types?: string[];
+  primaryType?: string;
+  rating?: number;
+  userRatingCount?: number;
 };
 
 /**
@@ -139,6 +149,9 @@ async function discoverViaGooglePlaces(origin: LatLng, radiusMeters: number, api
             priceLevelGoogle: place.priceLevel ? PRICE_LEVEL_TO_NUMBER[place.priceLevel] : undefined,
             photoUrl: photoName ? `/api/place-photo?name=${encodeURIComponent(photoName)}` : undefined,
             types: place.types,
+            primaryType: place.primaryType,
+            rating: place.rating,
+            userRatingCount: place.userRatingCount,
           });
         }
       } catch (err) {
