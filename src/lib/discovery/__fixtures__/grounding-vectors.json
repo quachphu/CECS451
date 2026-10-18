@@ -1,0 +1,28 @@
+{
+  "description": "Shared test vectors: src/lib/discovery/grounding.ts and ml/grounding.py must agree on every case.",
+  "normalize": [
+    ["The  **Garden Room**\n holds 40 guests.", "the garden room holds 40 guests."],
+    ["Call us — “private” events", "call us - \"private\" events"],
+    ["See [our rooms](https://x.com/rooms) today", "see our rooms today"],
+    ["Chef’s Table", "chef's table"]
+  ],
+  "contains_number": [
+    ["the garden room holds 40 guests", 40, true],
+    ["seats 1,200 people", 1200, true],
+    ["seats 1200 people", 1200, true],
+    ["seats 140 people", 40, false],
+    ["seats forty-five guests", 45, true],
+    ["one hundred and twenty guests", 120, true],
+    ["one hundred twenty guests", 20, false],
+    ["room 40.5 sq ft", 40, false],
+    ["for 2 people", 20, false]
+  ],
+  "grounded": [
+    ["The Garden Room holds 40 guests.", "Welcome. The Garden Room holds 40 guests. Book now.", 40, true],
+    ["“The Garden Room holds 40 guests.”", "Welcome. The Garden Room holds 40 guests. Book now.", 40, true],
+    ["The Garden Room holds 60 guests.", "Welcome. The Garden Room holds 40 guests. Book now.", 60, false],
+    ["The Garden Room holds 40 guests.", "Welcome. The Garden Room holds 40 guests. Book now.", 60, false],
+    ["40 pax", "The room holds 40 pax.", 40, false],
+    ["the GARDEN room HOLDS 40 guests", "The Garden Room holds 40 guests.", 40, true]
+  ]
+}

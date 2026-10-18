@@ -20,6 +20,7 @@ import { createHostLimiter } from "./lib/host-limiter";
 import { cliArgs, evalDir, readCsv, readJson, writeCsvAtomic, writeJsonAtomic } from "./lib/io";
 import { RunManifest } from "./lib/manifest";
 import { snapshotVenue, type Renderer, type Snapshot } from "./lib/snapshot-core";
+import { buildVenueIndex } from "./lib/venue-index";
 
 const FIRECRAWL = "https://api.firecrawl.dev/v2";
 const PILOT_PER_CITY = 5;
@@ -235,6 +236,8 @@ async function main() {
         .map((s) => snapPath(s.venue_id)),
     });
   }
+  buildVenueIndex();
+  manifest.outputs.push(evalDir("venue_index.csv"));
   manifest.spend.firecrawl_credits = pages.spent;
   manifest.spend.firecrawl_pdf_credits = pdfs.spent;
   manifest.models.user_agent = "private-dining-finder/0.2 (CSULB CECS 451 research)";
