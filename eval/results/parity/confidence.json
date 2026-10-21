@@ -1,0 +1,579 @@
+{
+  "name": "confidence",
+  "model": {
+    "feature_order": [
+      "llm_votes",
+      "regex_hit",
+      "in_grounded_quote",
+      "room_word_near",
+      "capacity_verb_near",
+      "reservation_phrase_near",
+      "whole_venue_phrase_near",
+      "looks_like_junk",
+      "on_private_page",
+      "value_rank",
+      "log_value",
+      "n_candidates_on_page"
+    ],
+    "impute_median": {
+      "llm_votes": 0.0,
+      "regex_hit": 0.0,
+      "in_grounded_quote": 0.0,
+      "room_word_near": 1.0,
+      "capacity_verb_near": 0.0,
+      "reservation_phrase_near": 0.0,
+      "whole_venue_phrase_near": 0.0,
+      "looks_like_junk": 0.0,
+      "on_private_page": 1.0,
+      "value_rank": 7.0,
+      "log_value": 2.833213344056216,
+      "n_candidates_on_page": 16.0
+    },
+    "scaler": {
+      "llm_votes": {
+        "mean": 0.1792452830188679,
+        "std": 0.754823105746185
+      },
+      "value_rank": {
+        "mean": 9.579245283018867,
+        "std": 9.031514185727996
+      },
+      "log_value": {
+        "mean": 3.082438063751411,
+        "std": 1.8706454988588548
+      },
+      "n_candidates_on_page": {
+        "mean": 18.158490566037734,
+        "std": 12.74841364844261
+      }
+    },
+    "coef": [
+      2.6827655630908613,
+      0.9228337865925988,
+      -0.5895124668247632,
+      -0.003143478178103837,
+      1.9333996942123497,
+      0.0,
+      0.0,
+      -0.8262808496557642,
+      1.7525021017383193,
+      -0.43094835885776894,
+      0.6712030953422565,
+      0.19883096822055046
+    ],
+    "intercept": -4.258037763294971,
+    "calibration": null
+  },
+  "rows": [
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 1.0,
+        "value_rank": 2.0,
+        "log_value": 2.3978952727983707,
+        "n_candidates_on_page": 11.0
+      },
+      "p": 0.018566732037409057
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 12.0,
+        "log_value": 3.8712010109078903,
+        "n_candidates_on_page": 26.0
+      },
+      "p": 0.009868964132236552
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 1.0,
+        "value_rank": 23.0,
+        "log_value": 1.3862943611198906,
+        "n_candidates_on_page": 26.0
+      },
+      "p": 0.013756088902545996
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 0.0,
+        "value_rank": 6.0,
+        "log_value": 6.577861357721047,
+        "n_candidates_on_page": 72.0
+      },
+      "p": 0.030477514768282112
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 0.0,
+        "value_rank": 34.0,
+        "log_value": 5.231108616854587,
+        "n_candidates_on_page": 72.0
+      },
+      "p": 0.005071216359506333
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 0.0,
+        "value_rank": 42.0,
+        "log_value": 4.795790545596741,
+        "n_candidates_on_page": 72.0
+      },
+      "p": 0.002967644317714497
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 47.0,
+        "log_value": 4.543294782270004,
+        "n_candidates_on_page": 72.0
+      },
+      "p": 0.004869358552446688
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 61.0,
+        "log_value": 2.995732273553991,
+        "n_candidates_on_page": 72.0
+      },
+      "p": 0.0014377816918091865
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 1.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 7.0,
+        "log_value": 3.4011973816621555,
+        "n_candidates_on_page": 11.0
+      },
+      "p": 0.05525002915913867
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 0.0,
+        "value_rank": 1.0,
+        "log_value": 7.444248649496705,
+        "n_candidates_on_page": 6.0
+      },
+      "p": 0.0190821021773752
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 2.0,
+        "log_value": 7.172424577124845,
+        "n_candidates_on_page": 2.0
+      },
+      "p": 0.03485465587750376
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 0.0,
+        "value_rank": 6.0,
+        "log_value": 0.0,
+        "n_candidates_on_page": 6.0
+      },
+      "p": 0.0010589939884998877
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 6.0,
+        "log_value": 2.1972245773362196,
+        "n_candidates_on_page": 12.0
+      },
+      "p": 0.005817015474577457
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 1.0,
+        "value_rank": 4.0,
+        "log_value": 3.218875824868201,
+        "n_candidates_on_page": 6.0
+      },
+      "p": 0.020908224327795898
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 1.0,
+        "value_rank": 2.0,
+        "log_value": 5.991464547107982,
+        "n_candidates_on_page": 10.0
+      },
+      "p": 0.06333801606806345
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 1.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 1.0,
+        "value_rank": 4.0,
+        "log_value": 0.6931471805599453,
+        "n_candidates_on_page": 4.0
+      },
+      "p": 0.1166804882579031
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 7.0,
+        "log_value": 3.218875824868201,
+        "n_candidates_on_page": 11.0
+      },
+      "p": 0.007861622181607079
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 9.0,
+        "log_value": 1.9459101490553132,
+        "n_candidates_on_page": 11.0
+      },
+      "p": 0.004541019432244369
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 2.0,
+        "log_value": 3.737669618283368,
+        "n_candidates_on_page": 3.0
+      },
+      "p": 0.010582507513961916
+    },
+    {
+      "x": {
+        "llm_votes": 2.0,
+        "regex_hit": 1.0,
+        "in_grounded_quote": 1.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 1.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 1.0,
+        "value_rank": 19.0,
+        "log_value": 2.772588722239781,
+        "n_candidates_on_page": 27.0
+      },
+      "p": 0.9970010894063718
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 1.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 1.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 6.0,
+        "log_value": 5.298317366548036,
+        "n_candidates_on_page": 14.0
+      },
+      "p": 0.06578247132657189
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 2.0,
+        "log_value": 5.703782474656201,
+        "n_candidates_on_page": 19.0
+      },
+      "p": 0.02704299250220528
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 0.0,
+        "value_rank": 5.0,
+        "log_value": 3.912023005428146,
+        "n_candidates_on_page": 19.0
+      },
+      "p": 0.005512336165110198
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 1.0,
+        "log_value": 2.1972245773362196,
+        "n_candidates_on_page": 9.0
+      },
+      "p": 0.007038175914489446
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 1.0,
+        "value_rank": 19.0,
+        "log_value": 2.302585092994046,
+        "n_candidates_on_page": 21.0
+      },
+      "p": 0.009405145957038964
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 0.0,
+        "value_rank": 2.0,
+        "log_value": 4.605170185988092,
+        "n_candidates_on_page": 15.0
+      },
+      "p": 0.007646964746167922
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 3.0,
+        "log_value": 2.1972245773362196,
+        "n_candidates_on_page": 6.0
+      },
+      "p": 0.006110819019359702
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 5.0,
+        "log_value": 1.0986122886681096,
+        "n_candidates_on_page": 6.0
+      },
+      "p": 0.0037539403442008856
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 1.0,
+        "on_private_page": 1.0,
+        "value_rank": 7.0,
+        "log_value": 5.298317366548036,
+        "n_candidates_on_page": 23.0
+      },
+      "p": 0.04841270213423927
+    },
+    {
+      "x": {
+        "llm_votes": 0.0,
+        "regex_hit": 0.0,
+        "in_grounded_quote": 0.0,
+        "room_word_near": 1.0,
+        "capacity_verb_near": 0.0,
+        "reservation_phrase_near": 0.0,
+        "whole_venue_phrase_near": 0.0,
+        "looks_like_junk": 0.0,
+        "on_private_page": 0.0,
+        "value_rank": 11.0,
+        "log_value": 2.70805020110221,
+        "n_candidates_on_page": 20.0
+      },
+      "p": 0.006232946653341645
+    }
+  ]
+}

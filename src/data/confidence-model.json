@@ -1,5 +1,67 @@
 {
   "model": "confidence",
-  "version": "placeholder-0",
-  "description": "Not trained yet. ml/train_confidence.py writes the trained model here (see NOTES-training.md). Until then no room is scored: ranking uses the v0 trust weights and the UI hides '% likely to fit'."
+  "version": "trained-2026-10-21",
+  "description": "P(a displayed candidate number is within 10% of a teacher room size). Serving caps this probability at 0.979, just below a planner confirmation of 0.98.",
+  "feature_order": [
+    "llm_votes",
+    "regex_hit",
+    "in_grounded_quote",
+    "room_word_near",
+    "capacity_verb_near",
+    "reservation_phrase_near",
+    "whole_venue_phrase_near",
+    "looks_like_junk",
+    "on_private_page",
+    "value_rank",
+    "log_value",
+    "n_candidates_on_page"
+  ],
+  "impute_median": {
+    "llm_votes": 0.0,
+    "regex_hit": 0.0,
+    "in_grounded_quote": 0.0,
+    "room_word_near": 1.0,
+    "capacity_verb_near": 0.0,
+    "reservation_phrase_near": 0.0,
+    "whole_venue_phrase_near": 0.0,
+    "looks_like_junk": 0.0,
+    "on_private_page": 1.0,
+    "value_rank": 7.0,
+    "log_value": 2.833213344056216,
+    "n_candidates_on_page": 16.0
+  },
+  "scaler": {
+    "llm_votes": {
+      "mean": 0.1792452830188679,
+      "std": 0.754823105746185
+    },
+    "value_rank": {
+      "mean": 9.579245283018867,
+      "std": 9.031514185727996
+    },
+    "log_value": {
+      "mean": 3.082438063751411,
+      "std": 1.8706454988588548
+    },
+    "n_candidates_on_page": {
+      "mean": 18.158490566037734,
+      "std": 12.74841364844261
+    }
+  },
+  "coef": [
+    2.6827655630908613,
+    0.9228337865925988,
+    -0.5895124668247632,
+    -0.003143478178103837,
+    1.9333996942123497,
+    0.0,
+    0.0,
+    -0.8262808496557642,
+    1.7525021017383193,
+    -0.43094835885776894,
+    0.6712030953422565,
+    0.19883096822055046
+  ],
+  "intercept": -4.258037763294971,
+  "calibration": null
 }

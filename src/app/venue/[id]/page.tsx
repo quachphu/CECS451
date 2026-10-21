@@ -6,6 +6,7 @@ import { getCurrentCompany } from "@/lib/workspace";
 import { createServiceClient } from "@/lib/supabase/server";
 import { addToShortlistAction, removeFromShortlistAction } from "@/app/actions";
 import { TrustBadge } from "@/components/trust-badge";
+import { roomUsesModelScore } from "@/lib/discovery/confidence";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -167,7 +168,7 @@ export default async function VenuePage({ params }: VenuePageProps) {
                 </div>
                 {room.notes && <div className="mt-1 text-xs text-muted-foreground">{room.notes}</div>}
               </div>
-              <TrustBadge level={room.capacity_trust} />
+              <TrustBadge level={room.capacity_trust} fromModel={roomUsesModelScore(room)} />
             </div>
           ))}
         </div>

@@ -6,6 +6,7 @@ import { getCurrentCompany } from "@/lib/workspace";
 import { createServiceClient } from "@/lib/supabase/server";
 import { clearSelectedVenueAction, removeFromShortlistAction, selectVenueAction } from "@/app/actions";
 import { TrustBadge } from "@/components/trust-badge";
+import { roomUsesModelScore } from "@/lib/discovery/confidence";
 import { BackToResults } from "@/components/back-to-results";
 import { CopyEventLink } from "@/components/copy-event-link";
 import { Badge } from "@/components/ui/badge";
@@ -131,7 +132,7 @@ export default async function ShortlistPage() {
                     {bestRoom && (
                       <span className="inline-flex items-center gap-1">
                         <Badge variant="secondary">Up to {bestRoom.max_capacity}</Badge>
-                        <TrustBadge level={bestRoom.capacity_trust} subject="Capacity" />
+                        <TrustBadge level={bestRoom.capacity_trust} subject="Capacity" fromModel={roomUsesModelScore(bestRoom)} />
                       </span>
                     )}
                     <span className="inline-flex items-center gap-1">

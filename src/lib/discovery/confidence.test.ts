@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   featureLog,
+  MODEL_PROBABILITY_CAP,
+  MODEL_TRUST_LIKELY_AT,
+  MODEL_TRUST_VERIFIED_AT,
+  PLANNER_CONFIDENCE,
   scoreRoomConfidence,
   TRAINED_CONFIDENCE_MODEL,
+  trustFromConfidence,
   type ConfidenceFeatures,
 } from "@/lib/discovery/confidence";
 import { CONFIDENCE_FEATURE_ORDER } from "@/lib/discovery/features";
@@ -35,10 +40,15 @@ const toy = loadModel(
 );
 
 describe("confidence model guard", () => {
-  it("ships as a placeholder, so no room is scored", () => {
-    expect(TRAINED_CONFIDENCE_MODEL).toBeNull();
+  it("scores candidate numbers, and does not score the older room-feature vector", () => {
+    expect(TRAINED_CONFIDENCE_MODEL).not.toBeNull();
     expect(scoreRoomConfidence(features)).toBeNull();
-    expect(featureLog("llm", features)).toMatchObject({ source: "llm", self_consistency: 1, regex_agree: 1, modelVersion: "none" });
+    expect(featureLog("llm", features)).toMatchObject({
+      source: "llm",
+      self_consistency: 1,
+      regex_agree: 1,
+      modelVersion: TRAINED_CONFIDENCE_MODEL!.version,
+    });
   });
 
   it("scores with a trained model and logs its version", () => {
@@ -46,6 +56,17 @@ describe("confidence model guard", () => {
     expect(scoreRoomConfidence(features, toy)).toBeCloseTo(1 / (1 + Math.exp(-2.5)), 3);
     expect(scoreRoomConfidence(null, toy)).toBeNull();
     expect(featureLog("regex", null, toy)).toEqual({ source: "regex", modelVersion: "trained-toy" });
+  });
+});
+
+describe("model trust labels", () => {
+  it("uses the cutoffs fixed at 0.90 and 0.60", () => {
+    expect(MODEL_TRUST_VERIFIED_AT).toBe(0.9);
+    expect(MODEL_TRUST_LIKELY_AT).toBe(0.6);
+    expect(trustFromConfidence(0.9)).toBe("verified");
+    expect(trustFromConfidence(0.899)).toBe("likely");
+    expect(trustFromConfidence(0.6)).toBe("likely");
+    expect(trustFromConfidence(0.599)).toBe("unverified");
   });
 });
 
@@ -97,25 +118,27 @@ describe("drafts record how each figure was obtained", () => {
     inputText: page,
   });
 
-  it("gives an LLM room the features of its own read", () => {
+  it("stores the model's probability for the number votes and a quote selected", () => {
     const [room] = buildVenueDraft(venue, signals({ capacityNumbers: [40] }), llm(40)).rooms;
+    expect(room.maxCapacity).toBe(40);
     expect(room.confidenceSource).toBe("both");
-    expect(room.confidenceFeatures).toEqual({
-      self_consistency: 2 / 3,
-      regex_status: "agree",
-      grounded: true,
-      competing_numbers: 1,
-      private_page_found: true,
-    });
-    expect(room.confidence).toBeNull(); // placeholder model
+    expect(room.confidenceFeatures).toMatchObject({ llm_votes: 1, regex_hit: 1, in_grounded_quote: 1 });
+    expect(room.confidence).not.toBeNull();
+    expect(room.confidence!).toBeLessThanOrEqual(MODEL_PROBABILITY_CAP);
+    expect(room.confidence!).toBeLessThan(PLANNER_CONFIDENCE);
   });
 
-  it("leaves a room showing another figure, regex-only rooms and estimates unscored", () => {
+  it("scores a displayed page number and leaves a category estimate unscored", () => {
     const conflicting = buildVenueDraft(venue, signals({ capacityNumbers: [90] }), llm(40)).rooms[0];
     const regexOnly = buildVenueDraft(venue, signals({ capacityNumbers: [40] })).rooms[0];
     const estimate = buildVenueDraft({ ...venue, website: undefined }, null).rooms[0];
-    expect([conflicting.confidenceSource, conflicting.confidenceFeatures]).toEqual(["both", null]);
-    expect([regexOnly.confidenceSource, regexOnly.confidenceFeatures]).toEqual(["regex", null]);
-    expect([estimate.confidenceSource, estimate.confidenceFeatures]).toEqual(["estimate", null]);
+    // The quote names 40 and the model voted for 40, so 40 is shown ahead of the stray 90.
+    expect(conflicting.maxCapacity).toBe(40);
+    expect(conflicting.confidence).not.toBeNull();
+    expect(regexOnly.confidenceSource).toBe("regex");
+    expect(regexOnly.confidence).not.toBeNull();
+    expect(estimate.isEstimate).toBe(true);
+    expect(estimate.confidence).toBeNull();
+    expect(estimate.confidenceFeatures).toBeNull();
   });
 });

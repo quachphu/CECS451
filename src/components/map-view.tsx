@@ -17,6 +17,7 @@ export type MapVenue = {
   commuteMinutes: number;
   capacity: number;
   trustLevel: TrustLevel;
+  fromModel?: boolean;
 };
 
 type MapViewProps = {
@@ -104,7 +105,7 @@ export default function MapView({ origin, venues, className }: MapViewProps) {
                 <div className="text-xs text-muted-foreground">
                   {Math.round(venue.commuteMinutes)} min &middot; fits up to {venue.capacity}
                 </div>
-                <TrustBadge level={venue.trustLevel} className="w-fit" />
+                <TrustBadge level={venue.trustLevel} className="w-fit" fromModel={venue.fromModel} />
               </div>
             </Popup>
           </Marker>

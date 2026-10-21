@@ -5,6 +5,7 @@ import { ImageOff } from "lucide-react";
 import { getCurrentCompany } from "@/lib/workspace";
 import { createServiceClient } from "@/lib/supabase/server";
 import { TrustBadge } from "@/components/trust-badge";
+import { roomUsesModelScore } from "@/lib/discovery/confidence";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { isPlaceholderPhoto } from "@/lib/photos";
@@ -85,7 +86,7 @@ export default async function ComparePage({
                 up to {room.max_capacity}
                 {room.min_capacity ? ` (from ${room.min_capacity})` : ""}
               </Badge>
-              <TrustBadge level={room.capacity_trust} subject="Capacity" />
+              <TrustBadge level={room.capacity_trust} subject="Capacity" fromModel={roomUsesModelScore(room)} />
             </span>
             {!fits && <span className="text-xs text-destructive">Too small for {headcount}</span>}
           </div>

@@ -1,5 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
+import { roomUsesModelScore } from "@/lib/discovery/confidence";
 import { performSearch } from "@/lib/search";
 import { priceSignal } from "@/lib/price-signal";
 import type { TrustLevel } from "@/lib/supabase/types";
@@ -29,6 +30,7 @@ export type PreviewCard = {
   commuteEstimated: boolean;
   capacity: number;
   capacityTrust: TrustLevel;
+  capacityFromModel: boolean;
   priceLabel: string;
   priceTrust: TrustLevel;
   photoUrl: string | null;
@@ -92,6 +94,7 @@ async function runPreviewSearch(): Promise<LandingPreview | null> {
       commuteEstimated: result.commuteEstimated,
       capacity: result.bestRoom.max_capacity,
       capacityTrust: result.bestRoom.capacity_trust,
+      capacityFromModel: roomUsesModelScore(result.bestRoom),
       priceLabel: price.label,
       priceTrust: price.trust,
       photoUrl: primary?.url ?? null,

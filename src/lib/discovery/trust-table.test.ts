@@ -1,9 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildVenueDraft } from "@/lib/discovery/trust";
+import { trustFromConfidence } from "@/lib/discovery/confidence";
+import { buildVenueDraft, type DraftRoom } from "@/lib/discovery/trust";
 import { groundExtraction, type LlmExtraction } from "@/lib/discovery/llm-extract";
 import { scrapeVenueForPrivateDining, type CapacityCandidate, type ScrapedSignals } from "@/lib/discovery/scraper";
 import type { CandidateVenue } from "@/lib/discovery/places";
 import { GARDEN_SITE, gardenSiteFetch } from "@/lib/discovery/__fixtures__/garden-room-site";
+
+function expectModelLabel(room: DraftRoom) {
+  expect(room.confidence).not.toBeNull();
+  expect(room.capacityTrust).toBe(trustFromConfidence(room.confidence!));
+}
 
 const venue: CandidateVenue = {
   placeSourceId: "osm-7",
@@ -95,10 +101,10 @@ describe("Step 2f trust table", () => {
     );
 
     const chefs = draft.rooms.find((r) => r.roomName === "Chef's Table")!;
-    expect(chefs.capacityTrust).toBe("ai_extracted");
+    expectModelLabel(chefs!);
     expect(chefs.maxCapacity).toBe(12);
     expect(chefs.evidenceUrl).toBe(PD_URL);
-    expect(draft.rooms.find((r) => r.roomName === "Garden Room")!.capacityTrust).toBe("verified");
+    expectModelLabel(draft.rooms.find((r) => r.roomName === "Garden Room")!);
   });
 
   it("regex only, with a private-dining page → likely, uses the room-named candidate, never the max", () => {
@@ -108,10 +114,10 @@ describe("Step 2f trust table", () => {
     );
 
     expect(draft.rooms).toHaveLength(1);
+    expectModelLabel(draft.rooms[0]);
     expect(draft.rooms[0]).toMatchObject({
       roomName: "Garden Room",
       maxCapacity: 40,
-      capacityTrust: "likely",
       evidenceQuote: GARDEN_SENTENCE,
       evidenceUrl: PD_URL,
       isEstimate: false,
@@ -126,7 +132,7 @@ describe("Step 2f trust table", () => {
     );
 
     expect(draft.rooms[0].maxCapacity).toBe(25);
-    expect(draft.rooms[0].capacityTrust).toBe("likely");
+    expectModelLabel(draft.rooms[0]);
   });
 
   it("regex and LLM disagree by more than 20% → likely, both figures in the note", () => {
@@ -143,8 +149,9 @@ describe("Step 2f trust table", () => {
       ])
     );
 
-    expect(draft.rooms[0].capacityTrust).toBe("likely");
-    expect(draft.rooms[0].maxCapacity).toBe(40);
+    expectModelLabel(draft.rooms[0]);
+    // Votes plus the quote name 90, so 90 is displayed. The regex 40 stays in the note.
+    expect(draft.rooms[0].maxCapacity).toBe(90);
     expect(draft.rooms[0].notes).toMatch(/sources disagree/i);
     expect(draft.rooms[0].notes).toContain("40");
     expect(draft.rooms[0].notes).toContain("90");
@@ -195,7 +202,8 @@ describe("the reproduced Garden Room defect", () => {
     const draft = buildVenueDraft({ ...venue, website: GARDEN_SITE }, scraped);
 
     expect(draft.rooms).toHaveLength(1);
-    expect(draft.rooms[0]).toMatchObject({ roomName: "Garden Room", maxCapacity: 40, capacityTrust: "likely" });
+    expect(draft.rooms[0]).toMatchObject({ roomName: "Garden Room", maxCapacity: 40 });
+    expectModelLabel(draft.rooms[0]);
     expect(draft.rooms[0].minCapacity).toBeUndefined();
     expect(draft.rooms[0].evidenceQuote).toContain("Garden Room holds 40 guests");
     expect(draft.rooms[0].evidenceUrl).toBe("https://garden.example/private-events");
@@ -252,7 +260,8 @@ describe("review fixes: figures from the wrong page", () => {
       ])
     );
 
-    expect(draft.rooms[0]).toMatchObject({ roomName: "Garden Room", maxCapacity: 40, capacityTrust: "ai_extracted" });
+    expect(draft.rooms[0]).toMatchObject({ roomName: "Garden Room", maxCapacity: 40 });
+    expectModelLabel(draft.rooms[0]);
     expect(draft.rooms[0].notes).not.toMatch(/disagree/i);
   });
 
@@ -270,7 +279,7 @@ describe("review fixes: figures from the wrong page", () => {
       ])
     );
 
-    expect(draft.rooms[0].capacityTrust).toBe("ai_extracted");
+    expectModelLabel(draft.rooms[0]);
     expect(draft.rooms[0].maxCapacity).toBe(40);
   });
 
@@ -288,13 +297,13 @@ describe("review fixes: figures from the wrong page", () => {
       ])
     );
 
-    expect(draft.rooms[0].capacityTrust).toBe("verified");
+    expectModelLabel(draft.rooms[0]);
   });
 
   it("labels a regex-only homepage figure unverified even when a private-dining page exists (D)", () => {
     const draft = buildVenueDraft(venue, signals([home(180, "Our main dining room seats 180 guests.")]));
 
-    expect(draft.rooms[0].capacityTrust).toBe("unverified");
+    expectModelLabel(draft.rooms[0]);
     expect(draft.rooms[0].notes).toMatch(/not on a private-dining page/i);
   });
 });

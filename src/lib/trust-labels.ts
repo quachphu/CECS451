@@ -9,6 +9,14 @@ import type { TrustLevel } from "@/lib/supabase/types";
  * happened to say. That exact bug shipped once — a planner-confirmed capacity
  * was described as "unverified" because it wasn't literally `verified`.
  */
+/** Badge text for a room whose trust came from the confidence model. */
+export function modelCapacityLabel(level: TrustLevel): string {
+  if (level === "verified") return "Verified";
+  if (level === "likely") return "Likely, call to confirm";
+  if (level === "unverified") return "Unverified";
+  return TRUST_LABELS[level];
+}
+
 export const TRUST_LABELS: Record<TrustLevel, string> = {
   confirmed_by_planner: "Confirmed by call",
   verified: "Verified",

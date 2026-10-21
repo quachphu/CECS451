@@ -33,7 +33,11 @@ from ml.common import (
     select_C,
     sha256_file,
     test_subsets,
+    model_dir,
+    read_json,
     write_json,
+    write_parity,
+    REPO,
     RunManifest,
 )
 
@@ -141,6 +145,7 @@ def heuristic_scores(frame) -> np.ndarray:
 
 
 def main() -> int:
+    export = "--export" in sys.argv
     manifest = RunManifest("ml/train_candidates.py")
     train = load_table("train_candidates.csv")
     test = load_table("test_candidates.csv")
@@ -219,9 +224,30 @@ def main() -> int:
             if beats_tier
             else "On the numbers the pipeline would show, its log loss does not beat the tier weight. "
         )
-        + "Not exported. The app keeps the tier weights."
+        + (
+            "Exported to src/data/confidence-model.json. The displayed number is still chosen by votes, a quote, and a regex hit."
+            if export
+            else "Not exported. The app keeps the tier weights."
+        )
     )
     write_json(eval_dir("results", "candidate_model.json"), report)
+    if export:
+        shipped = {
+            "model": "confidence",
+            "version": report["version"],
+            "description": "P(a displayed candidate number is within 10% of a teacher room size). Serving caps this probability at 0.979, just below a planner confirmation of 0.98.",
+            **exported,
+        }
+        write_json(model_dir() / "confidence-model.json", shipped)
+        parity_frame = test if len(test) else train
+        reference = pipe.predict_proba(parity_frame[FEATURES].to_numpy(float))[:, 1]
+        write_parity("confidence", exported, parity_frame, FEATURES, reference)
+        fixture_path = REPO / "src" / "lib" / "discovery" / "__fixtures__" / "model-parity.json"
+        fixture = read_json(fixture_path)
+        parity = read_json(eval_dir("results", "parity", "confidence.json"))
+        fixture["models"]["confidence"] = {"model": parity["model"], "rows": parity["rows"]}
+        fixture["model_versions"]["confidence"] = report["version"]
+        write_json(fixture_path, fixture)
     manifest.outputs.append(eval_dir("results", "candidate_model.json"))
     manifest.models["candidate_confidence"] = report["version"]
     manifest.counts = {"train_rows": int(len(train)), "train_positives": n_pos, "train_positive_venues": n_venues}
