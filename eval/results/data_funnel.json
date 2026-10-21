@@ -1,0 +1,110 @@
+{
+  "funnel": {
+    "NYC": {
+      "sampled": 145,
+      "replacements_drawn": 25,
+      "no_or_invalid_website": 0,
+      "robots_blocked": 49,
+      "fetch_failed": 35,
+      "parked_or_closed": 0,
+      "ok": 86,
+      "extraction_failed": 1,
+      "teacher_unclear": 3,
+      "teacher_labeled": 83,
+      "gold": 34,
+      "confidence_train_rows": 12,
+      "confidence_test_rows": 4,
+      "discovery_train_rows": 23,
+      "discovery_test_rows": 10,
+      "fit_prior_venues": 5
+    },
+    "SF": {
+      "sampled": 145,
+      "replacements_drawn": 25,
+      "no_or_invalid_website": 0,
+      "robots_blocked": 44,
+      "fetch_failed": 35,
+      "parked_or_closed": 1,
+      "ok": 90,
+      "extraction_failed": 5,
+      "teacher_unclear": 1,
+      "teacher_labeled": 89,
+      "gold": 34,
+      "confidence_train_rows": 13,
+      "confidence_test_rows": 4,
+      "discovery_train_rows": 24,
+      "discovery_test_rows": 18,
+      "fit_prior_venues": 7
+    },
+    "Honolulu": {
+      "sampled": 100,
+      "replacements_drawn": 17,
+      "no_or_invalid_website": 0,
+      "robots_blocked": 34,
+      "fetch_failed": 21,
+      "parked_or_closed": 0,
+      "ok": 62,
+      "extraction_failed": 2,
+      "teacher_unclear": 2,
+      "teacher_labeled": 60,
+      "gold": 23,
+      "confidence_train_rows": 9,
+      "confidence_test_rows": 1,
+      "discovery_train_rows": 12,
+      "discovery_test_rows": 8,
+      "fit_prior_venues": 5
+    },
+    "LA": {
+      "sampled": 170,
+      "replacements_drawn": 28,
+      "no_or_invalid_website": 0,
+      "robots_blocked": 59,
+      "fetch_failed": 41,
+      "parked_or_closed": 1,
+      "ok": 97,
+      "extraction_failed": 3,
+      "teacher_unclear": 7,
+      "teacher_labeled": 90,
+      "gold": 39,
+      "confidence_train_rows": 0,
+      "confidence_test_rows": 29,
+      "discovery_train_rows": 0,
+      "discovery_test_rows": 38,
+      "fit_prior_venues": 0
+    },
+    "all": {
+      "sampled": 560,
+      "replacements_drawn": 95,
+      "no_or_invalid_website": 0,
+      "robots_blocked": 186,
+      "fetch_failed": 132,
+      "parked_or_closed": 2,
+      "ok": 335,
+      "extraction_failed": 11,
+      "teacher_unclear": 13,
+      "teacher_labeled": 322,
+      "gold": 130,
+      "confidence_train_rows": 34,
+      "confidence_test_rows": 38,
+      "discovery_train_rows": 59,
+      "discovery_test_rows": 74,
+      "fit_prior_venues": 17
+    }
+  },
+  "pre_sampling_drops": {
+    "note": "Counted over the whole Foursquare extract before sampling; see run manifest."
+  },
+  "exclusions": {
+    "confidence": {
+      "label_unclear": 1,
+      "extraction_failed": 16
+    },
+    "discovery": {
+      "hosts_unknown": 202
+    }
+  },
+  "positives": {
+    "confidence_train": 34,
+    "discovery_train": 43
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "target_train_venues_with_a_room": 60,
+  "train_venues_with_a_room_now": 16,
+  "venues_still_needed": 44,
+  "ok_pages": 335,
+  "event_content_pages": 104,
+  "pages_with_a_teacher_room": 32,
+  "event_pages_with_a_teacher_room": 29,
+  "room_rate_given_event_content": 0.279,
+  "room_rate_given_readable": 0.096,
+  "prescreen_to_60": {
+    "sampled_venues": 994,
+    "expected_readable": 508,
+    "expected_labeled": 158,
+    "expected_new_room_venues": 44,
+    "grok_usd": 4.36,
+    "claude_usd": 0.84,
+    "firecrawl_credits": 74,
+    "google_calls": 994,
+    "google_calls_past_free_cap": 749
+  },
+  "no_prescreen_to_60": {
+    "sampled_venues": 901,
+    "expected_readable": 461,
+    "expected_labeled": 461,
+    "expected_new_room_venues": 44,
+    "grok_usd": 12.72,
+    "claude_usd": 2.46,
+    "firecrawl_credits": 67,
+    "google_calls": 901,
+    "google_calls_past_free_cap": 656
+  },
+  "prescreen_300_nyc_sf_honolulu": {
+    "sampled_venues": 300,
+    "expected_readable": 153,
+    "expected_labeled": 48,
+    "expected_new_room_venues": 13,
+    "grok_usd": 1.32,
+    "claude_usd": 0.25,
+    "firecrawl_credits": 22,
+    "google_calls": 300,
+    "google_calls_past_free_cap": 55
+  },
+  "note": "Prescreen still pays Google and the snapshot for every sampled venue. Grok and Claude run only when the saved page has event content. This pass spends nothing."
+}

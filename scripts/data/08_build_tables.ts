@@ -90,7 +90,7 @@ function main() {
   for (const [id, rows] of goldByVenue) {
     labels.set(id, {
       venueId: id,
-      source: "gold",
+      source: rows[0].source === "teacher_human_confirmed" ? "teacher_human_confirmed" : "gold",
       status: rows[0].venue_status === "unclear" ? "unclear" : "labeled",
       hosts: (rows[0].hosts_private_events || "unknown") as VenueLabel["hosts"],
       rooms: rows

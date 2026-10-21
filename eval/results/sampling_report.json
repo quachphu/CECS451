@@ -1,0 +1,253 @@
+{
+  "strata": {
+    "nyc/fine_dining": {
+      "available": 1,
+      "sampled": 1,
+      "reserve": 0
+    },
+    "nyc/casual_restaurant": {
+      "available": 1443,
+      "sampled": 44,
+      "reserve": 7
+    },
+    "nyc/steakhouse_grill": {
+      "available": 101,
+      "sampled": 11,
+      "reserve": 2
+    },
+    "nyc/bar_lounge": {
+      "available": 734,
+      "sampled": 26,
+      "reserve": 4
+    },
+    "nyc/hotel": {
+      "available": 296,
+      "sampled": 15,
+      "reserve": 3
+    },
+    "nyc/event_space": {
+      "available": 248,
+      "sampled": 14,
+      "reserve": 3
+    },
+    "nyc/fast_casual_cafe": {
+      "available": 1028,
+      "sampled": 34,
+      "reserve": 6
+    },
+    "sf/fine_dining": {
+      "available": 0,
+      "sampled": 0,
+      "reserve": 0
+    },
+    "sf/casual_restaurant": {
+      "available": 444,
+      "sampled": 43,
+      "reserve": 7
+    },
+    "sf/steakhouse_grill": {
+      "available": 22,
+      "sampled": 9,
+      "reserve": 2
+    },
+    "sf/bar_lounge": {
+      "available": 244,
+      "sampled": 27,
+      "reserve": 5
+    },
+    "sf/hotel": {
+      "available": 119,
+      "sampled": 17,
+      "reserve": 3
+    },
+    "sf/event_space": {
+      "available": 70,
+      "sampled": 13,
+      "reserve": 2
+    },
+    "sf/fast_casual_cafe": {
+      "available": 363,
+      "sampled": 36,
+      "reserve": 6
+    },
+    "hnl/fine_dining": {
+      "available": 0,
+      "sampled": 0,
+      "reserve": 0
+    },
+    "hnl/casual_restaurant": {
+      "available": 243,
+      "sampled": 29,
+      "reserve": 5
+    },
+    "hnl/steakhouse_grill": {
+      "available": 16,
+      "sampled": 9,
+      "reserve": 2
+    },
+    "hnl/bar_lounge": {
+      "available": 101,
+      "sampled": 16,
+      "reserve": 3
+    },
+    "hnl/hotel": {
+      "available": 104,
+      "sampled": 16,
+      "reserve": 3
+    },
+    "hnl/event_space": {
+      "available": 6,
+      "sampled": 6,
+      "reserve": 0
+    },
+    "hnl/fast_casual_cafe": {
+      "available": 195,
+      "sampled": 24,
+      "reserve": 4
+    },
+    "la/fine_dining": {
+      "available": 1,
+      "sampled": 1,
+      "reserve": 0
+    },
+    "la/casual_restaurant": {
+      "available": 709,
+      "sampled": 58,
+      "reserve": 9
+    },
+    "la/steakhouse_grill": {
+      "available": 24,
+      "sampled": 9,
+      "reserve": 2
+    },
+    "la/bar_lounge": {
+      "available": 293,
+      "sampled": 29,
+      "reserve": 5
+    },
+    "la/hotel": {
+      "available": 110,
+      "sampled": 15,
+      "reserve": 3
+    },
+    "la/event_space": {
+      "available": 59,
+      "sampled": 12,
+      "reserve": 2
+    },
+    "la/fast_casual_cafe": {
+      "available": 541,
+      "sampled": 46,
+      "reserve": 7
+    }
+  },
+  "shortfalls": [
+    "NYC / fine_dining: only 1 eligible (minimum 8); took all",
+    "SF / fine_dining: only 0 eligible (minimum 8); took all",
+    "Honolulu / fine_dining: only 0 eligible (minimum 8); took all",
+    "Honolulu / event_space: only 6 eligible (minimum 8); took all",
+    "LA / fine_dining: only 1 eligible (minimum 8); took all"
+  ],
+  "top_unmapped_categories": [
+    [
+      "Business and Professional Services > Event Service",
+      209
+    ],
+    [
+      "Business and Professional Services > Health and Beauty Service > Barbershop",
+      46
+    ],
+    [
+      "Retail > Flower Store",
+      9
+    ],
+    [
+      "Event > Entertainment Event",
+      7
+    ],
+    [
+      "Business and Professional Services > Shipping, Freight, and Material Transportation Service",
+      6
+    ],
+    [
+      "Event > Other Event",
+      5
+    ],
+    [
+      "Business and Professional Services > Business Service",
+      4
+    ],
+    [
+      "Event > Marketplace > Street Food Gathering",
+      3
+    ],
+    [
+      "Business and Professional Services > Design Studio",
+      3
+    ],
+    [
+      "Event > Entertainment Event > Parade",
+      3
+    ],
+    [
+      "Retail > Fashion Retail > Bridal Store",
+      2
+    ],
+    [
+      "Retail > Print Store",
+      2
+    ],
+    [
+      "Arts and Entertainment > Performing Arts Venue > Music Venue",
+      2
+    ],
+    [
+      "Business and Professional Services > Food and Beverage Service",
+      2
+    ],
+    [
+      "Business and Professional Services > Office",
+      2
+    ],
+    [
+      "Business and Professional Services > Art Studio",
+      1
+    ],
+    [
+      "Retail > Fashion Retail > Men's Store",
+      1
+    ],
+    [
+      "Business and Professional Services > Office > Business and Strategy Consulting Office",
+      1
+    ],
+    [
+      "Business and Professional Services > Funeral Home",
+      1
+    ],
+    [
+      "Event > Marketplace > Trade Fair",
+      1
+    ],
+    [
+      "Arts and Entertainment",
+      1
+    ],
+    [
+      "Travel and Transportation > Train",
+      1
+    ],
+    [
+      "Event > Marketplace > Street Fair",
+      1
+    ],
+    [
+      "Business and Professional Services > Health and Beauty Service > Hair Salon",
+      1
+    ],
+    [
+      "Business and Professional Services > Home Improvement Service > Home Service",
+      1
+    ]
+  ]
+}

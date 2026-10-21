@@ -1,0 +1,20 @@
+{
+  "candidate_rows": {
+    "train": 530,
+    "test": 571
+  },
+  "candidate_positives": {
+    "train": 58,
+    "train_venues": 15,
+    "all_positive_venues": 28
+  },
+  "discovery_event": {
+    "train": 147,
+    "test": 188,
+    "train_positives": 46
+  },
+  "fit_hosts_yes": {
+    "train": 43,
+    "train_published": 16
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "pilot_venues": 20,
+  "page_credits": 4,
+  "forecast_page_credits_for_560": 112,
+  "pdf_credits": 0,
+  "sample_snapshots": [
+    "eval/snapshots/nyc-0046.json",
+    "eval/snapshots/nyc-0057.json",
+    "eval/snapshots/sf-0044.json"
+  ]
+}

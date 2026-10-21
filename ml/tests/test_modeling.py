@@ -119,6 +119,13 @@ def test_fit_prior_formula_shrinkage_and_monotonicity():
         assert all(a >= c for a, c in zip(q, q[1:]))
 
 
+def test_fit_prior_thin_bucket_uses_the_global_curve():
+    rooms = {"hotel": [200], "bar_lounge": [40]}
+    t = fit_prior_table(rooms, alpha=5, grid=[10, 50], min_bucket_n=25)
+    assert t["buckets"]["hotel"]["q"] == pytest.approx(t["global"]["q"])
+    assert t["buckets"]["hotel"]["n"] == 1
+
+
 def test_yield_at_k():
     y = [1, 0, 1, 0, 0]
     s = [0.9, 0.8, 0.7, 0.1, 0.2]

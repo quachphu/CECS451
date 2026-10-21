@@ -1,0 +1,20 @@
+{
+  "mode": "pilot",
+  "snapshots": 20,
+  "outcomes": {
+    "robots_blocked": 7,
+    "empty_after_render": 1,
+    "ok": 10,
+    "http_error": 2
+  },
+  "ok": 10,
+  "target_ok": 500,
+  "non_english": [
+    "hnl-0030"
+  ],
+  "firecrawl_credits_ledger": 4,
+  "firecrawl_pdf_credits_ledger": 0,
+  "firecrawl_credits_measured_this_run": 4,
+  "firecrawl_remaining_credits": 1358,
+  "pdf_pilot": []
+}

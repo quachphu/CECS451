@@ -62,6 +62,27 @@ def section_teacher(lines: list[str]) -> None:
     if not q:
         lines.append("Not run yet (scripts/data/07_ingest_review.ts).\n")
         return
+    if q.get("gate", {}).get("basis") == "attestation":
+        lines.append(q.get("attestation", q["gate"].get("statement", "")))
+        lines.append("")
+        lines.append("The gate passed on this attestation. Per-item human accuracy and Cohen's kappa are not reported.")
+        lines.append("")
+        agreement = q.get("teacher_teacher_agreement")
+        if agreement:
+            lines.append(
+                table(
+                    ["Teacher-teacher agreement", "Value"],
+                    [
+                        ["Venues compared", agreement["venues"]],
+                        ["hosts_private_events", agreement["hosts_private_events_agreement"]],
+                        ["status", agreement["status_agreement"]],
+                        ["Sonnet figures within 10% of an Opus figure", agreement["sonnet_figures_within_10pct_of_an_opus_figure"]],
+                        ["Opus figures within 10% of a Sonnet figure", agreement["opus_figures_within_10pct_of_a_sonnet_figure"]],
+                    ],
+                )
+            )
+            lines.append("")
+        return
     d = q["double_review"]
     lines.append(
         table(

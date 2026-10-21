@@ -1,0 +1,160 @@
+venue_id,venue_status,unclear_reason,hosts_private_events,room_name,seated_max,standing_max,min,reviewers,source
+nyc-0003,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0004,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0007,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0013,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0028,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0038,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0041,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0044,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0055,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0059,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0065,labeled,,yes,Private Dining Room,24,,12,Thien Phu Quach,teacher_human_confirmed
+nyc-0065,labeled,,yes,Full buyout,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0075,unclear,"The pages describe two locations (Times Square and Midtown) and the capacity statement of 15–500 people, the three floors, the rooftop bar and the Klub 45 Room are not tied to the 14 E 47th St address, so rooms for this address cannot be determined.",yes,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0080,unclear,"The saved pages are from Casa Felix (casafelixny.com), not Merchants NY, and cannot be tied to the address 190 7th Ave. They state no rooms, capacities or private event details.",unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0086,unclear,"The pages describe Sonesta's four New York hotels (Benjamin, Shelburne, Fifty, Gardens), and none is identified as Southgate Tower Hotel at 371 7th Ave, so the rooms cannot be matched to this address.",unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0094,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0095,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0097,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0100,labeled,,yes,The Suite,1850,1380,,Thien Phu Quach,teacher_human_confirmed
+nyc-0100,labeled,,yes,The Studio,1500,1050,,Thien Phu Quach,teacher_human_confirmed
+nyc-0108,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0110,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0114,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0119,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0120,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0125,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0130,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0137,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-0144,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0008,labeled,,yes,Full buyout,300,,,Thien Phu Quach,teacher_human_confirmed
+sf-0008,labeled,,yes,Cellar Room,15,,,Thien Phu Quach,teacher_human_confirmed
+sf-0008,labeled,,yes,Florence Room,40,,,Thien Phu Quach,teacher_human_confirmed
+sf-0008,labeled,,yes,Venetian Room,40,,,Thien Phu Quach,teacher_human_confirmed
+sf-0008,labeled,,yes,Artist Room,100,,,Thien Phu Quach,teacher_human_confirmed
+sf-0008,labeled,,yes,Aperitivo Bar,100,,,Thien Phu Quach,teacher_human_confirmed
+sf-0008,labeled,,yes,Speakeasy Room,20,,,Thien Phu Quach,teacher_human_confirmed
+sf-0008,labeled,,yes,Terrace Room,80,,,Thien Phu Quach,teacher_human_confirmed
+sf-0008,labeled,,yes,Donatello Rooftop,3000,,,Thien Phu Quach,teacher_human_confirmed
+sf-0011,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0034,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0046,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0047,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0053,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0054,labeled,,yes,Full buyout,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0057,unclear,"The saved pages describe The LINE hotel in Los Angeles (Koreatown), Washington DC and Austin. None of the text covers the San Francisco address at 33 Turk St, so no rooms can be tied to this location.",unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0062,labeled,,yes,The Big Private Dinning Room,32,,,Thien Phu Quach,teacher_human_confirmed
+sf-0067,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0069,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0075,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0090,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0096,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0102,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0103,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0106,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0111,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0112,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0117,labeled,,yes,Full buyout,52,,,Thien Phu Quach,teacher_human_confirmed
+sf-0118,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0125,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0134,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0135,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-0136,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0008,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0010,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0011,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0013,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0015,labeled,,yes,Private rooms,75,,10,Thien Phu Quach,teacher_human_confirmed
+hnl-0031,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0042,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0050,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0055,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0056,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0057,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0074,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0080,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0082,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0089,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0098,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-0099,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0003,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0006,unclear,"The pages describe Norman's Florida Kitchen in Orlando (7924 Via Dellagio Way), not the given West Hollywood address (8570 W Sunset Blvd), so no rooms can be attributed to this address.",yes,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0014,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0017,unclear,"The pages are for Classic Thai at 1708 Colorado Boulevard, Los Angeles, CA 90041, not Pasha's Persian Restaurant at 112 W 9th St. The text does not describe any rooms for the given address.",unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0030,unclear,"The private dining page is for the El Segundo location, and the homepage lists several locations (El Segundo, Malibu, Sherman Oaks, Westlake Village). Nothing indicates that any of the described rooms belong to the Santa Monica address at 710 Montana Ave.",unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0044,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0045,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0047,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0051,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0058,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0064,unclear,"The pages are for the Il Fornaio chain and list many locations, but none is Santa Monica (1551 Ocean Ave). No rooms or capacities are given, so it cannot be determined which spaces belong to this address.",yes,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0066,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0069,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0072,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0076,labeled,,yes,Full buyout,50,,,Thien Phu Quach,teacher_human_confirmed
+la-0081,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0095,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0098,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0109,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0113,labeled,,yes,Vibiana Main Hall,550,800,,Thien Phu Quach,teacher_human_confirmed
+la-0113,labeled,,yes,Restaurant & Lounge,110,200,,Thien Phu Quach,teacher_human_confirmed
+la-0113,labeled,,yes,The Garden,108,200,,Thien Phu Quach,teacher_human_confirmed
+la-0113,labeled,,yes,West Room,80,125,,Thien Phu Quach,teacher_human_confirmed
+la-0113,labeled,,yes,East Room,26,50,,Thien Phu Quach,teacher_human_confirmed
+la-0113,labeled,,yes,The Nest,36,50,,Thien Phu Quach,teacher_human_confirmed
+la-0113,labeled,,yes,Cardinal's Quarters,45,75,,Thien Phu Quach,teacher_human_confirmed
+la-0113,labeled,,yes,Bishop's Perch,16,30,,Thien Phu Quach,teacher_human_confirmed
+la-0113,labeled,,yes,Full buyout,1400,1500,,Thien Phu Quach,teacher_human_confirmed
+la-0115,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0116,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0122,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0127,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0128,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0129,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0138,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0141,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0142,unclear,"The website text describes a restaurant at 23 West Chestnut St., Lancaster, PA, not the Los Angeles address given (311 W 7th St), so it cannot be confirmed that any of the content belongs to this location, and no private dining information is given.",unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0144,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0145,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0149,labeled,,no,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0155,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-0166,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-r003,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-r004,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-r008,labeled,,yes,Main floor,200,350,,Thien Phu Quach,teacher_human_confirmed
+nyc-r009,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-r012,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-r013,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+nyc-r019,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-r001,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-r005,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-r007,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-r008,labeled,,yes,Private dining spaces,200,,20,Thien Phu Quach,teacher_human_confirmed
+sf-r011,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-r012,labeled,,yes,Gold Room,800,,,Thien Phu Quach,teacher_human_confirmed
+sf-r012,labeled,,yes,Venetian Room,800,,,Thien Phu Quach,teacher_human_confirmed
+sf-r012,labeled,,yes,Crown Room,350,,,Thien Phu Quach,teacher_human_confirmed
+sf-r016,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-r019,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+sf-r025,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-r002,labeled,,yes,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-r007,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-r008,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-r010,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-r012,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+hnl-r016,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-r005,unclear,"The site lists only Champaign and Mahomet, Illinois locations. The West Hollywood address is not on the pages, so no rooms can be assigned to this address.",unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-r009,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-r013,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed
+la-r015,labeled,,yes,White Rabbit Pool Deck,,300,,Thien Phu Quach,teacher_human_confirmed
+la-r015,labeled,,yes,White Rabbit Hut,,75,,Thien Phu Quach,teacher_human_confirmed
+la-r015,labeled,,yes,White Rabbit Sky Lounge,,675,,Thien Phu Quach,teacher_human_confirmed
+la-r015,labeled,,yes,White Rabbit Cabanas,,125,,Thien Phu Quach,teacher_human_confirmed
+la-r015,labeled,,yes,Gallery A,,60,,Thien Phu Quach,teacher_human_confirmed
+la-r015,labeled,,yes,Gallery B,,28,,Thien Phu Quach,teacher_human_confirmed
+la-r015,labeled,,yes,Gallery C,,30,,Thien Phu Quach,teacher_human_confirmed
+la-r015,labeled,,yes,SkyView Loft,,40,,Thien Phu Quach,teacher_human_confirmed
+la-r015,labeled,,yes,Penthouse,,50,,Thien Phu Quach,teacher_human_confirmed
+la-r015,labeled,,yes,Gallery A+Gallery B,88,,,Thien Phu Quach,teacher_human_confirmed
+la-r024,labeled,,unknown,,,,,Thien Phu Quach,teacher_human_confirmed

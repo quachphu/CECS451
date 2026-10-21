@@ -1,0 +1,17 @@
+{
+  "venues": 24,
+  "rooms": 82,
+  "scored_modal_rows": 72,
+  "rooms_with_a_different_number": 0,
+  "rooms_missing_from_some_reads_but_same_number": 10,
+  "modal_train_y": {
+    "0": 0,
+    "1": 31
+  },
+  "modal_test_y": {
+    "0": 0,
+    "1": 41
+  },
+  "discarded_numbers": [],
+  "displayed_number_changed": []
+}
