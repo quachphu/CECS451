@@ -1,0 +1,656 @@
+venue_id,source,replaces,name,address,city,bucket,domain,website,fetch_outcome,language,in_dataset
+nyc-0001,sample,,Ramani Bistro,"145 E 48th St, New York, NY, 10017",NYC,fine_dining,ramanibistro.com,http://www.ramanibistro.com,robots_blocked,unknown,0
+nyc-0002,sample,,The Organic Salad,"515 Madison Ave, New York, NY, 10022",NYC,casual_restaurant,theorganicsalad.com,http://www.theorganicsalad.com,empty_after_render,unknown,0
+nyc-0003,sample,,Sushi 35 West,"232 W 35th St Fl 2, New York, NY, 10001",NYC,casual_restaurant,sushi35west.com,https://www.sushi35west.com,ok,en,1
+nyc-0004,sample,,North Shore Poke,"122 E 42nd St, New York, NY, 10168",NYC,casual_restaurant,northshorepokeco.com,http://www.northshorepokeco.com,ok,en,1
+nyc-0005,sample,,Fuji Hibachi,"321 W 42nd St, New York, NY, 10036",NYC,casual_restaurant,fujihibachiny.com,https://www.fujihibachiny.com,robots_blocked,unknown,0
+nyc-0006,sample,,Leonetta,"181 Lexington Av, New York, NY, 10016",NYC,casual_restaurant,leonettanyc.com,https://www.leonettanyc.com,ok,en,1
+nyc-0007,sample,,Island Salon,"875 Avenue of the Americas Rm 1601, New York, NY, 10001",NYC,casual_restaurant,islandsrestaurants.com,http://www.islandsrestaurants.com,ok,en,1
+nyc-0008,sample,,Sushi Rose,"248 E 52nd St Fl 2, New York, NY, 10022",NYC,casual_restaurant,sushirose.com,http://www.sushirose.com,empty_after_render,unknown,0
+nyc-0009,sample,,Dig Inn,"150 E 52nd St, New York, NY, 10022",NYC,casual_restaurant,diginn.com,https://www.diginn.com,ok,en,1
+nyc-0010,sample,,Poké Fun,"334 W 37th St, New York, NY, 10018",NYC,casual_restaurant,pokefunnyc.com,http://www.pokefunnyc.com,robots_blocked,unknown,0
+nyc-0011,sample,,Mama Mia 44sw Italian Cuisine,"621 9th Ave, New York, NY, 10036",NYC,casual_restaurant,mamamia44sw.com,http://www.mamamia44sw.com,ok,en,1
+nyc-0012,sample,,Esan Thai,"637 2nd Ave, New York, NY, 10016",NYC,casual_restaurant,esanthainyc.com,http://www.esanthainyc.com,robots_blocked,unknown,0
+nyc-0013,sample,,Taberu Nomu,"124 W 25th St, New York, NY, 10001",NYC,casual_restaurant,taberunomu.com,http://taberunomu.com,ok,non_en,1
+nyc-0014,sample,,The House of Blue Leaves,"218 W 48th St, New York, NY, 10036",NYC,casual_restaurant,newyorkcitytheatre.com,http://www.newyorkcitytheatre.com/theaters/walterkerrtheater/the,http_error,unknown,0
+nyc-0015,sample,,Spring Taste NYC,"125 W 18th St, New York, NY, 10011",NYC,casual_restaurant,springtastenyc.com,http://springtastenyc.com,robots_blocked,unknown,0
+nyc-0016,sample,,Five Senses,"9 W 32nd St, New York, NY, 10001",NYC,casual_restaurant,fivesensesnyc.com,https://www.fivesensesnyc.com,robots_blocked,unknown,0
+nyc-0017,sample,,Broksonic,"935 Broadway, New York, NY, 10010",NYC,casual_restaurant,broksonic.com,http://www.broksonic.com,ok,en,1
+nyc-0018,sample,,Sachi Asian Bistro,"713 2nd Ave, New York, NY, 10016",NYC,casual_restaurant,sachinyc.com,http://sachinyc.com,ok,en,1
+nyc-0019,sample,,Vp Caters,"220 E 42nd St, New York, NY, 10017",NYC,casual_restaurant,vaprestony.com,http://www.vaprestony.com,robots_blocked,unknown,0
+nyc-0020,sample,,Chai Thai Kitchen,"930 8th Ave, New York, NY, 10019",NYC,casual_restaurant,chai-restaurants.com,http://www.chai-restaurants.com,robots_blocked,unknown,0
+nyc-0021,sample,,DK Restaurant,"207 W 36th St, New York, NY, 10018",NYC,casual_restaurant,dkrestaurantnyc.com,http://www.dkrestaurantnyc.com,ok,en,1
+nyc-0022,sample,,Midtown Vision Develop,"551 5th Ave, New York, NY, 10176",NYC,casual_restaurant,midtownvdc.com,http://www.midtownvdc.com,robots_blocked,unknown,0
+nyc-0023,sample,,Osteria Delbianco,"22 E 49th St, New York, NY, 10017",NYC,casual_restaurant,osteriadelbianco.com,https://osteriadelbianco.com,empty_after_render,unknown,0
+nyc-0024,sample,,Bookchangdong,"34 W 32nd St Fl 2, New York, NY, 10001",NYC,casual_restaurant,seoulgarden32.com,http://www.seoulgarden32.com,empty_after_render,unknown,0
+nyc-0025,sample,,Yakiniku TORAJI,"217 E 43rd St, New York, NY, 10017",NYC,casual_restaurant,torajiny.com,https://torajiny.com,ok,en,1
+nyc-0026,sample,,Fushimi,"311 W 43rd St, New York, NY 10036, New York, NY, 10036",NYC,casual_restaurant,fushimigroup.com,https://fushimigroup.com/times-square/,ok,en,1
+nyc-0027,sample,,Top 10 Restaurants New York,"244 5th Ave Fl 2, New York, NY, 10001",NYC,casual_restaurant,top10restaurantsnewyork.com,http://www.top10restaurantsnewyork.com,robots_blocked,unknown,0
+nyc-0028,sample,,Gnocchi on 9th,"836 7th Ave, New York, NY, 10019",NYC,casual_restaurant,gnocchinyc.com,http://gnocchinyc.com,ok,en,1
+nyc-0029,sample,,Joon Crispy Rice,"1440 Broadway, New York, NY, 10018",NYC,casual_restaurant,joonrice.com,https://www.joonrice.com,ok,en,1
+nyc-0030,sample,,Izmir Delights Mediterranean Catering,"242 E 50th St, New York, NY, 10022",NYC,casual_restaurant,izmirdelights.com,http://izmirdelights.com,robots_blocked,unknown,0
+nyc-0031,sample,,DubuHaus,"6 E 32nd St, New York, NY, 10016",NYC,casual_restaurant,dubuhaus.com,http://dubuhaus.com,bot_blocked,unknown,0
+nyc-0032,sample,,Osteria Laguna,"209 E 42nd St, New York, NY, 10017",NYC,casual_restaurant,osterialagunanyc.com,http://www.osterialagunanyc.com,ok,en,1
+nyc-0033,sample,,La Vela Dining & Bar,"558 11th Ave, New York, NY, 10036",NYC,casual_restaurant,veladiningny.com,http://www.veladiningny.com,robots_blocked,unknown,0
+nyc-0034,sample,,MTHR Vegan,"954 2nd Ave, New York, NY, 10022",NYC,casual_restaurant,mthrvegan.com,https://mthrvegan.com,ok,en,1
+nyc-0035,sample,,Village Crown To-Go,"216 E 49th St, New York, NY, 10017",NYC,casual_restaurant,villagecrown.com,http://www.villagecrown.com,ok,en,1
+nyc-0036,sample,,Federicxo's,"251 W 50th St, New York, NY, 10019",NYC,casual_restaurant,federicosalon.com,http://www.federicosalon.com,ok,en,1
+nyc-0037,sample,,Shelly's La Tradizionale,"41 W 57th St, New York, NY, 10019",NYC,casual_restaurant,shellysnewyork.com,http://www.shellysnewyork.com,ok,en,1
+nyc-0038,sample,,Sakura Sushi 88,"154 W 29th St, New York, NY, 10001",NYC,casual_restaurant,sakurasushi88.com,http://sakurasushi88.com,ok,en,1
+nyc-0039,sample,,Splosh Cafe,"155 8th Ave, New York, NY, 10011",NYC,casual_restaurant,sploshcafe.com,http://www.sploshcafe.com,robots_blocked,unknown,0
+nyc-0040,sample,,Pinocchio,"2 Park Ave, New York, NY, 10016",NYC,casual_restaurant,pinocchiocafe.com,http://www.pinocchiocafe.com,robots_blocked,unknown,0
+nyc-0041,sample,,International Wine Center,"350 7th Ave Rm 1201, New York, NY, 10001",NYC,casual_restaurant,internationalwinecenter.com,http://www.internationalwinecenter.com,ok,en,1
+nyc-0042,sample,,Whistlin Dixies Texas Tavern,"714 11th Ave, New York, NY, 10019",NYC,casual_restaurant,dixiestexastavern.com,http://www.dixiestexastavern.com,robots_blocked,unknown,0
+nyc-0043,sample,,Quality Bistro,"120 W 55th St, New York, NY, 10019",NYC,casual_restaurant,qualitybistro.com,http://www.qualitybistro.com,ok,en,1
+nyc-0044,sample,,Anytime Kitchen,"23 W 32nd St Fl 3, New York, NY, 10001",NYC,casual_restaurant,anytimenyc.com,http://anytimenyc.com,ok,en,1
+nyc-0045,sample,,Demel Ny,"1 W 58th St, New York, NY, 10019",NYC,casual_restaurant,demel.at,http://www.demel.at/en,ok,en,1
+nyc-0046,sample,,Monkey Bar,"60 E 54th St, New York, NY, 10022",NYC,steakhouse_grill,nycmonkeybar.com,https://nycmonkeybar.com,ok,en,1
+nyc-0047,sample,,Executive Club NYC,"603 W 45th St, New York, NY, 10036",NYC,steakhouse_grill,pecnyc.com,http://www.pecnyc.com,robots_blocked,unknown,0
+nyc-0048,sample,,212 Steakhouse,"316 E 53rd St, New York, NY, 10022",NYC,steakhouse_grill,212steakhouse.com,http://www.212steakhouse.com,robots_blocked,unknown,0
+nyc-0049,sample,,Jade Sixty,"116 E 60th St, New York, NY, 10022",NYC,steakhouse_grill,jadesixty.com,http://www.jadesixty.com,empty_after_render,unknown,0
+nyc-0050,sample,,P&Mc's Holding,"150 E 58th St, New York, NY, 10155",NYC,steakhouse_grill,castleharlan.com,http://www.castleharlan.com,ok,en,1
+nyc-0051,sample,,Mighty Quinn's Barbeque,"1407 Broadway, New York, NY, 10018",NYC,steakhouse_grill,mightyquinnsbbq.com,http://mightyquinnsbbq.com,ok,en,1
+nyc-0052,sample,,Porter House Bar and Grill,"10 Columbus Cir, New York, NY, 10019",NYC,steakhouse_grill,porterhousenyc.com,https://porterhousenyc.com,robots_blocked,unknown,0
+nyc-0053,sample,,Sonny's BBQ,"47 W 55th St, New York, NY, 10019",NYC,steakhouse_grill,sonnysbbq.com,http://www.sonnysbbq.com,ok,en,1
+nyc-0054,sample,,Bruno Restaurant,"240 E 58th St, New York, NY, 10022",NYC,steakhouse_grill,brunosnyc.com,http://www.brunosnyc.com,empty_after_render,en,0
+nyc-0055,sample,,Strip House,"15 W 44th St, New York, NY, 10036",NYC,steakhouse_grill,striphouse.com,https://www.striphouse.com/location/striphouse-midtown,ok,non_en,1
+nyc-0056,sample,,Royal 35 Steakhouse,"1 E 35th St, New York, NY, 10016",NYC,steakhouse_grill,royal35steakhouse.com,https://royal35steakhouse.com,ok,en,1
+nyc-0057,sample,,Red Eye NY,"355 W 41st St, New York, NY, 10036",NYC,bar_lounge,redeyeny.com,https://redeyeny.com,ok,en,1
+nyc-0058,sample,,ViceVersa,"325 W 51st St, New York, NY, 10019",NYC,bar_lounge,viceversanyc.com,http://www.viceversanyc.com,robots_blocked,unknown,0
+nyc-0059,sample,,Spenglish Bar,"230w 39th St, New York, NY, 10001",NYC,bar_lounge,spenglish.com,http://www.spenglish.com,ok,en,1
+nyc-0060,sample,,Cherry,"120 E 39th St (W Tuscany), New York, NY, 10016",NYC,bar_lounge,mocbars.com,http://www.mocbars.com,robots_blocked,unknown,0
+nyc-0061,sample,,Times Square Food Court,"263 W 42nd St, New York, NY, 10036",NYC,bar_lounge,rownyc.com,http://citykitchen.rownyc.com,robots_blocked,unknown,0
+nyc-0062,sample,,Bravest,"700 2nd Ave, New York, NY, 10016",NYC,bar_lounge,thebravestnyc.com,http://thebravestnyc.com,robots_blocked,unknown,0
+nyc-0063,sample,,The Sheffield Rooftop,"322 W 57th St, New York, NY, 10019",NYC,bar_lounge,thesheffield57.com,https://thesheffield57.com,ok,en,1
+nyc-0064,sample,,The Triple Crown Ale House,"330 7th Ave, New York, NY, 10001",NYC,bar_lounge,triplecrownnyc.com,http://www.triplecrownnyc.com,bot_blocked,unknown,0
+nyc-0065,sample,,Patrick’s Restaurant,"259 W 42nd St, New York, NY, 10036",NYC,bar_lounge,patricksnyc.com,http://patricksnyc.com,ok,en,1
+nyc-0066,sample,,Jack Doyle's,"240 W 35th St, New York, NY, 10001",NYC,bar_lounge,jackdoylesnyc.com,http://www.jackdoylesnyc.com,http_error,unknown,0
+nyc-0067,sample,,Tequila Chito's,"358 W 23rd St, New York, NY, 10011",NYC,bar_lounge,tequilachitos.com,http://www.tequilachitos.com,empty_after_render,unknown,0
+nyc-0068,sample,,Local West,"1 Penn Plaza, New York, NY, 10119",NYC,bar_lounge,localcafenyc.com,http://www.localcafenyc.com,robots_blocked,unknown,0
+nyc-0069,sample,,Cafe Nunez,"240 W 35th St, New York, NY, 10001",NYC,bar_lounge,cafenunez.com,http://www.cafenunez.com,ok,en,1
+nyc-0070,sample,,Tranny Strip,"59 W 21st St, New York, NY, 10010",NYC,bar_lounge,trannystrip.com,http://www.trannystrip.com,empty_after_render,en,0
+nyc-0071,sample,,BXL Cafe,"125 W 43rd St, New York, NY, 10036",NYC,bar_lounge,bxlrestaurants.com,https://www.bxlrestaurants.com/location/cafe,http_error,unknown,0
+nyc-0072,sample,,Rumours Bar & Grille,"933 8th Ave, New York, NY, 10019",NYC,bar_lounge,rumoursbarnyc.com,http://www.rumoursbarnyc.com,robots_blocked,unknown,0
+nyc-0073,sample,,The Beach at Dream Downtown,"355 W 16th St, New York, NY, 10011",NYC,bar_lounge,dreambeach.club,http://dreambeach.club,ok,en,1
+nyc-0074,sample,,Broadway Comedy Club,"318 W 53rd St, New York, NY, 10019",NYC,bar_lounge,broadwaycomedyclub.com,http://www.broadwaycomedyclub.com,ok,en,1
+nyc-0075,sample,,Connolly's Pub & Restaurant,"14 E 47th St, New York, NY, 10017",NYC,bar_lounge,connollyspubandrestaurant.com,https://www.connollyspubandrestaurant.com,ok,en,1
+nyc-0076,sample,,Annie Moore's,"22 E 41st St, New York, NY, 10017",NYC,bar_lounge,anniemooresnyc.com,http://anniemooresnyc.com,robots_blocked,unknown,0
+nyc-0077,sample,,Reichenbach Hall,"5 W 37th St, New York, NY, 10018",NYC,bar_lounge,reichenbachhall.com,http://reichenbachhall.com,ok,en,1
+nyc-0078,sample,,Rarities,"455 Madison Ave, New York, NY, 10022",NYC,bar_lounge,raritiesnyc.com,http://www.raritiesnyc.com,bot_blocked,unknown,0
+nyc-0079,sample,,Peter Dillon's Pub,"130 E 40th St, New York, NY, 10016",NYC,bar_lounge,peterdillonsnyc.com,http://peterdillonsnyc.com,empty_after_render,unknown,0
+nyc-0080,sample,,Merchants NY,"190 7th Ave, New York, NY, 10011",NYC,bar_lounge,merchantsny.com,http://www.merchantsny.com,ok,en,1
+nyc-0081,sample,,Karizma Lounge,"244 E 51st St, New York, NY, 10022",NYC,bar_lounge,karizmalounge.com,http://www.karizmalounge.com,empty_after_render,en,0
+nyc-0082,sample,,The Waylon,"736 10th Ave, New York, NY, 10019",NYC,bar_lounge,thewaylon.com,http://www.thewaylon.com,ok,en,1
+nyc-0083,sample,,Hilton Garden Inn New York/Central Park South-Midtown West,"237 W 54th St, New York, NY, 10019",NYC,hotel,hgicentralparknyhotel.com,https://www.hgicentralparknyhotel.com,robots_blocked,unknown,0
+nyc-0084,sample,,The Paul Hotel NYC,"32 W 29th St, New York, NY, 10001",NYC,hotel,thepaulnyc.com,http://www.thepaulnyc.com,empty_after_render,unknown,0
+nyc-0085,sample,,San Carlos Hotel,"150 E 50th St, New York, NY, 10022",NYC,hotel,sancarloshotel.com,https://www.sancarloshotel.com,ok,en,1
+nyc-0086,sample,,Southgate Tower Hotel,"371 7th Ave, New York, NY, 10001",NYC,hotel,affinia.com,http://affinia.com/manhattan,ok,en,1
+nyc-0087,sample,,The Gregorian Hotel,"42 W 35th St, New York, NY, 10001",NYC,hotel,gregorianhotel.com,https://www.gregorianhotel.com,bot_blocked,unknown,0
+nyc-0088,sample,,The Carlton House,"680 Madison Ave, New York, NY, 10065",NYC,hotel,helmsleyhotels.com,http://www.helmsleyhotels.com,robots_blocked,unknown,0
+nyc-0089,sample,,Seton Hotel,"144 E 40th St, New York, NY, 10016",NYC,hotel,setonhotelny.com,http://www.setonhotelny.com,robots_blocked,unknown,0
+nyc-0090,sample,,The Bryant Park Hotel,"40 W 40th St, New York, NY, 10018",NYC,hotel,bryantparkhotel.com,http://www.bryantparkhotel.com,ok,en,1
+nyc-0091,sample,,Sutton Residence,"47th street, New York, NY, 10017",NYC,hotel,suttonresidence.com,http://www.suttonresidence.com,robots_blocked,unknown,0
+nyc-0092,sample,,DHG,"500 W 37th St, New York, NY, 10018",NYC,hotel,denihan.com,http://www.denihan.com,robots_blocked,unknown,0
+nyc-0093,sample,,The Sherry-Netherland,"781 5th Ave, New York, NY, 10022",NYC,hotel,sherrynetherland.com,https://www.sherrynetherland.com,bot_blocked,unknown,0
+nyc-0094,sample,,Hotel St James,"109 W 45th St, New York, NY, 10036",NYC,hotel,hotelstjames.net,http://www.hotelstjames.net,ok,en,1
+nyc-0095,sample,,Gilsey House,"1200 Broadway, New York, NY, 10001",NYC,hotel,gilseyhouse.com,http://www.gilseyhouse.com/Home.html,ok,en,1
+nyc-0096,sample,,Lotte New York Palace,"455 Madison Ave, New York, NY, 10022",NYC,hotel,lottenypalace.com,https://www.lottenypalace.com,bot_blocked,unknown,0
+nyc-0097,sample,,Roomza Times Square At Pestana Cr7,"338 W 39th St, New York, NY, 10018",NYC,hotel,roomza.com,http://www.roomza.com,ok,en,1
+nyc-0098,sample,,Post Me,"244 5th Ave Fl 2, New York, NY, 10001",NYC,event_space,post-me.org,http://post-me.org,robots_blocked,unknown,0
+nyc-0099,sample,,Verizon Club,"Madison Square Garden, New York, NY, 10119",NYC,event_space,msg.com,https://www.msg.com/madison-square-garden/luxury-suites/clubs/verizon-club,ok,en,1
+nyc-0100,sample,,Glasshouse,"660 12th Ave, New York, NY, 10019",NYC,event_space,theglasshouses.com,https://www.theglasshouses.com/the-glasshouse,ok,en,1
+nyc-0101,sample,,Gannett Media,"535 Madison Ave, New York, NY, 10022",NYC,event_space,usatoday.com,http://www.usatoday.com,ok,en,1
+nyc-0102,sample,,Explosion Robinson,"630 9th Ave, New York, NY, 10036",NYC,event_space,explosionrobinson.com,http://www.explosionrobinson.com,empty_after_render,unknown,0
+nyc-0103,sample,,The Yard: Flatiron North,"246 5th Ave, New York, NY, 10001",NYC,event_space,theyard.com,https://theyard.com/new-york-city-coworking-office-space/flatiron-north,robots_blocked,unknown,0
+nyc-0104,sample,,SVA MFA Interaction Design Dept,"136 W 21st St Fl 3, New York, NY, 10011",NYC,event_space,sva.edu,http://interactiondesign.sva.edu,ok,en,1
+nyc-0105,sample,,AVEnts,"15 W 28th St, New York, NY, 10016",NYC,event_space,avenyc.com,http://avenyc.com,empty_after_render,unknown,0
+nyc-0106,sample,,Friends House,"130 E 25th St, New York, NY, 10010",NYC,event_space,rosehill.org,http://www.rosehill.org,robots_blocked,unknown,0
+nyc-0107,sample,,The Blue Building,"222 E 46th St, New York, NY, 10017",NYC,event_space,streeteasy.com,http://streeteasy.com/building/blue-condominium,ok,non_en,1
+nyc-0108,sample,,Loft One NY,"119 W 22nd St, New York, NY, 10011",NYC,event_space,inicio.one,https://inicio.one,ok,en,1
+nyc-0109,sample,,Select Dining Studio,"315 W 39th St, New York, NY, 10018",NYC,event_space,selectdiningstudio.com,http://www.selectdiningstudio.com,robots_blocked,unknown,0
+nyc-0110,sample,,Pinch Food Design,"27th Street, New York, NY, 10001",NYC,event_space,pinchfooddesign.com,http://www.pinchfooddesign.com,ok,en,1
+nyc-0111,sample,,Simon Wiesenthal Center NY Tolerance Center,"226 E 42nd St, New York, NY, 10017",NYC,event_space,museumoftolerancenewyork.com,http://www.museumoftolerancenewyork.com,robots_blocked,unknown,0
+nyc-0112,sample,,10th Avenue Pizza & Cafe,"256 10th Ave, New York, NY, 10001",NYC,fast_casual_cafe,10thavenuepizza.com,http://www.10thavenuepizza.com,robots_blocked,unknown,0
+nyc-0113,sample,,Baskin-Robbins,"360 W 31st St, 21 Penn Plaza, New York, NY, 10001",NYC,fast_casual_cafe,baskinrobbins.com,https://www.baskinrobbins.com,ok,en,1
+nyc-0114,sample,,99¢ Fresh Pizza,"1723 Broadway, New York, NY, 10019",NYC,fast_casual_cafe,99centsfreshpizzanyc.com,http://99centsfreshpizzanyc.com,ok,non_en,1
+nyc-0115,sample,,Breakfast Cart,"W 36th St., New York, NY, 10018",NYC,fast_casual_cafe,mamajosbreakfastcart.com,http://mamajosbreakfastcart.com,empty_after_render,non_en,0
+nyc-0116,sample,,The Parisian Tea Room,"347 W 36th St, New York, NY, 10018",NYC,fast_casual_cafe,theparisiantearoom.com,https://theparisiantearoom.com,bot_blocked,unknown,0
+nyc-0117,sample,,Meltkraft,"151 E 43rd St, New York, NY, 10017",NYC,fast_casual_cafe,meltkraft.com,http://meltkraft.com,robots_blocked,unknown,0
+nyc-0118,sample,,Mayer's Espresso & Bagels,"144 W 37th St, New York, NY, 10018",NYC,fast_casual_cafe,mayersbagels.com,https://mayersbagels.com,ok,non_en,1
+nyc-0119,sample,,Moynihan Food Hall,"421 8th Ave, New York, NY, 10001",NYC,fast_casual_cafe,moynihanfoodhall.com,https://www.moynihanfoodhall.com,ok,en,1
+nyc-0120,sample,,Brown Bag Sandwich Co.,"64 West 22nd Street, New York, NY, 10010",NYC,fast_casual_cafe,brownbagny.com,https://www.brownbagny.com,ok,en,1
+nyc-0121,sample,,Bandit,"120 Park Ave, New York, NY, 10017",NYC,fast_casual_cafe,thebandit.com,http://thebandit.com,robots_blocked,unknown,0
+nyc-0122,sample,,Let Them Eat Cake,"90 Park Ave, New York, NY, 10016",NYC,fast_casual_cafe,letthemeatcakenyc.com,http://www.letthemeatcakenyc.com,ok,en,1
+nyc-0123,sample,,Bagel Express III,"340 3rd Ave, New York, NY, 10010",NYC,fast_casual_cafe,enjoyablecafes.space,http://bagelexpressiinewyork5.enjoyablecafes.space,robots_blocked,unknown,0
+nyc-0124,sample,,Snap Dog,"West 46th, New York, NY, 10036",NYC,fast_casual_cafe,snapdognyc.com,http://www.snapdognyc.com,robots_blocked,unknown,0
+nyc-0125,sample,,Gail Watson Custom Cake,"335 W 38th St Apt 11, New York, NY, 10018",NYC,fast_casual_cafe,gailwatsoncake.com,http://www.gailwatsoncake.com,ok,non_en,1
+nyc-0126,sample,,Amorino,"721 8th Ave, New York, NY, 10036",NYC,fast_casual_cafe,amorino.com,http://www.amorino.com/us/,http_error,unknown,0
+nyc-0127,sample,,Handcraft Burgers and Brew,"110 W 40th St, New York, NY, 10018",NYC,fast_casual_cafe,handcraftburgers.com,https://handcraftburgers.com,ok,en,1
+nyc-0128,sample,,Krispy Krunchy Chicken,"707 9th Ave, New York, NY, 10036",NYC,fast_casual_cafe,krispykrunchy.com,https://www.krispykrunchy.com,ok,en,1
+nyc-0129,sample,,Junior's Restaurant & Bakery,"1515 Broadway, New York, NY, 10036",NYC,fast_casual_cafe,juniorscheesecake.com,http://www.juniorscheesecake.com/our_restaurants/times_square/,bot_blocked,unknown,0
+nyc-0130,sample,,Jacques Torres Ice Cream Shop,"Grand Central Dining Concourse, New York, NY, 10017",NYC,fast_casual_cafe,mrchocolate.com,http://mrchocolate.com,ok,en,1
+nyc-0131,sample,,The Russian Tea Room,"150 W 57th St, New York, NY, 10019",NYC,fast_casual_cafe,russiantearoomnyc.com,http://www.russiantearoomnyc.com,ok,en,1
+nyc-0132,sample,,Blue Dog Kitchen Bar,"308 W 50th St, New York, NY, 10019",NYC,fast_casual_cafe,bluedognyc.com,http://www.bluedognyc.com,bot_blocked,unknown,0
+nyc-0133,sample,,Shawarma Bay,"1290 6th Ave, New York, NY, 10019",NYC,fast_casual_cafe,shawarmabay.site,https://shawarmabay.site,robots_blocked,unknown,0
+nyc-0134,sample,,Westfield Market Place,"686 10th Ave, New York, NY, 10019",NYC,fast_casual_cafe,westfieldmarketplacenewyork.net,http://www.westfieldmarketplacenewyork.net,http_error,unknown,0
+nyc-0135,sample,,Pizza Bungalow,"40 E 23rd St, New York, NY, 10010",NYC,fast_casual_cafe,pizzabungalownyc.com,http://pizzabungalownyc.com,empty_after_render,unknown,0
+nyc-0136,sample,,SFILAPIZZA,"866 9th Ave, New York, NY, 10019",NYC,fast_casual_cafe,sfilapizza.com,https://www.sfilapizza.com/home,robots_blocked,unknown,0
+nyc-0137,sample,,Egghead,"485 Fashion Ave, New York, NY, 10018",NYC,fast_casual_cafe,eggheadny.com,http://eggheadny.com,ok,en,1
+nyc-0138,sample,,Margari Pizza,"1072 2nd Ave, New York, NY, 10022",NYC,fast_casual_cafe,margaripizzanyc.com,https://www.margaripizzanyc.com,robots_blocked,unknown,0
+nyc-0139,sample,,Metro Marche,"30 W 57th St, New York, NY, 10019",NYC,fast_casual_cafe,metromarche.com,https://www.metromarche.com,ok,en,1
+nyc-0140,sample,,Chelsea Bagel of Tudor City,"800 2nd Ave, New York, NY, 10017",NYC,fast_casual_cafe,chelseabagel.com,http://www.chelseabagel.com,ok,en,1
+nyc-0141,sample,,Bake Me A Wish!,"211 E 43rd St Rm 305, New York, NY, 10017",NYC,fast_casual_cafe,bakemeawish.com,http://www.bakemeawish.com,ok,en,1
+nyc-0142,sample,,R/GA Cafeteria,"350 W 39th St, New York, NY, 10018",NYC,fast_casual_cafe,rga.com,http://www.rga.com,ok,en,1
+nyc-0143,sample,,Food Trends,"56 E 41st St, New York, NY, 10017",NYC,fast_casual_cafe,foodtrendscatering.com,http://foodtrendscatering.com,bot_blocked,unknown,0
+nyc-0144,sample,,Radio City Pizza,"142 W 49th St, New York, NY, 10019",NYC,fast_casual_cafe,radiocitypizzanewyork.com,http://radiocitypizzanewyork.com,ok,non_en,1
+nyc-0145,sample,,Dos Caminos,"1567 Broadway, New York, NY, 10036",NYC,fast_casual_cafe,doscaminos.com,http://www.doscaminos.com/times-square/,ok,non_en,1
+sf-0001,sample,,SF Wraps,"255 Kearny St, San Francisco, CA, 94108",SF,casual_restaurant,sfwraps-hub.com,http://sfwraps-hub.com,robots_blocked,unknown,0
+sf-0002,sample,,Green Hills Tours,"201 Spear St Ste 1100, San Francisco, CA, 94105",SF,casual_restaurant,san-franciscocitytours.com,https://www.san-franciscocitytours.com,robots_blocked,unknown,0
+sf-0003,sample,,Hinodeya Ramen To Go,"303 2nd St, San Francisco, CA, 94107",SF,casual_restaurant,hinodeyaramen.com,http://hinodeyaramen.com/?page_id=430,bot_blocked,unknown,0
+sf-0004,sample,,Henry's Hunan Restaurant,"674 Sacramento St, San Francisco, CA, 94111",SF,casual_restaurant,henryshunanrestaurant.com,http://henryshunanrestaurant.com,robots_blocked,unknown,0
+sf-0005,sample,,High Horse,"582 Washington St, San Francisco, CA, 94111",SF,casual_restaurant,highhorsesf.com,http://highhorsesf.com,ok,en,1
+sf-0006,sample,,Prather Ranch Meat Co.,"1 Ferry Building Ste 32, San Francisco, CA, 94111",SF,casual_restaurant,prmeatco.com,http://www.prmeatco.com,ok,en,1
+sf-0007,sample,,Henry's Hunan Restaurant,"1016 Bryant St, San Francisco, CA, 94103",SF,casual_restaurant,henryshunan.com,http://henryshunan.com,robots_blocked,unknown,0
+sf-0008,sample,,Zingari Ristorante + Jazz Bar,"501 Post St, San Francisco, CA, 94102",SF,casual_restaurant,zingari.com,http://www.zingari.com,ok,en,1
+sf-0009,sample,,LetsSweet Kitchen,"1010 Bryant St, San Francisco, CA, 94103",SF,casual_restaurant,letssweetkitchen.com,https://www.letssweetkitchen.com,ok,en,1
+sf-0010,sample,,The Spicy Shrimp,"150 Waverly Pl, San Francisco, CA, 94108",SF,casual_restaurant,thespicyshrimp.com,http://www.thespicyshrimp.com,robots_blocked,unknown,0
+sf-0011,sample,,Da Poke-Man,"24 Willie Mays Plz, San Francisco, CA, 94107",SF,casual_restaurant,dapokeman.com,http://www.dapokeman.com,ok,en,1
+sf-0012,sample,,Boich Family Cellars,"651 Wall Rd, Napa, CA, 94558",SF,casual_restaurant,boichfamilycellar.com,http://www.boichfamilycellar.com,empty_after_render,en,0
+sf-0013,sample,,Jack's Place,"140 New Montgomery St, San Francisco, CA, 94105",SF,casual_restaurant,the140story.com,http://the140story.com,robots_blocked,unknown,0
+sf-0014,sample,,Sf Momo,"60 Morris St, San Francisco, CA, 94107",SF,casual_restaurant,sfmomo.com,http://www.sfmomo.com,http_error,unknown,0
+sf-0015,sample,,Beijing 49er,"744 Washington St, San Francisco, CA, 94108",SF,casual_restaurant,beijing49er.com,http://beijing49er.com,robots_blocked,unknown,0
+sf-0016,sample,,The Garden Court,"2 New Montgomery St, San Francisco, CA, 94105",SF,casual_restaurant,spg.com,http://www.spg.com/foursquare/,bot_blocked,unknown,0
+sf-0017,sample,,Spice Kitchen,"432 Sutter St, San Francisco, CA, 94108",SF,casual_restaurant,spicekitchen-sf.com,https://www.spicekitchen-sf.com,robots_blocked,unknown,0
+sf-0018,sample,,Sakana Sushi Bar & Grill,"605 Post St, San Francisco, CA, 94109",SF,casual_restaurant,sfsakana.com,http://sfsakana.com,empty_after_render,unknown,0
+sf-0019,sample,,FUSION DUMPLING,"650 Jackson St, San Francisco, CA, 94133",SF,casual_restaurant,fusiondumplingsf.com,https://fusiondumplingsf.com,ok,en,1
+sf-0020,sample,,La Salsa - Financial District,"280 Battery St, San Francisco, CA, 94111",SF,casual_restaurant,lasalsa.com,http://lasalsa.com,ok,non_en,1
+sf-0021,sample,,Japanese House,"510 Mission St, San Francisco, CA, 94105",SF,casual_restaurant,japanesehousesf.com,http://japanesehousesf.com,empty_after_render,en,0
+sf-0022,sample,,El Manifesto,"350 Taylor St, San Francisco, CA, 94102",SF,casual_restaurant,elmanifesto.org,http://www.elmanifesto.org,robots_blocked,unknown,0
+sf-0023,sample,,Spicy & Cloud,"823 Clay St, San Francisco, CA, 94108",SF,casual_restaurant,spicycloudrestaurant.com,http://spicycloudrestaurant.com,bot_blocked,unknown,0
+sf-0024,sample,,DJ Sushi,"450 Broadway, San Francisco, CA, 94133",SF,casual_restaurant,djsushisf.com,http://www.djsushisf.com,robots_blocked,unknown,0
+sf-0025,sample,,J Tu Cafe,"582 Sutter St, San Francisco, CA, 94102",SF,casual_restaurant,jtucafe-hub.com,http://jtucafe-hub.com,robots_blocked,unknown,0
+sf-0026,sample,,L'Olivier French Restaurant,"465 Davis Ct, San Francisco, CA, 94111",SF,casual_restaurant,lolivier-restaurant.com,http://lolivier-restaurant.com,robots_blocked,unknown,0
+sf-0027,sample,,Julie's Kitchen,"50 Fremont St, San Francisco, CA, 94105",SF,casual_restaurant,julieskitchensf.net,http://www.julieskitchensf.net,robots_blocked,unknown,0
+sf-0028,sample,,City Vinters San Francisco Winery,"53 Bluxome St, San Francisco, CA, 94107",SF,casual_restaurant,sfvintnersmarket.com,http://www.sfvintnersmarket.com,robots_blocked,unknown,0
+sf-0029,sample,,Chotto Matte San Francisco,"50 Ofarrell St, San Francisco, CA, 94108",SF,casual_restaurant,chotto-matte.com,https://chotto-matte.com/sanfrancisco,ok,en,1
+sf-0030,sample,,New Fortune Restaurant,"811 Stockton St, San Francisco, CA, 94108",SF,casual_restaurant,newfortunetogo.com,http://newfortunetogo.com,ok,en,1
+sf-0031,sample,,Grant Place Restaurant,"737 Washington St, San Francisco, CA, 94108",SF,casual_restaurant,grantplacerestaurant.com,http://grantplacerestaurant.com,bot_blocked,unknown,0
+sf-0032,sample,,Hot Plate,"217 King St, San Francisco, CA, 94107",SF,casual_restaurant,sfjazz.org,https://www.sfjazz.org/hotplate,bot_blocked,unknown,0
+sf-0033,sample,,Muracci's Japanese Curry & Grill,"307 Kearny St, San Francisco, CA, 94108",SF,casual_restaurant,muraccis.com,http://muraccis.com,bot_blocked,unknown,0
+sf-0034,sample,,Gai Chicken & Rice,"1001 Market St, San Francisco, CA, 94103",SF,casual_restaurant,gaiandrice.com,http://www.gaiandrice.com,ok,en,1
+sf-0035,sample,,Benjaminos Trattoria,"380 Bush St, San Francisco, CA, 94104",SF,casual_restaurant,benjaminostrattoria.com,https://benjaminostrattoria.com,ok,non_en,1
+sf-0036,sample,,El Porteño,"700 2nd St, San Francisco, CA, 94107",SF,casual_restaurant,elporteno.com,http://elporteno.com,ok,en,1
+sf-0037,sample,,Sons & Daughters,"708 Bush St, San Francisco, CA, 94108",SF,casual_restaurant,sonsanddaughterssf.com,https://www.sonsanddaughterssf.com,bot_blocked,unknown,0
+sf-0038,sample,,Phở Vung Tau,"708 Vallejo St, San Francisco, CA, 94133",SF,casual_restaurant,yibada.com,http://sf.yibada.com/yp/9168-%E9%A0%AD%E9%A0%93%E8%B6%8A%E5%8D%97%E7%B2%89-Pho-Vung-Tau-Restaurant.html,ok,non_en,1
+sf-0039,sample,,House of Tadu Ethiopian Kitchen,"1130 4th St, San Francisco, CA, 94158",SF,casual_restaurant,taduethiopiankitchen.com,http://taduethiopiankitchen.com/home-house-of-tadu/,http_error,unknown,0
+sf-0040,sample,,Ma's Dimsum & Cafe,"1315 Powell St, San Francisco, CA, 94133",SF,casual_restaurant,masdimsumcafe.com,http://www.masdimsumcafe.com,empty_after_render,unknown,0
+sf-0041,sample,,Lucky Star,"720 Pacific Ave, San Francisco, CA, 94133",SF,casual_restaurant,coosluckystarrestaurant.com,http://www.coosluckystarrestaurant.com,robots_blocked,unknown,0
+sf-0042,sample,,Aramark,"850 Bryant St, San Francisco, CA, 94103",SF,casual_restaurant,aramark.com,http://www.aramark.com,empty_after_render,unknown,0
+sf-0043,sample,,My Canh,"626 Broadway, San Francisco, CA, 94133",SF,casual_restaurant,snackbars.website,http://mycanhsanfrancisco.snackbars.website,empty_after_render,unknown,0
+sf-0044,sample,,Roka Akor,"801 Montgomery St, San Francisco, CA, 94133",SF,steakhouse_grill,rokaakor.com,https://www.rokaakor.com/san-francisco/,ok,en,1
+sf-0045,sample,,John's Grill,"63 Ellis St, San Francisco, CA, 94102",SF,steakhouse_grill,johnsgrill.com,http://www.johnsgrill.com,ok,en,1
+sf-0046,sample,,The Boneyard Truck,"San Francisco, CA, 94105",SF,steakhouse_grill,theboneyardtruck.com,http://www.theboneyardtruck.com,ok,en,1
+sf-0047,sample,,ABSteak by Chef Akira Back,"124 Ellis St, San Francisco, CA, 94102",SF,steakhouse_grill,absteaksf.com,https://absteaksf.com,ok,en,1
+sf-0048,sample,,Alexander's Steakhouse,"165 O'Farrell St, San Francisco, CA, 94102",SF,steakhouse_grill,alexanderssteakhouse.com,https://alexanderssteakhouse.com,bot_blocked,unknown,0
+sf-0049,sample,,Acme Chophouse,"24 Willie Mays Plz, San Francisco, CA, 94107",SF,steakhouse_grill,acmechophouse.com,http://www.acmechophouse.com,parked_or_closed,en,0
+sf-0050,sample,,Superprime,"545 Mission St, San Francisco, CA, 94105",SF,steakhouse_grill,yokaisf.com,https://yokaisf.com,empty_after_render,en,0
+sf-0051,sample,,L&L Hawaiian Barbecue,"312 Kearny St, San Francisco, CA, 94108",SF,steakhouse_grill,hawaiianbarbecue.com,http://www.hawaiianbarbecue.com,ok,en,1
+sf-0052,sample,,Bourbon Steak,"335 Powell St, San Francisco, CA, 94102",SF,steakhouse_grill,bourbonsteaksf.com,http://www.bourbonsteaksf.com,ok,en,1
+sf-0053,sample,,Club Envy,"715 Harrison St, San Francisco, CA, 94107",SF,bar_lounge,clubenvymuskegon.com,http://www.clubenvymuskegon.com,ok,en,1
+sf-0054,sample,,Raven Bar,"1151 Folsom St, San Francisco, CA, 94103",SF,bar_lounge,ravenbarsf.com,http://www.ravenbarsf.com,ok,en,1
+sf-0055,sample,,RVIP Lounge & Karoke Cabaret,"San Francisco, CA, 94103",SF,bar_lounge,rviplounge.com,http://rviplounge.com,robots_blocked,unknown,0
+sf-0056,sample,,Bar Sprezzatura,"300 Clay St #100, San Francisco, CA, 94111",SF,bar_lounge,barsprezzatura.com,https://www.barsprezzatura.com,ok,en,1
+sf-0057,sample,,Rise Over Run,"33 Turk St, San Francisco, CA, 94102",SF,bar_lounge,thelinehotel.com,https://www.thelinehotel.com/san-francisco/restaurants-bars/rise-over-run,ok,en,1
+sf-0058,sample,,Priime,"414 Brannan St, San Francisco, CA, 94107",SF,bar_lounge,priime.com,https://priime.com,ok,en,1
+sf-0059,sample,,"BRE Properties, Inc.","525 Market St Fl 4, San Francisco, CA, 94105",SF,bar_lounge,breproperties.com,http://www.breproperties.com,bot_blocked,unknown,0
+sf-0060,sample,,Chateau Montelena Tasting Room,"335 Powell St, San Francisco, CA, 94102",SF,bar_lounge,montelena.com,http://montelena.com,bot_blocked,unknown,0
+sf-0061,sample,,Deep Purpl,"59 New Montgomery St, San Francisco, CA, 94105",SF,bar_lounge,deeppurplchicago.com,http://deeppurplchicago.com,ok,en,1
+sf-0062,sample,,Dragon Horse,"917 Folsom St, San Francisco, CA, 94107",SF,bar_lounge,dragonhorsesf.com,http://www.dragonhorsesf.com,ok,en,1
+sf-0063,sample,,The Treasury,"115 Sansome St, San Francisco, CA, 94103",SF,bar_lounge,thetreasurysf.com,http://www.thetreasurysf.com,ok,en,1
+sf-0064,sample,,Thistle,"1 Tillman Pl, San Francisco, CA, 94108",SF,bar_lounge,thistlechangeyou.com,http://thistlechangeyou.com,empty_after_render,unknown,0
+sf-0065,sample,,Monarch,"101 6th St, San Francisco, CA, 94103",SF,bar_lounge,monarchsf.com,http://www.monarchsf.com,ok,en,1
+sf-0066,sample,,Artist Untied,"35 Stillman St, San Francisco, CA, 94107",SF,bar_lounge,artistuntied.com,http://www.artistuntied.com,robots_blocked,unknown,0
+sf-0067,sample,,Centerfolds,"391 Broadway, San Francisco, CA, 94133",SF,bar_lounge,hustlerclubsf.com,http://www.hustlerclubsf.com,ok,en,1
+sf-0068,sample,,Dirty Habit,"12 4th St, San Francisco, CA, 94103",SF,bar_lounge,dirtyhabitsf.com,http://www.dirtyhabitsf.com,bot_blocked,unknown,0
+sf-0069,sample,,Royal Exchange,"301 Sacramento St, San Francisco, CA, 94111",SF,bar_lounge,royalexchange.com,http://royalexchange.com,ok,en,1
+sf-0070,sample,,Sake and Sound,"222 Mason St, San Francisco, CA, 94102",SF,bar_lounge,sakeandsound.com,http://www.sakeandsound.com,robots_blocked,unknown,0
+sf-0071,sample,,Perry's San Francisco,"155 Steuart St, San Francisco, CA, 94105",SF,bar_lounge,perryssf.com,http://perryssf.com,ok,en,1
+sf-0072,sample,,Biere Restaurant & Lounge,"142 Minna St, San Francisco, CA, 94105",SF,bar_lounge,sfalibi.com,http://www.sfalibi.com,robots_blocked,unknown,0
+sf-0073,sample,,25 Lusk,"25 Lusk St, San Francisco, CA, 94107",SF,bar_lounge,25lusk.com,http://www.25lusk.com,ok,en,1
+sf-0074,sample,,The Wilson San Francisco,"973 Market St, San Francisco, CA, 94103",SF,bar_lounge,thewilsonsf.com,https://www.thewilsonsf.com,ok,en,1
+sf-0075,sample,,Leopard Lounge,"25 Maiden Ln, San Francisco, CA, 94108",SF,bar_lounge,romperroom.com,http://romperroom.com,ok,en,1
+sf-0076,sample,,Tonga Room & Hurricane Bar,"950 Mason St, San Francisco, CA, 94108",SF,bar_lounge,tongaroom.com,http://www.tongaroom.com,ok,en,1
+sf-0077,sample,,3rd Street Tap Room,"251 3rd St, San Francisco, CA, 94103",SF,bar_lounge,beermenus.com,https://www.beermenus.com/places/47952-3rd-street-taproom,ok,en,1
+sf-0078,sample,,Murphy's Pub,"217 Kearny St, San Francisco, CA, 94108",SF,bar_lounge,murphyspubsf.net,http://murphyspubsf.net,ok,en,1
+sf-0079,sample,,Cavalia,"4th St, San Francisco, CA, 94158",SF,bar_lounge,cavalia.net,http://www.cavalia.net,ok,en,1
+sf-0080,sample,,Hotel Union Square,"114 Powell St, San Francisco, CA, 94102",SF,hotel,hotelunionsquare.com,http://hotelunionsquare.com,http_error,unknown,0
+sf-0081,sample,,Hotel Zeppelin San Francisco,"545 Post St, San Francisco, CA, 94102",SF,hotel,zhotelssf.com,https://www.zhotelssf.com/hotels/zeppelin,bot_blocked,unknown,0
+sf-0082,sample,,1080 Residence,"1080 Folsom St, San Francisco, CA, 94103",SF,hotel,sfhousingservices.com,http://www.sfhousingservices.com,robots_blocked,unknown,0
+sf-0083,sample,,The Clift Royal Sonesta San Francisco,"495 Geary St, San Francisco, CA, 94102",SF,hotel,sonesta.com,https://www.sonesta.com/royal-sonesta/ca/san-francisco/clift-royal-sonesta-hotel/,ok,en,1
+sf-0084,sample,,Hotel Diva,"440 Geary St, San Francisco, CA, 94102",SF,hotel,hoteldiva.com,https://www.hoteldiva.com,empty_after_render,en,0
+sf-0085,sample,,rentLEVER,"832 Sansome St, San Francisco, CA, 94111",SF,hotel,rentl.com,https://www.rentl.com,robots_blocked,unknown,0
+sf-0086,sample,,Hotel North Beach,"935 Kearny St, San Francisco, CA, 94133",SF,hotel,hotelnorthbeach.com,http://hotelnorthbeach.com,robots_blocked,unknown,0
+sf-0087,sample,,Union Square Backpacker's Hostel,"70 Derby St, San Francisco, CA, 94102",SF,hotel,hostel.com,http://www.unionsquarebackpackershostel.hostel.com,robots_blocked,unknown,0
+sf-0088,sample,,Hotel G San Francisco,"386 Geary St, San Francisco, CA, 94102",SF,hotel,hotels-g.com,https://www.hotels-g.com/san-francisco/,ok,en,1
+sf-0089,sample,,Feline Wishes & Caviar Dreams,"San Francisco, CA, 94107",SF,hotel,felinewishes.com,http://www.felinewishes.com,empty_after_render,unknown,0
+sf-0090,sample,,Signature San Francisco,"259 7th St, San Francisco, CA, 94103",SF,hotel,redlion.com,https://www.redlion.com/signature-inn/ca/san-francisco/signature-san-francisco,ok,en,1
+sf-0091,sample,,The Inn at Union Square,"440 Post St, San Francisco, CA, 94102",SF,hotel,unionsquare.com,https://www.unionsquare.com,bot_blocked,unknown,0
+sf-0092,sample,,Bay Bridge Inn,"966 Harrison St, San Francisco, CA, 94107",SF,hotel,baybridgeinn.com,http://baybridgeinn.com,bot_blocked,unknown,0
+sf-0093,sample,,Greystone Hotels,"155 Montgomery Street, San Francisco, CA, 94104",SF,hotel,greystonehotels.com,https://www.greystonehotels.com,bot_blocked,unknown,0
+sf-0094,sample,,Pontiac Hotel,"509 Minna St, San Francisco, CA, 94103",SF,hotel,pontiachotel.com,http://www.pontiachotel.com,robots_blocked,unknown,0
+sf-0095,sample,,Grant Plaza Hotel,"465 Grant Ave, San Francisco, CA, 94108",SF,hotel,grantplaza.com,http://www.grantplaza.com,ok,en,1
+sf-0096,sample,,International Hotel Senior Housing,"848 Kearny St Apt 301, San Francisco, CA, 94108",SF,hotel,chinatowncdc.org,https://www.chinatowncdc.org,ok,en,1
+sf-0097,sample,,InterContinental Mark Hopkins,"999 California St, San Francisco, CA, 94108",SF,event_space,intercontinentalmarkhopkins.com,http://www.intercontinentalmarkhopkins.com,http_error,unknown,0
+sf-0098,sample,,The Emerald Tablet,"80 Fresno St, San Francisco, CA, 94133",SF,event_space,emtab.org,http://emtab.org,empty_after_render,unknown,0
+sf-0099,sample,,Salesforce,"1 Market St #300, San Francisco, CA, 94105",SF,event_space,salesforce.com,http://salesforce.com,ok,en,1
+sf-0100,sample,,Baana,"1256 Mason St, San Francisco, CA, 94108",SF,event_space,baana.co,https://www.baana.co,robots_blocked,unknown,0
+sf-0101,sample,,Farming Hope,"690 Van Ness Ave, San Francisco, CA, 94102",SF,event_space,farminghope.org,http://farminghope.org,ok,en,1
+sf-0102,sample,,The Podio Store,"224 6th St, San Francisco, CA, 94103",SF,event_space,podio.com,https://store.podio.com,ok,non_en,1
+sf-0103,sample,,Cookhouse,"253 Columbus Ave, San Francisco, CA, 94133",SF,event_space,cookhousesf.com,http://www.cookhousesf.com,ok,en,1
+sf-0104,sample,,Bayanihan Community Center,"1010 Mission St, San Francisco, CA, 94103",SF,event_space,bayanihancc.org,http://bayanihancc.org,http_error,unknown,0
+sf-0105,sample,,RocketStudios at RocketSpace,"180 Sansome St Fl 3, San Francisco, CA, 94104",SF,event_space,rocket-space.com,http://rocket-space.com,robots_blocked,unknown,0
+sf-0106,sample,,Infinity Club Lounge,"333 Main St, San Francisco, CA, 94105",SF,event_space,infinitysf.org,http://infinitysf.org,ok,en,1
+sf-0107,sample,,Kvänum Kitchens,"526 Washington St, San Francisco, CA, 94111",SF,event_space,kvanum.com,http://www.kvanum.com,ok,non_en,1
+sf-0108,sample,,Transform1060,"1060 Folsom St, San Francisco, CA, 94103",SF,event_space,transform1060.org,https://www.transform1060.org,ok,en,1
+sf-0109,sample,,The Mayan Room,"450 Sutter St Rm 310, San Francisco, CA, 94108",SF,event_space,450sutter.com,http://www.450sutter.com,ok,en,1
+sf-0110,sample,,Uji Time Dessert,"121 4th St, San Francisco, CA, 94103",SF,fast_casual_cafe,ujitimedessert.com,http://ujitimedessert.com,ok,en,1
+sf-0111,sample,,Coffee Cultures,"655 Montgomery St, San Francisco, CA, 94111",SF,fast_casual_cafe,coffee-cultures.com,http://www.coffee-cultures.com,ok,en,1
+sf-0112,sample,,Try Treats,"44 Tehama St, San Francisco, CA 94105, San Francisco, CA, 94105",SF,fast_casual_cafe,trytreats.com,https://www.trytreats.com,ok,en,1
+sf-0113,sample,,Union Square Pizza & Kitchen,"284 Ofarrell St, San Francisco, CA, 94102",SF,fast_casual_cafe,unionsquarepk.com,http://unionsquarepk.com,ok,non_en,1
+sf-0114,sample,,Barbara Express,"427 Columbus Ave, San Francisco, CA, 94133",SF,fast_casual_cafe,sfbarbara.com,https://www.sfbarbara.com/barbara-express&cachebuster=1624459538,http_error,unknown,0
+sf-0115,sample,,Soma Eats,"186 2nd St, San Francisco, CA, 94105",SF,fast_casual_cafe,somaeatssf.com,http://www.somaeatssf.com,ok,en,1
+sf-0116,sample,,Morning Brew Coffee & Tea,"401 Sansome St, San Francisco, CA, 94111",SF,fast_casual_cafe,morningbrewsf.com,http://morningbrewsf.com,robots_blocked,unknown,0
+sf-0117,sample,,Eagle Cafe,"Pier 39, Space A-201, San Francisco, CA, 94111",SF,fast_casual_cafe,eaglecafe.com,http://www.eaglecafe.com,ok,en,1
+sf-0118,sample,,Cheezy's Artisan Pizza,"945 Market Street, San Francisco, CA, 94103",SF,fast_casual_cafe,cheezysartisanpizza.com,https://cheezysartisanpizza.com,ok,en,1
+sf-0119,sample,,Wicked Star,"601 Mission Bay Blvd N, San Francisco, CA, 94158",SF,fast_casual_cafe,wickedstarsf.com,http://www.wickedstarsf.com,ok,en,1
+sf-0120,sample,,Rize Up Bakery,"1160 Howard St, San Francisco, CA, 94103",SF,fast_casual_cafe,rizeupsourdough.com,http://rizeupsourdough.com,ok,en,1
+sf-0121,sample,,Bollywood Pizza,"215 Fremont St, San Francisco, CA, 94105",SF,fast_casual_cafe,bollywoodpizza.com,http://bollywoodpizza.com,ok,en,1
+sf-0122,sample,,Namaste Cafe for testing,"629 California St, San Francisco, CA, 94109",SF,fast_casual_cafe,testingcsm.com,https://www.testingcsm.com,robots_blocked,unknown,0
+sf-0123,sample,,Yummy Bakery and Cafe,"607 Jackson St, San Francisco, CA, 94133",SF,fast_casual_cafe,qmenu.us,http://qmenu.us,ok,en,1
+sf-0124,sample,,Beanstalk Cafe,"724 Bush St, San Francisco, CA, 94108",SF,fast_casual_cafe,beanstalk3.com,http://www.beanstalk3.com,robots_blocked,unknown,0
+sf-0125,sample,,Imperial Tea Court,"One Ferry Building #27, San Francisco, CA, 94111",SF,fast_casual_cafe,imperialtea.com,http://imperialtea.com,ok,en,1
+sf-0126,sample,,Tranquil Resonance,"1352 Mason St, San Francisco, CA, 94133",SF,fast_casual_cafe,tranquilresonance.com,http://site.tranquilresonance.com,ok,en,1
+sf-0127,sample,,The Breakfast Basile Sandwich,"643 Clay St, San Francisco, CA, 94111",SF,fast_casual_cafe,breakfastbasile.com,http://breakfastbasile.com,robots_blocked,unknown,0
+sf-0128,sample,,Just Desserts,"101 4th St, San Francisco, CA, 94103",SF,fast_casual_cafe,justdesserts.com,http://www.justdesserts.com,ok,en,1
+sf-0129,sample,,Pazzia Caffe & Trattoria,"337 3rd St, San Francisco, CA, 94107",SF,fast_casual_cafe,pazziarestaurant.com,http://www.pazziarestaurant.com,robots_blocked,unknown,0
+sf-0130,sample,,Supremo Pizza,"87 6th St, San Francisco, CA, 94103",SF,fast_casual_cafe,supremopizzaca.com,http://supremopizzaca.com,ok,en,1
+sf-0131,sample,,The Courtyard by Off the Grid,"100 Terry A Francois Blvd, San Francisco, CA, 94158",SF,fast_casual_cafe,thecourtyardsf.com,http://www.thecourtyardsf.com,robots_blocked,unknown,0
+sf-0132,sample,,Dick Lee Pastry Shop,"716 Jackson St, San Francisco, CA, 94133",SF,fast_casual_cafe,page.tl,http://www.dickleepastry.page.tl,robots_blocked,unknown,0
+sf-0133,sample,,Native Baking Company,"San Francisco, CA",SF,fast_casual_cafe,nativebaking.com,https://www.nativebaking.com,ok,non_en,1
+sf-0134,sample,,Firetrail Pizza,"601 Mission Bay Blvd N, San Francisco, CA, 94158",SF,fast_casual_cafe,firetrailpizza.com,http://firetrailpizza.com,ok,en,1
+sf-0135,sample,,The Sarap Shop,"1379 4th St, San Francisco, CA, 94158",SF,fast_casual_cafe,thesarapshop.com,http://www.thesarapshop.com,ok,en,1
+sf-0136,sample,,Batter Bakery Kiosk,"555 California St, San Francisco, CA, 94104",SF,fast_casual_cafe,batterbakery.com,http://www.batterbakery.com,ok,en,1
+sf-0137,sample,,Coffee Bodega,"50 Fremont St, San Francisco, CA, 94105",SF,fast_casual_cafe,coffeebodega.com,http://www.coffeebodega.com,robots_blocked,unknown,0
+sf-0138,sample,,La Jefa Taqueria,"San Francisco, CA, 94124",SF,fast_casual_cafe,lajefatacotruck.com,https://lajefatacotruck.com,robots_blocked,unknown,0
+sf-0139,sample,,Super Duper Burgers,"721 Market St, San Francisco, CA, 94103",SF,fast_casual_cafe,superduperburgers.com,https://locations.superduperburgers.com/ca/san-francisco/721-market-street.html,robots_blocked,unknown,0
+sf-0140,sample,,Frena Bakery and Cafe,"132 6th St, San Francisco, CA, 94103",SF,fast_casual_cafe,frenabakery.com,https://www.frenabakery.com,empty_after_render,unknown,0
+sf-0141,sample,,Soma Supermarket,"1000 howard st, San Francisco, CA, 94103",SF,fast_casual_cafe,somasupermarket.com,https://somasupermarket.com,robots_blocked,unknown,0
+sf-0142,sample,,Loveski,"499 Jackson St, San Francisco, CA, 94111",SF,fast_casual_cafe,loveskideli.com,https://www.loveskideli.com/loveski-jackson-square,ok,en,1
+sf-0143,sample,,Ghirardelli Ice Cream & Chocolate Shop,"24 Willie Mays Plz, San Francisco, CA, 94107",SF,fast_casual_cafe,ghirardelli.com,http://ghirardelli.com,robots_blocked,unknown,0
+sf-0144,sample,,Good Eats Cafe,"200 Pine St, San Francisco, CA, 94104",SF,fast_casual_cafe,goodeats-cafe.com,http://goodeats-cafe.com,robots_blocked,unknown,0
+sf-0145,sample,,Cocoa Cafe,"103 Waverly Pl, San Francisco, CA, 94108",SF,fast_casual_cafe,coupacafe.com,http://www.coupacafe.com,ok,en,1
+hnl-0001,sample,,Bonsai Burrito,"1000 Bishop St, Honolulu, HI, 96813",Honolulu,casual_restaurant,bonsaiburritohi.com,http://www.bonsaiburritohi.com,robots_blocked,unknown,0
+hnl-0002,sample,,Taormina Sicilian Cuisine,"227 Lewers St, Honolulu, HI, 96815",Honolulu,casual_restaurant,taorminarestaurant.com,http://taorminarestaurant.com,ok,en,1
+hnl-0003,sample,,Mediterraneo Italian Restaurant,"349 Royal Hawaiian Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,mediterraneohawaii.com,https://www.mediterraneohawaii.com,robots_blocked,unknown,0
+hnl-0004,sample,,Ethiopian Love Restaurant,"1112 Smith St, Honolulu, HI, 96817",Honolulu,casual_restaurant,ethiopianlovehi.com,http://www.ethiopianlovehi.com,empty_after_render,unknown,0
+hnl-0005,sample,,Sushi Tokiwa,"2233 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,restaurantsuntory.com,https://www.restaurantsuntory.com/Sushi-Tokiwa.htm,ok,en,1
+hnl-0006,sample,,Ship's Tavern Restaurant,"2365 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,moana-surfrider.com,http://www.moana-surfrider.com,ok,en,1
+hnl-0007,sample,,Ezogiku Noodle Cafe,"2201 Kalakaua Ave Unit B6, Honolulu, HI, 96815",Honolulu,casual_restaurant,jimdo.com,http://ezogiku.jimdo.com,robots_blocked,unknown,0
+hnl-0008,sample,,Kono's Waikiki,"2310 Kuhio Avenue, Honolulu, HI, 96815",Honolulu,casual_restaurant,konosinternational.com,http://www.konosinternational.com,ok,en,1
+hnl-0009,sample,,Phillip Paolo's Italian Restaurant,"500 Ala Moana Blvd, Honolulu, HI, 96813",Honolulu,casual_restaurant,phillippaolos.com,http://www.phillippaolos.com,robots_blocked,unknown,0
+hnl-0010,sample,,Mikawon Korean Restaurant,"2310 Kuhio Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,mikawonkorean.com,http://www.mikawonkorean.com,ok,en,1
+hnl-0011,sample,,Wild Mushroom,"1040 Richards St, Honolulu, HI, 96813",Honolulu,casual_restaurant,wildmushroompizza.com,http://www.wildmushroompizza.com,ok,en,1
+hnl-0012,sample,,"Panya, Remington College Courtyard","1111 Bishop St, Honolulu, HI, 96813",Honolulu,casual_restaurant,panyabakery.com,http://www.panyabakery.com,ok,en,1
+hnl-0013,sample,,Masa's Sushi,HI,Honolulu,casual_restaurant,masas-sushi.com,http://masas-sushi.com,ok,en,1
+hnl-0014,sample,,Five-O Ribs,"555 South St, Honolulu, HI, 96813",Honolulu,casual_restaurant,fiveoribs.com,http://www.fiveoribs.com,robots_blocked,unknown,0
+hnl-0015,sample,,Kirin Restaurant,"2424 Kalakaua Ave Ste 103, Honolulu, HI, 96815",Honolulu,casual_restaurant,kirinrestauranthawaii.com,http://www.kirinrestauranthawaii.com,ok,en,1
+hnl-0016,sample,,Sunset Grill,"500 Ala Moana Blvd Ste 1A, Honolulu, HI, 96813",Honolulu,casual_restaurant,sunsetgrill.com,http://sunsetgrill.com,robots_blocked,unknown,0
+hnl-0017,sample,,Ramen Nakamura,"2141 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,ramennakamura.com,http://www.ramennakamura.com,robots_blocked,unknown,0
+hnl-0018,sample,,San Francisco Salad Co.,"1001 Bishop St, Honolulu, HI, 96813",Honolulu,casual_restaurant,lesliesflowersandgifts.com,http://www.lesliesflowersandgifts.com,robots_blocked,unknown,0
+hnl-0019,sample,,Furusato Sushi,"2424 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,furusatosushi.net,https://www.furusatosushi.net,ok,en,1
+hnl-0020,sample,,Irie Jerk Hawaii,"1088 Bishop St Ste 101, Honolulu, HI, 96813",Honolulu,casual_restaurant,iriejerkhi.com,https://www.iriejerkhi.com,ok,non_en,1
+hnl-0021,sample,,Morimoto Asia Waikiki,"2490 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,morimotoasiawaikiki.com,https://morimotoasiawaikiki.com,ok,non_en,1
+hnl-0022,sample,,All Star Hawaii,"2080 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,allstarhawaii.com,http://www.allstarhawaii.com,robots_blocked,unknown,0
+hnl-0023,sample,,Ray's BYOB Kitchen,"100 N Beretania St #113, Honolulu, HI, 96817",Honolulu,casual_restaurant,raysbyobkitchen.com,http://www.raysbyobkitchen.com,robots_blocked,unknown,0
+hnl-0024,sample,,The Blue Fish,"226 Lewers St # L-200, Honolulu, HI, 96815",Honolulu,casual_restaurant,thebluefishsushi.com,http://www.thebluefishsushi.com,bot_blocked,unknown,0
+hnl-0025,sample,,Pindan Foods,"131 Kaiulani Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,pindanfoods.com,http://www.pindanfoods.com,robots_blocked,unknown,0
+hnl-0026,sample,,Oahu Mexican Grill,"2520 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,omg.menu,https://www.omg.menu,bot_blocked,unknown,0
+hnl-0027,sample,,Top of Waikiki,"2270 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,topofwaikiki.com,http://topofwaikiki.com,robots_blocked,unknown,0
+hnl-0028,sample,,Hana No Sato,"2410 Koa Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,ameblo.jp,http://ameblo.jp/myshand-inc011,empty_after_render,unknown,0
+hnl-0029,sample,,Village Steak & Seafood,"2005 Kalia Rd, Honolulu, HI, 96815",Honolulu,casual_restaurant,hiltonhawaiianvillage.com,http://www.hiltonhawaiianvillage.com/dining/wiki-wiki-market,http_error,unknown,0
+hnl-0030,sample,,Soho,"80 S Pauahi St, Honolulu, HI, 96813",Honolulu,steakhouse_grill,groupon.com,https://www.groupon.com/biz/honolulu/soho,ok,non_en,1
+hnl-0031,sample,,Tony Roma,"Honolulu, HI, 96815",Honolulu,steakhouse_grill,tonyromas.com,http://www.tonyromas.com,ok,en,1
+hnl-0032,sample,,Beachhouse at the Moana,"2365 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,steakhouse_grill,beachhousewaikiki.com,https://www.beachhousewaikiki.com,bot_blocked,unknown,0
+hnl-0033,sample,,d.k Steak House,"2552 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,steakhouse_grill,dksteakhouse.com,http://www.dksteakhouse.com,robots_blocked,unknown,0
+hnl-0034,sample,,Oh My Grill,"1960 Kapiolani Blvd, Honolulu, HI, 96826",Honolulu,steakhouse_grill,ohmygrillhawaii.com,http://ohmygrillhawaii.com,ok,en,1
+hnl-0035,sample,,Smokehouse BBQ & Pub,"438 Hobron Ln., Honolulu, HI, 96815",Honolulu,steakhouse_grill,corporateeventcateringhonolulu.com,http://www.corporateeventcateringhonolulu.com,robots_blocked,unknown,0
+hnl-0036,sample,,Chopchop Rotisserie,"438 Hobron Ln, Honolulu, HI, 96815",Honolulu,steakhouse_grill,chopchoprotisserie.com,http://www.chopchoprotisserie.com,robots_blocked,unknown,0
+hnl-0037,sample,,Stripsteak,"2330 Kalakaua Ave Ste 330 # 330, Honolulu, HI, 96815",Honolulu,steakhouse_grill,stripsteakwaikiki.com,http://stripsteakwaikiki.com,ok,en,1
+hnl-0038,sample,,Wolfgang's Steakhouse,"2301 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,steakhouse_grill,wolfgangssteakhouse.net,http://www.wolfgangssteakhouse.net,ok,en,1
+hnl-0039,sample,,Smith's Union Bar,"19 N Hotel St, Honolulu, HI, 96817",Honolulu,bar_lounge,firstfridayhawaii.com,http://www.firstfridayhawaii.com/d/d/smiths-union-bar.html,ok,en,1
+hnl-0040,sample,,M.A.C. 24/7,"2500 Kuhio Ave, Honolulu, HI, 96815",Honolulu,bar_lounge,mac247waikiki.com,http://www.mac247waikiki.com,bot_blocked,unknown,0
+hnl-0041,sample,,Tropics Ale House Waikiki,"1778 Ala Moana Blvd, Honolulu, HI, 96815",Honolulu,bar_lounge,tropicsalehousehonolulu.com,http://www.tropicsalehousehonolulu.com,robots_blocked,unknown,0
+hnl-0042,sample,,Wang Chung's,"2424 Koa Ave, Honolulu, HI, 96815",Honolulu,bar_lounge,wangchungs.com,http://wangchungs.com,ok,en,1
+hnl-0043,sample,,Smith & Kings,"69 N King St, Honolulu, HI, 96817",Honolulu,bar_lounge,smithandkings.website,https://www.smithandkings.website,robots_blocked,unknown,0
+hnl-0044,sample,,Ferguson's Irish Pub,"729 Bishop St, Honolulu, HI, 96813",Honolulu,bar_lounge,fergusonspub.com,http://www.fergusonspub.com,ok,en,1
+hnl-0045,sample,,Suzie Wong's Hideaway,"1913 Dudoit Ln, Honolulu, HI, 96815",Honolulu,bar_lounge,suziewongshideaway.com,http://suziewongshideaway.com,bot_blocked,unknown,0
+hnl-0046,sample,,Bourbon Street,"1055 Alakea St, Honolulu, HI, 96813",Honolulu,bar_lounge,bourbonstreethi.com,https://www.bourbonstreethi.com/contact,robots_blocked,unknown,0
+hnl-0047,sample,,Assaggio,"450 Ala Moana Blvd, Honolulu, HI, 96813",Honolulu,bar_lounge,assaggioitaliano.com,http://www.assaggioitaliano.com,robots_blocked,unknown,0
+hnl-0048,sample,,Heyday,"431 Nohonani St, Honolulu, HI, 96815",Honolulu,bar_lounge,heydayhawaii.com,http://www.heydayhawaii.com,ok,en,1
+hnl-0049,sample,,Scarlet Honolulu,"60-98 S Pauahi St, Honolulu, HI, 96813",Honolulu,bar_lounge,scarlethonolulu.com,http://www.scarlethonolulu.com,empty_after_render,unknown,0
+hnl-0050,sample,,Heavenly Island Lifestyle,"342 Seaside Ave, Honolulu, HI, 96815",Honolulu,bar_lounge,heavenly-waikiki.com,https://www.heavenly-waikiki.com,ok,en,1
+hnl-0051,sample,,Cuckoo Coconuts Waikiki,"333 Royal Hawaiian Ave, Honolulu, HI, 96815",Honolulu,bar_lounge,cuckoococonutswaikiki.com,http://www.cuckoococonutswaikiki.com,ok,en,1
+hnl-0052,sample,,Mai Tai Bar,"2259 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,bar_lounge,maitaibarwaikiki.com,https://www.maitaibarwaikiki.com,bot_blocked,unknown,0
+hnl-0053,sample,,Olohana Brewpub by Kalihi Beer,"96 North King Street, Honolulu, HI, 96817",Honolulu,bar_lounge,brokenboundarybrewery.com,https://brokenboundarybrewery.com,ok,en,1
+hnl-0054,sample,,Green Lady Cocktail Room,"431 Nohonani St, Honolulu, HI, 96815",Honolulu,bar_lounge,greenladycocktailroom.com,https://www.greenladycocktailroom.com,empty_after_render,unknown,0
+hnl-0055,sample,,Makee Properties,"230 Makee Rd, Honolulu, HI, 96815",Honolulu,hotel,makeeproperties.com,https://makeeproperties.com,ok,en,1
+hnl-0056,sample,,Oasis Hotel Waikiki,"320 Lewers St, Honolulu, HI, 96815",Honolulu,hotel,oasishotelwaikiki.com,https://oasishotelwaikiki.com,ok,en,1
+hnl-0057,sample,,Castle Waikiki Shore Beachfront Condominiums,"2161 Kalia Rd, Honolulu, HI, 96815",Honolulu,hotel,waikikishore.com,http://www.waikikishore.com,ok,en,1
+hnl-0058,sample,,Marine Surf Waikiki Hotel,"364 Seaside Ave, Honolulu, HI, 96815",Honolulu,hotel,marinesurfaoao.com,http://www.marinesurfaoao.com/marinesurfaoao/outside_home.asp,http_error,unknown,0
+hnl-0059,sample,,Romer Waikiki At The Ambassador,"2040 Kuhio Ave, Honolulu, HI, 96815",Honolulu,hotel,romerhotels.com,https://www.romerhotels.com/hotels/waikiki-ambassador,bot_blocked,unknown,0
+hnl-0060,sample,,Stay Hotel,"2424 Koa Ave, Honolulu, HI, 96815",Honolulu,hotel,stayhotelwaikiki.com,http://www.stayhotelwaikiki.com,ok,en,1
+hnl-0061,sample,,Resort Environments,"1888 Kalakaua Ave Ste C312, Honolulu, HI, 96815",Honolulu,hotel,resortenv.com,http://www.resortenv.com,robots_blocked,unknown,0
+hnl-0062,sample,,Ewa Hotel Waikiki,"2555 Cartwright Rd, Honolulu, HI, 96815",Honolulu,hotel,aquaaston.com,https://www.aquaaston.com/hotels/ewa-hotel-waikiki,ok,en,1
+hnl-0063,sample,,Royal Waikiki Condos,"2240 Kuhio Ave Ste 103, Honolulu, HI, 96815",Honolulu,hotel,royalwaikikicondos.com,http://www.royalwaikikicondos.com,robots_blocked,unknown,0
+hnl-0064,sample,,Seaside towers,"435 Seaside Ave, Honolulu, HI, 96815",Honolulu,hotel,seasidehotelwaikiki.com,http://seasidehotelwaikiki.com,robots_blocked,unknown,0
+hnl-0065,sample,,Hawaii Polo Inn Hotel Honolulu,"1695 Ala Moana Blvd Honolulu HI 96815 USA, Honolulu, HI, 96815",Honolulu,hotel,astonhotels.com,http://astonhotels.com,robots_blocked,unknown,0
+hnl-0066,sample,,Pacific Monarch Hotel,"2427 Kuhio Ave, Honolulu, HI, 96815",Honolulu,hotel,pacificmonarch.com,https://www.pacificmonarch.com,ok,en,1
+hnl-0067,sample,,Disney Vacation Club Waikiki Preview Center,"2250 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,hotel,go.com,https://disneyvacationclub.disney.go.com/preview-centers/hawaii/,empty_after_render,unknown,0
+hnl-0068,sample,,Kyo-Ya Company,"2255 Kalakaua Ave Fl 2, Honolulu, HI, 96815",Honolulu,hotel,kyoyahotelsandresorts.com,http://kyoyahotelsandresorts.com,ok,en,1
+hnl-0069,sample,,Seaside Hawaiian Hostel,"419 Seaside Ave, Honolulu, HI, 96815",Honolulu,hotel,seasidehawaiianhostel.com,http://www.seasidehawaiianhostel.com,ok,en,1
+hnl-0070,sample,,Hawaiian Sun Holidays at Waikiki Banyan,"201 Ohua Ave, Honolulu, HI, 96815",Honolulu,hotel,vriresorts.com,http://www.vriresorts.com,ok,en,1
+hnl-0071,sample,,Hawai‘i Convention Center,"1801 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,event_space,meethawaii.com,https://www.meethawaii.com/convention-center,ok,en,1
+hnl-0072,sample,,Mau'loa Weddings,"1917 Dudoit Ln Apt A, Honolulu, HI, 96815",Honolulu,event_space,mauloaweddings.com,http://www.mauloaweddings.com,robots_blocked,unknown,0
+hnl-0073,sample,,Altitude37,"2500 Kuhio Ave, Honolulu, HI, 96815",Honolulu,event_space,altitude37.com,http://www.altitude37.com,robots_blocked,unknown,0
+hnl-0074,sample,,Beachwedding Oahu,"PO Box 38191, Honolulu, HI, 96837",Honolulu,event_space,beachweddingoahu.com,http://www.beachweddingoahu.com,ok,en,1
+hnl-0075,sample,,Weddings of Hawaii,"1888 Kalakaua Avenue c106, Honolulu, HI, 96815",Honolulu,event_space,wedhawaii.com,https://www.wedhawaii.com,ok,en,1
+hnl-0076,sample,,The Pacific Club,"1451 Queen Emma St, Honolulu, HI, 96813",Honolulu,event_space,thepacificclub.org,http://www.thepacificclub.org,empty_after_render,en,0
+hnl-0077,sample,,Kula & Kō,"2330 Kalakaua Ave Ste 214, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,kulaandko.com,http://www.kulaandko.com,robots_blocked,unknown,0
+hnl-0078,sample,,grass shack bistro,"2453 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,restaurants-us.com,https://waikikigrassshack.restaurants-us.com,bot_blocked,unknown,0
+hnl-0079,sample,,E.A.R.L.,"2919 Kapiolani Blvd, Honolulu, HI, 96826",Honolulu,fast_casual_cafe,earlhawaii.com,https://earlhawaii.com,ok,en,1
+hnl-0080,sample,,Cafe Aloha,"1301 Punchbowl St, Honolulu, HI, 96813",Honolulu,fast_casual_cafe,queensmedicalcenter.net,http://www.queensmedicalcenter.net,ok,non_en,1
+hnl-0081,sample,,Mahaloha Burger,"2233 Kalakaua Ave Ste 9, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,mahalohaburger.com,http://www.mahalohaburger.com,ok,en,1
+hnl-0082,sample,,ABC Store,"205 Lewers St, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,abcstores.com,http://www.abcstores.com,ok,en,1
+hnl-0083,sample,,Dean & Deluca,"2233 Kalakaua Ave, ホノルル, HI, 96815",Honolulu,fast_casual_cafe,deandeluca-hawaii.com,https://www.deandeluca-hawaii.com,ok,en,1
+hnl-0084,sample,,Honolulu Cafe,"741 Bishop St, Honolulu, HI, 96813",Honolulu,fast_casual_cafe,honolulucafehi.com,https://www.honolulucafehi.com,bot_blocked,unknown,0
+hnl-0085,sample,,Cookie Corner,"2570 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,cookiecornerhawaii.com,http://www.cookiecornerhawaii.com,ok,en,1
+hnl-0086,sample,,Omusubi Gaba,"438 Hobron Ln, Ste 107, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,omusubigaba.com,http://omusubigaba.com,robots_blocked,unknown,0
+hnl-0087,sample,,Kokoro Cafe,"2233 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,kokorohawaii.com,https://kokorohawaii.com,empty_after_render,unknown,0
+hnl-0088,sample,,Hula Dog Kuhio,"206 Kapuni St, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,huladogkuhiohonolulu.com,https://www.huladogkuhiohonolulu.com,robots_blocked,unknown,0
+hnl-0089,sample,,Cafe Glacé,"227 Lewers St Ste 115, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,cafeglace.com,http://www.cafeglace.com,ok,non_en,1
+hnl-0090,sample,,The Sunrise Shack Hawaii,"Honolulu, HI, 96815",Honolulu,fast_casual_cafe,sunriseshackhawaii.com,http://www.sunriseshackhawaii.com,ok,en,1
+hnl-0091,sample,,I love country cafe,"1138 Fort Street Mall, Honolulu, HI, 96813",Honolulu,fast_casual_cafe,ilovecountrycafehawaii.com,http://ilovecountrycafehawaii.com,bot_blocked,unknown,0
+hnl-0092,sample,,Häagen-Dazs,"2344 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,haagendazs.com,http://www.haagendazs.com,ok,en,1
+hnl-0093,sample,,Hiking Hawaii Cafe,"1956 Ala Moana Blvd, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,hikinghawaii808.com,https://www.hikinghawaii808.com,ok,non_en,1
+hnl-0094,sample,,Cafe Honua Olakino,"2443 Kuhio Ave, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,honuaolakino.com,http://www.honuaolakino.com,robots_blocked,unknown,0
+hnl-0095,sample,,Junbi Waikiki,"2301 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,junbishop.com,http://junbishop.com,ok,en,1
+hnl-0096,sample,,Coconut Cafe,"2441 Kuhio Ave, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,hinet.net,http://hi-coconut-cafe.myweb.hinet.net,robots_blocked,unknown,0
+hnl-0097,sample,,Morning Glass Coffee + Cafe,"1150 Nuʻuanu Ave, Honolulu, HI, 96817",Honolulu,fast_casual_cafe,morningglasscoffee.com,http://www.morningglasscoffee.com,ok,en,1
+hnl-0098,sample,,Laniakea Dining Room,"1040 Richards St, Honolulu, HI, 96813",Honolulu,fast_casual_cafe,ywcaoahu.org,http://www.ywcaoahu.org,ok,en,1
+hnl-0099,sample,,Hula Swirl,"2310 Kuhio Ave, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,hulaswirl.com,http://www.hulaswirl.com,ok,en,1
+hnl-0100,sample,,Aloha sundry,"1100 Alakea St, Honolulu, HI, 96813",Honolulu,fast_casual_cafe,alohafundraising.com,http://www.alohafundraising.com,empty_after_render,unknown,0
+la-0001,sample,,The Dining Room,"1301 Ocean Ave, Santa Monica, CA, 90401",LA,fine_dining,shangrila-hotel.com,http://www.shangrila-hotel.com/eat/,robots_blocked,unknown,0
+la-0002,sample,,"Madgidi, Kamal","8539 W Sunset Blvd Ste 4, West Hollywood, CA, 90069",LA,casual_restaurant,myprintop.com,http://www.myprintop.com/wordpress,robots_blocked,unknown,0
+la-0003,sample,,The Butcher's Daughter,"8755 Melrose Ave, West Hollywood, CA, 90069",LA,casual_restaurant,thebutchersdaughter.com,https://www.thebutchersdaughter.com,ok,en,1
+la-0004,sample,,Jinya Ramen Bar,"700 Wilshire Blvd Ste B, Los Angeles, CA, 90017",LA,casual_restaurant,jinyaramenbar.com,https://www.jinyaramenbar.com,ok,en,1
+la-0005,sample,,Doug Arangos Restaurant,"8826 Melrose Ave, West Hollywood, CA, 90069",LA,casual_restaurant,dougarangos.com,http://www.dougarangos.com,robots_blocked,unknown,0
+la-0006,sample,,Norman's,"8570 W Sunset Blvd, West Hollywood, CA, 90069",LA,casual_restaurant,normans.com,http://www.normans.com,ok,en,1
+la-0007,sample,,Pan-American Banana,"1059 S San Pedro St, Los Angeles, CA, 90015",LA,casual_restaurant,panamericanbanana.com,http://www.panamericanbanana.com,robots_blocked,unknown,0
+la-0008,sample,,The Factory Kitchen,"1300 Factory Pl, Los Angeles, CA, 90013",LA,casual_restaurant,thefactorykitchen.com,https://thefactorykitchen.com,ok,en,1
+la-0009,sample,,Cilantro Lime,"934 S Los Angeles St, Los Angeles, CA, 90015",LA,casual_restaurant,cilantrolime.net,http://www.cilantrolime.net,robots_blocked,unknown,0
+la-0010,sample,,Yuko Kitchen DTLA,"101 W 5th St, Los Angeles, CA, 90013",LA,casual_restaurant,yukokitchen.com,http://www.yukokitchen.com,bot_blocked,unknown,0
+la-0011,sample,,Blowfish Sushi to Die for,"9229 W Sunset Blvd, West Hollywood, CA, 90069",LA,casual_restaurant,blowfishsushi.com,http://blowfishsushi.com,robots_blocked,unknown,0
+la-0012,sample,,Noma Sushi,"2031 Wilshire Blvd, Santa Monica, CA, 90403",LA,casual_restaurant,nomarestaurants.com,http://www.nomarestaurants.com,robots_blocked,unknown,0
+la-0013,sample,,Benihana,"1447 4th St, Santa Monica, CA, 90401",LA,casual_restaurant,benihana.com,https://www.benihana.com,ok,en,1
+la-0014,sample,,Kinjiro,"424 E 2nd St, Los Angeles, CA, 90012",LA,casual_restaurant,kinjiro-la.com,http://www.kinjiro-la.com,ok,en,1
+la-0015,sample,,Warrior,"8909 W Sunset Blvd, West Hollywood, CA, 90069",LA,casual_restaurant,warriorlosangeles.com,https://warriorlosangeles.com,ok,non_en,1
+la-0016,sample,,The Red Fish,"West Hollywood, CA, 90069",LA,casual_restaurant,theredfishweho.com,https://www.theredfishweho.com,bot_blocked,unknown,0
+la-0017,sample,,Pasha's Persian Restaurant,"112 W 9th St, Los Angeles, CA, 90015",LA,casual_restaurant,classicthairestaurant.com,http://www.classicthairestaurant.com,ok,en,1
+la-0018,sample,,Broad Street Oyster Co.,"317 S Broadway, Los Angeles, CA, 90013",LA,casual_restaurant,broadstreetoyster.com,https://www.broadstreetoyster.com,empty_after_render,unknown,0
+la-0019,sample,,Simply Salad,"645 W 9th St, Los Angeles, CA, 90015",LA,casual_restaurant,simplysalad.com,http://simplysalad.com,ok,en,1
+la-0020,sample,,Sushi Park,"8539 W Sunset Blvd, West Hollywood, CA, 90069",LA,casual_restaurant,sushiparkonsunset.com,http://www.sushiparkonsunset.com,empty_after_render,unknown,0
+la-0021,sample,,Chez Mia,"8478 Melrose Ave, West Hollywood, CA, 90069",LA,casual_restaurant,chezmia.com,https://www.chezmia.com,robots_blocked,unknown,0
+la-0022,sample,,Blue Plate Oysterette,"1355 Ocean Ave, Santa Monica, CA, 90401",LA,casual_restaurant,blueplatesantamonica.com,http://www.blueplatesantamonica.com,empty_after_render,en,0
+la-0023,sample,,Lemonade,"505 S Flower St City National Plaza, Los Angeles, CA, 90071",LA,casual_restaurant,lemonadela.com,http://www.lemonadela.com,robots_blocked,unknown,0
+la-0024,sample,,Burritobox,"8380 Santa Monica Blvd, West Hollywood, CA, 90069",LA,casual_restaurant,burritobox.com,http://www.burritobox.com,empty_after_render,unknown,0
+la-0025,sample,,Made,"7168 Melrose Ave, Los Angeles, CA, 90046",LA,casual_restaurant,madeinhavana.com,http://madeinhavana.com,bot_blocked,unknown,0
+la-0026,sample,,Melrose Steakhouse,"7661 Melrose Ave, Los Angeles, CA, 90046",LA,casual_restaurant,melrosesteak.com,http://www.melrosesteak.com,empty_after_render,unknown,0
+la-0027,sample,,LunchStop Cafeteria,"313 N Figueroa St, Los Angeles, CA, 90012",LA,casual_restaurant,lunchstop.com,http://lunchstop.com/index.html,empty_after_render,unknown,0
+la-0028,sample,,Kyoto Japanese Restaurant,"930 Wilshire Blvd, Los Angeles, CA, 90017",LA,casual_restaurant,wilshiregrand.com,http://www.wilshiregrand.com/restaurant,robots_blocked,unknown,0
+la-0029,sample,,pasta e pasta by allegro,"432 E 2nd St, Los Angeles, CA, 90012",LA,casual_restaurant,restaurant-bank.jp,http://www.restaurant-bank.jp,robots_blocked,unknown,0
+la-0030,sample,,Marmalade Cafe,"710 Montana Ave, Santa Monica, CA, 90403",LA,casual_restaurant,marmaladecafe.com,http://www.marmaladecafe.com,ok,en,1
+la-0031,sample,,Wall Street Gangsters Exposed,"8730 W Sunset Blvd, West Hollywood, CA, 90069",LA,casual_restaurant,wallstreetgangstersexposed.com,http://www.wallstreetgangstersexposed.com,robots_blocked,unknown,0
+la-0032,sample,,Backseat of a cab,"Santa Monica Blvd., Los Angeles, CA, 90046",LA,casual_restaurant,obarla.com,http://www.obarla.com,robots_blocked,unknown,0
+la-0033,sample,,La Romana,"444 S Flower St, Los Angeles, CA, 90071",LA,casual_restaurant,rosehillsfoundation.org,http://www.rosehillsfoundation.org,bot_blocked,unknown,0
+la-0034,sample,,Los Angeles Flower and Plant Auction,"766 Wall St, Los Angeles, CA, 90014",LA,casual_restaurant,laflowerdistrict.com,http://www.laflowerdistrict.com,ok,en,1
+la-0035,sample,,Adkt La,"531 N Fairfax Ave, Los Angeles, CA, 90036",LA,casual_restaurant,adktla.com,https://l.adktla.com/opentable,robots_blocked,unknown,0
+la-0036,sample,,Salata,"505 S Flower St, Los Angeles, CA, 90071",LA,casual_restaurant,salata.com,https://www.salata.com,ok,en,1
+la-0037,sample,,Pez Cantina,"401 S Grand Ave, Los Angeles, CA, 90071",LA,casual_restaurant,pezcantina.com,http://www.pezcantina.com,ok,en,1
+la-0038,sample,,Alexandria Cafe,"1400 3rd Street Promenade, Santa Monica, CA, 90401",LA,casual_restaurant,alexandriacafe.us,http://www.alexandriacafe.us,robots_blocked,unknown,0
+la-0039,sample,,Schmidt's Brauhaus,"330 W Olympic Blvd, Los Angeles, CA, 90015",LA,casual_restaurant,schmidtsbrauhaus.com,http://www.schmidtsbrauhaus.com,robots_blocked,unknown,0
+la-0040,sample,,The Griddle Cafe,"7916 W Sunset Blvd, Los Angeles, CA, 90046",LA,casual_restaurant,thegriddlecafe.com,http://www.thegriddlecafe.com,bot_blocked,unknown,0
+la-0041,sample,,Shangrila Cafe,"744 E 3rd St, Los Angeles, CA, 90013",LA,casual_restaurant,zipfusion.com,http://www.zipfusion.com,ok,en,1
+la-0042,sample,,Taco Mundo,"105 E 8th St, Los Angeles, CA, 90014",LA,casual_restaurant,tacomundo.com,http://www.tacomundo.com,ok,non_en,1
+la-0043,sample,,Sushi Gen,"422 E 2nd St, Los Angeles, CA, 90012",LA,casual_restaurant,sushigen-dtla.com,https://www.sushigen-dtla.com,bot_blocked,unknown,0
+la-0044,sample,,Santa Monica Seafood Market & Cafe,"1000 Wilshire Blvd, Santa Monica, CA, 90401",LA,casual_restaurant,santamonicaseafood.com,http://santamonicaseafood.com,ok,en,1
+la-0045,sample,,Uovo,"1320 2nd Street, santa monica, CA, 90401",LA,casual_restaurant,uovo.la,https://uovo.la,ok,en,1
+la-0046,sample,,Mitsuru Sushi and Grill,"316 E 1st St, Los Angeles, CA, 90012",LA,casual_restaurant,menuism.com,http://www.menuism.com,robots_blocked,unknown,0
+la-0047,sample,,Sweetfin Poké,"829 Broadway, Santa Monica, CA, 90401",LA,casual_restaurant,sweetfin.com,https://www.sweetfin.com,ok,en,1
+la-0048,sample,,Hana Ichimonme,"333 S Alameda St, Los Angeles, CA, 90013",LA,casual_restaurant,tmcs.net,http://tracker.tmcs.net/www.mifune.com,robots_blocked,unknown,0
+la-0049,sample,,Dan Modern Chinese,"1403 2nd St, Santa Monica, CA, 90401",LA,casual_restaurant,danmodernchinese.com,http://danmodernchinese.com,ok,en,1
+la-0050,sample,,Perry's Cafe,"1200 Palisades Beach Rd, Santa Monica, CA, 90401",LA,casual_restaurant,perryscafe.com,http://perryscafe.com,ok,en,1
+la-0051,sample,,RA Sushi Bar Restaurant,"1447 4th St, Santa Monica, CA, 90401",LA,casual_restaurant,rasushi.com,https://www.rasushi.com,ok,en,1
+la-0052,sample,,Rama Thai Cuisine,"625 S Hill St Ste B69, Los Angeles, CA, 90014",LA,casual_restaurant,elrocoto.com,http://www.elrocoto.com,bot_blocked,unknown,0
+la-0053,sample,,Ono Hawaiian BBQ,"655 S Hope St,  Suite 100, Los Angeles, CA, 90017",LA,casual_restaurant,onohawaiianbbq.com,https://onohawaiianbbq.com,ok,en,1
+la-0054,sample,,Ostioneria Colima,"1465 W 3rd St, Los Angeles, CA, 90017",LA,casual_restaurant,ostioneriacolimala.com,http://www.ostioneriacolimala.com,robots_blocked,unknown,0
+la-0055,sample,,Joyce,"770 S Grand Ave, Los Angeles, CA, 90017",LA,casual_restaurant,joycela.com,https://www.joycela.com,ok,en,1
+la-0056,sample,,Piccolo Santa Monica,"2127 Lincoln Blvd, Santa Monica, CA, 90405",LA,casual_restaurant,piccoloristoranti.com,http://www.piccoloristoranti.com,robots_blocked,unknown,0
+la-0057,sample,,Vromage Artisan Cheese,"7988 W Sunset Blvd, Los Angeles, CA, 90046",LA,casual_restaurant,vromage.com,http://www.vromage.com,ok,en,1
+la-0058,sample,,Santa Monica Women's Health,"2001 Santa Monica Blvd Ste 970W, Santa Monica, CA, 90404",LA,casual_restaurant,santamonicawomenshealth.com,http://www.santamonicawomenshealth.com,ok,en,1
+la-0059,sample,,Cabanas Salvadorian,"1003 S Hill St, Los Angeles, CA, 90015",LA,casual_restaurant,lacabanavenice.com,http://www.lacabanavenice.com,bot_blocked,unknown,0
+la-0060,sample,,Polanco DTLA,"840 S Spring St, Los Angeles, CA, 90014",LA,steakhouse_grill,dtlapolanco.com,https://www.dtlapolanco.com,robots_blocked,unknown,0
+la-0061,sample,,Manna Korean BBQ,"333 S Alameda St, Los Angeles, CA, 90013",LA,steakhouse_grill,mannabbq.com,http://www.mannabbq.com,http_error,unknown,0
+la-0062,sample,,Ocho Mexican Grill,"735 S Figueroa St Ste 315, Los Angeles, CA, 90017",LA,steakhouse_grill,adorogrille.com,http://www.adorogrille.com,robots_blocked,unknown,0
+la-0063,sample,,Baby Blues BBQ at The Crossing - DTLA,"200 S Hill St, Los Angeles, CA, 90012",LA,steakhouse_grill,babybluesbbq.com,http://www.babybluesbbq.com,ok,en,1
+la-0064,sample,,Philly Steak,"1551 Ocean Ave, Santa Monica, CA, 90401",LA,steakhouse_grill,ilfornaio.com,http://www.ilfornaio.com,ok,en,1
+la-0065,sample,,Maple Block,"324 S Hill St, Los Angeles, CA, 90013",LA,steakhouse_grill,mapleblockmeat.com,https://mapleblockmeat.com,robots_blocked,unknown,0
+la-0066,sample,,Black Sugar Rib Company,"746 S Central Ave, Los Angeles, CA, 90021",LA,steakhouse_grill,blacksugarribs.com,http://blacksugarribs.com,ok,en,1
+la-0067,sample,,LA Prime,"404 S Figueroa St, Los Angeles, CA, 90071",LA,steakhouse_grill,thebonaventure.com,http://www.thebonaventure.com/dining/la_prime.cfm,robots_blocked,unknown,0
+la-0068,sample,,Genwa Korean BBQ,"450 W Olympic Blvd, Los Angeles, CA, 90015",LA,steakhouse_grill,genwakoreanbbq.com,https://www.genwakoreanbbq.com,empty_after_render,unknown,0
+la-0069,sample,,Formosa Cafe,"7156 Santa Monica Blvd, West Hollywood, CA, 90046",LA,bar_lounge,theformosacafe.com,https://theformosacafe.com,ok,en,1
+la-0070,sample,,Ten Thirty Eight,"1044 S Hill St, Los Angeles, CA, 90015",LA,bar_lounge,clubmayan.com,http://www.clubmayan.com,robots_blocked,unknown,0
+la-0071,sample,,Traxx Bar,"800 N Alameda St, Los Angeles, CA, 90012",LA,bar_lounge,traxx.la,http://www.traxx.la/traxx-bar/,robots_blocked,unknown,0
+la-0072,sample,,O'Briens Irish Pub,"2226 Wilshire Blvd, Santa Monica, CA, 90403",LA,bar_lounge,obriensla.com,http://www.obriensla.com,ok,en,1
+la-0073,sample,,The Chestnut Club,"1348 14th St, Santa Monica, CA, 90404",LA,bar_lounge,thechestnutclubsm.com,http://www.thechestnutclubsm.com,robots_blocked,unknown,0
+la-0074,sample,,Joao Lobby Bar,"8490 W Sunset Blvd, West Hollywood, CA, 90069",LA,bar_lounge,jeremyhotel.com,https://jeremyhotel.com/joao-lobby-bar,http_error,unknown,0
+la-0075,sample,,Wurstküche,"800 E 3rd St, Los Angeles, CA, 90013",LA,bar_lounge,wurstkuche.com,http://www.wurstkuche.com,ok,en,1
+la-0076,sample,,Good Clean Fun,"868 S Olive St, Los Angeles, CA, 90014",LA,bar_lounge,goodcleanfundtla.com,https://www.goodcleanfundtla.com,ok,en,1
+la-0077,sample,,V Cut Cigar Lounge,"8172 Melrose Ave, Los Angeles, CA, 90046",LA,bar_lounge,thevcut.com,https://www.thevcut.com,ok,en,1
+la-0078,sample,,Tropical Smoothie,"620 Santa Monica Blvd, Santa Monica, CA, 90401",LA,bar_lounge,tropicalsmoothie.com,http://tropicalsmoothie.com,empty_after_render,unknown,0
+la-0079,sample,,Coco Papaya,"8445 Melrose Ave, West Hollywood, CA, 90069",LA,bar_lounge,cocopapayajuice.com,https://www.cocopapayajuice.com,ok,en,1
+la-0080,sample,,LAndmark Hookah Lounge,"1059 S Broadway, Los Angeles, CA, 90015",LA,bar_lounge,landmarkhookah.com,http://www.landmarkhookah.com,robots_blocked,unknown,0
+la-0081,sample,,Coucou,"9045 Santa Monica Blvd, West Hollywood, CA, 90069",LA,bar_lounge,coucou.la,https://www.coucou.la,ok,en,1
+la-0082,sample,,35th Floor Rotating Bar At The westin,"Los Angeles, CA, 90071",LA,bar_lounge,opentable.com,https://www.opentable.com/bonavista-revolving-lounge-at-the-westin-bonaventure-hotel,robots_blocked,unknown,0
+la-0083,sample,,Collar & Comb,"7813 W Sunset Blvd, Los Angeles, CA, 90046",LA,bar_lounge,collarandcomb.dog,https://collarandcomb.dog,bot_blocked,unknown,0
+la-0084,sample,,Genghis Cohen,"740 N Fairfax Ave, Los Angeles, CA, 90036",LA,bar_lounge,genghiscohen.com,http://www.genghiscohen.com,bot_blocked,unknown,0
+la-0085,sample,,Las Perlas,"7511 Santa Monica Blvd, West Hollywood, CA, 90046",LA,bar_lounge,lasperlasweho.com,https://www.lasperlasweho.com,ok,en,1
+la-0086,sample,,Florentín Rooftop Bar,"617 S Spring ST, Los Angeles, CA, 90014",LA,bar_lounge,florentindtla.com,https://florentindtla.com,ok,en,1
+la-0087,sample,,Olivetta,"9010 Melrose Ave, West Hollywood, CA, 90069",LA,bar_lounge,olivetta.la,https://www.olivetta.la,robots_blocked,unknown,0
+la-0088,sample,,Golden State,"241 S San Pedro St, Los Angeles, CA, 90012",LA,bar_lounge,eatgoldenstate.com,http://www.eatgoldenstate.com,robots_blocked,unknown,0
+la-0089,sample,,El Patron Cantina,"888 Wilshire Blvd, Los Angeles, CA, 90017",LA,bar_lounge,elpatrondtla.com,https://www.elpatrondtla.com,ok,en,1
+la-0090,sample,,Melrose Station,"7384 Melrose Ave, Los Angeles, CA, 90046",LA,bar_lounge,themelrosestation.com,http://themelrosestation.com,ok,en,1
+la-0091,sample,,Rudolph’s Bar & Tea,"416 W 8th St, Los Angeles, CA, 90014",LA,bar_lounge,freehandhotels.com,http://freehandhotels.com/los-angeles/rudolphs-bar-tea,empty_after_render,en,0
+la-0092,sample,,Soho House West Hollywood,"9200 W Sunset Blvd, West Hollywood, CA, 90069",LA,bar_lounge,sohohousewh.com,https://www.sohohousewh.com,ok,en,1
+la-0093,sample,,Exchange LA,"618 S Spring St, Los Angeles, CA, 90014",LA,bar_lounge,exchangela.com,http://www.exchangela.com,ok,en,1
+la-0094,sample,,Lost DTLA,"718 S Hill St, Los Angeles, CA, 90014",LA,bar_lounge,getlostdtla.com,https://www.getlostdtla.com,bot_blocked,unknown,0
+la-0095,sample,,Hi Tops,"8933 Santa Monica Blvd, West Hollywood, CA, 90069",LA,bar_lounge,hitopsbar.com,https://www.hitopsbar.com,ok,en,1
+la-0096,sample,,La Cita Patio,"336 S Hill St, Los Angeles, CA, 90013",LA,bar_lounge,djastar.com,http://www.djastar.com,robots_blocked,unknown,0
+la-0097,sample,,Summer Social Club,"7961 Santa Monica Blvd, West Hollywood, CA, 90046",LA,bar_lounge,summersocialclub.com,https://www.summersocialclub.com,http_error,unknown,0
+la-0098,sample,,Mikado Little Tokyo,"331 E 1st St, Los Angeles, CA, 90012",LA,hotel,mikadolittletokyo.com,https://www.mikadolittletokyo.com,ok,en,1
+la-0099,sample,,Beverly Terrace Hotel,"469 N Doheny Dr, Beverly Hills, CA, 90210",LA,hotel,hotelbeverlyterrace.com,http://www.hotelbeverlyterrace.com,bot_blocked,unknown,0
+la-0100,sample,,Freehand Los Angeles,"416 W 8th St, Los Angeles, CA, 90014",LA,hotel,thefreehand.com,http://thefreehand.com/losangeles/,http_error,unknown,0
+la-0101,sample,,TempHome Services,"1223 Wilshire Blvd # 891, Santa Monica, CA, 90403",LA,hotel,temphome.com,http://www.temphome.com,ok,en,1
+la-0102,sample,,Shore Hotel,"1515 Ocean Ave, Santa Monica, CA, 90401",LA,hotel,shorehotel.com,https://www.shorehotel.com,bot_blocked,unknown,0
+la-0103,sample,,Roes hotel,"2683 Euclid Avenue, Los Angeles, CA, 90001",LA,hotel,roeshotel.com,http://www.roeshotel.com,robots_blocked,unknown,0
+la-0104,sample,,Eugene Hotel,"560 Stanford Ave, Los Angeles, CA, 90013",LA,hotel,eugenehotel.com,http://eugenehotel.com,robots_blocked,unknown,0
+la-0105,sample,,Best Western Plus Gateway Hotel Santa Monica,"1920 Santa Monica Blvd, Santa Monica, CA, 90404",LA,hotel,gatewayhotel.com,http://www.gatewayhotel.com,ok,en,1
+la-0106,sample,,Hotel Connect USA,"610 Santa Monica Blvd Ste 216, Santa Monica, CA, 90401",LA,hotel,hotelconnectusa.net,http://www.hotelconnectusa.net,robots_blocked,unknown,0
+la-0107,sample,,Hotel California,"1670 Ocean Ave, Santa Monica, CA, 90401",LA,hotel,hotelca.com,http://www.hotelca.com,empty_after_render,unknown,0
+la-0108,sample,,Rest Haven Motel,"815 Grant St, Santa Monica, CA, 90405",LA,hotel,resthavenmotel.net,http://www.resthavenmotel.net,robots_blocked,unknown,0
+la-0109,sample,,London Guest Suites,"818 N La Jolla Ave, Los Angeles, CA, 90046",LA,hotel,londonguestsuites.com,https://www.londonguestsuites.com,ok,en,1
+la-0110,sample,,The Senator Hotel,"729 S Main St, Los Angeles, CA, 90014",LA,hotel,senatorhotel.com,http://www.senatorhotel.com,bot_blocked,unknown,0
+la-0111,sample,,Nrea-TRC 711 Operating Company,"700 S Flower St Ste 2600, Los Angeles, CA, 90017",LA,hotel,sheratonlosangelesdowntown.com,http://www.sheratonlosangelesdowntown.com,bot_blocked,unknown,0
+la-0112,sample,,Hidalgo Lodge,"700 S Flower St Ste 1216, Los Angeles, CA, 90017",LA,hotel,hidalgolodge.com.mx,http://hidalgolodge.com.mx,ok,en,1
+la-0113,sample,,Vibiana,"214 S Main St, Los Angeles, CA, 90012",LA,event_space,vibiana.com,http://www.vibiana.com,ok,en,1
+la-0114,sample,,Sky Studio,"1150 S Olive St, Los Angeles, CA, 90015",LA,event_space,skystudio.com,http://www.skystudio.com,empty_after_render,unknown,0
+la-0115,sample,,FD Photo Studio - Main,"530 E 8th St, 5th Fl, Los Angeles, CA, 90014",LA,event_space,fdphotostudio.com,http://fdphotostudio.com,ok,en,1
+la-0116,sample,,Los Angeles Convention & Visitors Bureau,"333 S Hope St Ste 1800, Los Angeles, CA, 90071",LA,event_space,discoverlosangeles.com,http://www.discoverlosangeles.com,ok,en,1
+la-0117,sample,,Illusion Magic Lounge,"1418 4th St, Santa Monica, CA, 90401",LA,event_space,illusionmagiclounge.com,https://illusionmagiclounge.com,ok,en,1
+la-0118,sample,,The Majestic Downtown + the Reserve,"South Spring Street, Los Angeles, CA, 90014",LA,event_space,themajesticdowntown.com,http://www.themajesticdowntown.com,ok,en,1
+la-0119,sample,,Cross Campus,"929 Colorado Ave, Santa Monica, CA, 90401",LA,event_space,crosscamp.us,http://www.crosscamp.us/site/locations/cross-campus-santa-monica.html,http_error,unknown,0
+la-0120,sample,,Far East Lounge,"323 E 1st St, Los Angeles, CA, 90012",LA,event_space,ltsc.org,http://fel.ltsc.org,robots_blocked,unknown,0
+la-0121,sample,,Ultimate Life Living,"548 S Spring St #109, Los Angeles, CA, 90013",LA,event_space,compass.com,https://www.compass.com,ok,en,1
+la-0122,sample,,Herald Examiner Building,"1111 S Broadway, Los Angeles, CA, 90015",LA,event_space,herald-examiner-los-angeles-filming-location.com,http://www.herald-examiner-los-angeles-filming-location.com,ok,non_en,1
+la-0123,sample,,Social Media Week Los Angeles #SMWLA,"604 Arizona Ave, Santa Monica, CA, 90401",LA,event_space,socialmediaweek.org,http://socialmediaweek.org/losangeles/,bot_blocked,unknown,0
+la-0124,sample,,Pacific Electric Lofts Apartments,"610 S Main St, Los Angeles, CA, 90014",LA,event_space,pelofts.com,http://pelofts.com,ok,non_en,1
+la-0125,sample,,The Wellness store,"1412 14th St, Santa Monica, CA, 90404",LA,fast_casual_cafe,wellnesslivingstore.com,http://www.wellnesslivingstore.com,ok,en,1
+la-0126,sample,,Apple Cafe,"435 S Los Angeles St, Los Angeles, CA, 90013",LA,fast_casual_cafe,applerestaurantlounge.com,http://applerestaurantlounge.com,ok,en,1
+la-0127,sample,,Joint Seafood,"600 E 1st St, Los Angeles, CA, 90012",LA,fast_casual_cafe,jointseafood.com,https://jointseafood.com,ok,en,1
+la-0128,sample,,Petitpain et Chocolat,"1013 Pico Blvd, Santa Monica, CA, 90405",LA,fast_casual_cafe,theinfatuation.com,https://www.theinfatuation.com/los-angeles/reviews/petitpain-et-chocolat,ok,en,1
+la-0129,sample,,Deli Taiyaki,"333 S Alameda St, Los Angeles, CA, 90013",LA,fast_casual_cafe,lttaiyaki.com,http://www.lttaiyaki.com,ok,en,1
+la-0130,sample,,City Market South,"1124 San Julian St, Los Angeles, CA, 90015",LA,fast_casual_cafe,citymarketsouth.com,http://www.citymarketsouth.com,robots_blocked,unknown,0
+la-0131,sample,,QQ Cafe,"824 San Julian St, Los Angeles, CA, 90014",LA,fast_casual_cafe,qqcafetogo.com,http://www.qqcafetogo.com,robots_blocked,unknown,0
+la-0132,sample,,"Mel and Rose Wine, Spirits & Gifts","8344 Melrose Ave, Los Angeles, CA, 90069",LA,fast_casual_cafe,melandrose.com,http://www.melandrose.com,ok,non_en,1
+la-0133,sample,,Bella Bread & Butter,"Los Angeles, CA, 90046",LA,fast_casual_cafe,toasttab.com,https://order.toasttab.com/online/bellas-bread-and-butter-7212-melrose,ok,en,1
+la-0134,sample,,Oliana,"8951 Santa Monica Blvd, West Hollywood, CA, 90069",LA,fast_casual_cafe,olianaoil.com,https://olianaoil.com,robots_blocked,unknown,0
+la-0135,sample,,Keep It C'Asian,"350 S Grand Ave, Monterey Park, CA, 90071",LA,fast_casual_cafe,keepitcasian.com,http://www.keepitcasian.com,robots_blocked,unknown,0
+la-0136,sample,,Happy Ice,"7324 Melrose Ave, Los Angeles, CA, 90046",LA,fast_casual_cafe,happyicela.com,https://happyicela.com,ok,en,1
+la-0137,sample,,Olio Wood Fire Pizzeria,"317 S. Broadway, Stall B6-B7, Los Angeles, CA, 90013",LA,fast_casual_cafe,oliogcm.com,http://www.oliogcm.com,robots_blocked,unknown,0
+la-0138,sample,,El Pollo Loco,"226 E 9th St, Los Angeles, CA, 90015",LA,fast_casual_cafe,elpolloloco.com,http://www.elpolloloco.com/locations/store/3297,ok,en,1
+la-0139,sample,,Bandier,"8101 Melrose Ave, Los Angeles, CA, 90046",LA,fast_casual_cafe,bandier.com,http://www.bandier.com,ok,en,1
+la-0140,sample,,Prince Street Pizza,"9161 W Sunset Blvd, West Hollywood, CA, 90069",LA,fast_casual_cafe,princestreetpizza.com,https://locations.princestreetpizza.com/west-hollywood,ok,en,1
+la-0141,sample,,Boketto Cold Brews,"743 S Broadway, Los Angeles, CA, 90014",LA,fast_casual_cafe,bokettocoldbrew.com,https://www.bokettocoldbrew.com,ok,en,1
+la-0142,sample,,House Of Pizza,"311 W 7th St, Los Angeles, CA, 90014",LA,fast_casual_cafe,houseofpizza.com,http://houseofpizza.com,ok,en,1
+la-0143,sample,,Cafe Zella,"1531 Wilshire Blvd, Santa Monica, CA, 90403",LA,fast_casual_cafe,cafezella.com,http://cafezella.com,bot_blocked,unknown,0
+la-0144,sample,,Kale Me Crazy,"8801 Santa Monica Blvd, West Hollywood, CA, 90069",LA,fast_casual_cafe,kalemecrazy.net,http://kalemecrazy.net,ok,en,1
+la-0145,sample,,Dtown Pizzeria,"8424 Santa Monica Blvd Ste D, West Hollywood, CA, 90069",LA,fast_casual_cafe,dtownpizzeria.com,https://www.dtownpizzeria.com,ok,en,1
+la-0146,sample,,Clara Shortridge Foltz Criminal Building Cafeteria,"210 W Temple St, Los Angeles, CA, 90012",LA,fast_casual_cafe,lacourt.org,http://lacourt.org,http_error,unknown,0
+la-0147,sample,,Bumsan Organic Milk Bar,"369 E 2nd St, Los Angeles, CA, 90012",LA,fast_casual_cafe,organicmilkbar.com,http://organicmilkbar.com,ok,non_en,1
+la-0148,sample,,Sol Handcrafted Paletas,"200 Santa Monica Pier, Santa Monica, CA, 90401",LA,fast_casual_cafe,solpaletas.com,http://www.solpaletas.com,robots_blocked,unknown,0
+la-0149,sample,,Temperley London,"8452 Melrose Pl, Los Angeles, CA, 90069",LA,fast_casual_cafe,temperleylondon.com,http://www.temperleylondon.com,ok,en,1
+la-0150,sample,,Cookie Shed,"8787 Shoreham Dr, West Hollywood, CA, 90069",LA,fast_casual_cafe,cookieshed.com,http://www.cookieshed.com,robots_blocked,unknown,0
+la-0151,sample,,S’moreology,"922 W West Covina Pkwy, Los Angeles, CA, 90021",LA,fast_casual_cafe,smoreology.com,http://smoreology.com,ok,non_en,1
+la-0152,sample,,Established Today,"7707 Melrose Ave, Los Angeles, CA, 90046",LA,fast_casual_cafe,est.today,https://est.today,ok,en,1
+la-0153,sample,,Wendy's,"7135 W Sunset Blvd, Los Angeles, CA, 90046",LA,fast_casual_cafe,wendys.com,https://locations.wendys.com/united-states/ca/los-angeles/7135-sunset-blvd,ok,en,1
+la-0154,sample,,Mitsuru Cafe,"117 Japanese Village Plaza Mall, Los Angeles, CA, 90012",LA,fast_casual_cafe,top-cafes.com,http://mitsuru.top-cafes.com,ok,en,1
+la-0155,sample,,V Cafe,"8164 Melrose Ave, Los Angeles, CA, 90046",LA,fast_casual_cafe,vcafe.com,http://www.vcafe.com,ok,en,1
+la-0156,sample,,First Cup Caffe,"333 S Spring St, Los Angeles, CA, 90013",LA,fast_casual_cafe,firstcupcaffetogo.com,http://firstcupcaffetogo.com,robots_blocked,unknown,0
+la-0157,sample,,Trimana Express,"1149 S Hill St, Los Angeles, CA, 90015",LA,fast_casual_cafe,trimana.com,http://www.trimana.com,robots_blocked,unknown,0
+la-0158,sample,,Long Beach Tacos,"724 S Spring St, Los Angeles, CA, 90014",LA,fast_casual_cafe,mylbtacos.com,http://mylbtacos.com,http_error,unknown,0
+la-0159,sample,,Canter's Food Truck,"777 S Figueroa St, Los Angeles, CA, 90017",LA,fast_casual_cafe,canterstruck.com,http://www.canterstruck.com,robots_blocked,unknown,0
+la-0160,sample,,City Bean Coffee,"700 S Flower St #300, Los Angeles, CA, 90017",LA,fast_casual_cafe,citybean.com,http://www.citybean.com,ok,en,1
+la-0161,sample,,The Market At Santa Monica Place,"395 Santa Monica Pl, Santa Monica, CA, 90401",LA,fast_casual_cafe,themarketsmp.com,http://www.themarketsmp.com,robots_blocked,unknown,0
+la-0162,sample,,Rocking Popcorn,"8355 West Sunset Blvd, West Hollywood, CA, 90069",LA,fast_casual_cafe,rockingpopcorn.com,http://www.rockingpopcorn.com,ok,en,1
+la-0163,sample,,Wild Dogs Grill,"808 W 7th St, Los Angeles, CA, 90017",LA,fast_casual_cafe,wilddogsgrilldtla.com,http://www.wilddogsgrilldtla.com,robots_blocked,unknown,0
+la-0164,sample,,Trimana,"1348 3rd Street Promenade, Santa Monica, CA, 90401",LA,fast_casual_cafe,ritual.co,http://trimanapromenade.ritual.co,ok,en,1
+la-0165,sample,,Benny's Tacos & Chicken Rotisserie,"915 Wilshire Blvd, Santa Monica, CA, 90401",LA,fast_casual_cafe,bennystacos.com,http://bennystacos.com,ok,non_en,1
+la-0166,sample,,The Red Chickz,"557 S Spring St, Los Angeles, CA, 90013",LA,fast_casual_cafe,theredchickz.com,http://www.theredchickz.com,ok,en,1
+la-0167,sample,,Aussie Pies And Sausages,"857 S San Pedro St, Los Angeles, CA, 90014",LA,fast_casual_cafe,aussiepiesandsausages.com,https://aussiepiesandsausages.com,ok,en,1
+la-0168,sample,,Normandie Cafe,"9201 W Sunset Blvd Ste GF3, Los Angeles, CA, 90069",LA,fast_casual_cafe,normandieusa.com,https://www.normandieusa.com,robots_blocked,unknown,0
+la-0169,sample,,The Mart Cafe,"110 E 9th St #BL036, Los Angeles, CA, 90079",LA,fast_casual_cafe,hairshopetcetra.com,http://www.hairshopetcetra.com,robots_blocked,unknown,0
+la-0170,sample,,Bottega Louie,"700 S Grand Ave, Los Angeles, CA, 90017",LA,fast_casual_cafe,bottegalouie.com,http://www.bottegalouie.com,ok,non_en,1
+nyc-r001,reserve,nyc-0002,Amaranth,"21 E 62nd St, New York, NY, 10065",NYC,casual_restaurant,amaranthrestaurant.com,http://www.amaranthrestaurant.com,ok,en,1
+nyc-r002,reserve,nyc-0005,Bellizi's On Broadway,"202 W 36th St, New York, NY, 10018",NYC,casual_restaurant,broadwaycatering.com,http://www.broadwaycatering.com,bot_blocked,unknown,0
+nyc-r003,reserve,nyc-0005,Terra - Eat Better Food,"124 7th Ave, New York, NY, 10011",NYC,casual_restaurant,terra-ny.com,https://terra-ny.com,ok,en,1
+nyc-r004,reserve,nyc-0008,Sarge's Delicatessen & Diner,"548 3rd Ave, New York, NY, 10016",NYC,casual_restaurant,sargesdeli.com,http://www.sargesdeli.com,ok,en,1
+nyc-r005,reserve,nyc-0010,Elemental Foods,"259 W 19th St, New York, NY, 10011",NYC,casual_restaurant,elementalfoods.com,http://www.elementalfoods.com,bot_blocked,unknown,0
+nyc-r006,reserve,nyc-0010,Da Antonio,"157 E 55th St, New York, NY, 10022",NYC,casual_restaurant,daantonio.com,http://www.daantonio.com,empty_after_render,unknown,0
+nyc-r007,reserve,nyc-0010,Six Pans,"180 7th Ave, New York, NY, 10011",NYC,casual_restaurant,sixpansnyc.com,http://sixpansnyc.com,robots_blocked,unknown,0
+nyc-r008,reserve,nyc-0047,STK Steakhouse Midtown NYC,"1114 Avenue of the Americas, New York, NY, 10036",NYC,steakhouse_grill,stksteakhouse.com,https://stksteakhouse.com/venues/nyc-midtown,ok,en,1
+nyc-r009,reserve,nyc-0048,miss KOREA BBQ,"10 W 32nd St, New York, NY, 10001",NYC,steakhouse_grill,misskoreabbq.com,http://www.misskoreabbq.com,ok,en,1
+nyc-r010,reserve,nyc-0058,Jasper's Taphouse & Kitchen,"761 9th Ave, New York, NY, 10019",NYC,bar_lounge,jaspersnyc.com,http://jaspersnyc.com,ok,en,1
+nyc-r011,reserve,nyc-0060,The Perfect Pint,"123 W 45th St, New York, NY, 10036",NYC,bar_lounge,theperfectpintnyc.com,http://www.theperfectpintnyc.com,empty_after_render,unknown,0
+nyc-r012,reserve,nyc-0060,Oak Room - Algonquin Hotel,"59 W 44th St, New York, NY, 10036",NYC,bar_lounge,algonquinhotel.com,http://www.algonquinhotel.com,ok,en,1
+nyc-r013,reserve,nyc-0061,Wine Escape,"405 W 44th St, New York, NY, 10036",NYC,bar_lounge,wineescapenyc.com,http://wineescapenyc.com,ok,non_en,1
+nyc-r014,reserve,nyc-0083,Hotel Hendricks,"25 W 38th St, New York, NY, 10018",NYC,hotel,hotelhendricksny.com,https://www.hotelhendricksny.com,ok,en,1
+nyc-r015,reserve,nyc-0084,Selina,"518 W 27th St, New York, NY, 10001",NYC,hotel,selina.com,http://www.selina.com/usa/chelsea-new-york-city,bot_blocked,unknown,0
+nyc-r016,reserve,nyc-0084,Ravenscroft Crystal,"230 5th Ave Ste 1305, New York, NY, 10001",NYC,hotel,ravenscroftcrystal.com,http://www.ravenscroftcrystal.com,ok,en,1
+nyc-r017,reserve,nyc-0098,Skyline Hotel NYC,"725 10th Ave, New York, NY, 10019",NYC,event_space,skylinehotelny.com,http://www.skylinehotelny.com,ok,en,1
+nyc-r018,reserve,nyc-0102,Allure Home Creations,"295 5th Ave Ste 518, New York, NY, 10016",NYC,event_space,allurehome.com,http://www.allurehome.com,ok,en,1
+nyc-r019,reserve,nyc-0103,MWP Studios,"320 W 37th St, New York, NY, 10018",NYC,event_space,mwpstudios.com,http://mwpstudios.com,ok,non_en,1
+nyc-r020,reserve,nyc-0112,Butterfly Bakeshop Bakery,"335 W 35th St, New York, NY, 10001",NYC,fast_casual_cafe,butterflyfabrics.us,http://butterflyfabrics.us,robots_blocked,unknown,0
+nyc-r021,reserve,nyc-0112,Cafe Aroma,"502 9th Ave, New York, NY, 10018",NYC,fast_casual_cafe,aromacafe.la,http://www.aromacafe.la,robots_blocked,unknown,0
+nyc-r022,reserve,nyc-0112,Bravo Pizza,"6 E 42nd St, New York, NY, 10017",NYC,fast_casual_cafe,bravopizza42nyc.com,http://www.bravopizza42nyc.com,robots_blocked,unknown,0
+nyc-r023,reserve,nyc-0112,Studio 9C - NBCUniversal,"30 Rockefeller Plz, New York, NY, 10112",NYC,fast_casual_cafe,nbc.com,http://www.nbc.com,ok,en,1
+nyc-r024,reserve,nyc-0115,La Merenda by Dominique Le Stanc,"420 Lexington Ave, New York, NY, 10170",NYC,fast_casual_cafe,lamerenda.com,https://lamerenda.com,robots_blocked,unknown,0
+nyc-r025,reserve,nyc-0115,Revdup,"451 3rd Ave, New York, NY, 10016",NYC,fast_casual_cafe,revduppi.com,http://revduppi.com,robots_blocked,unknown,0
+sf-r001,reserve,sf-0001,Tropisueno,"75 Yerba Buena Ln, San Francisco, CA, 94103",SF,casual_restaurant,tropisueno.com,https://www.tropisueno.com,ok,non_en,1
+sf-r002,reserve,sf-0002,Locali Mediterranean,"98 Battery St, San Francisco, CA, 94111",SF,casual_restaurant,localimediterranean.com,http://localimediterranean.com,robots_blocked,unknown,0
+sf-r003,reserve,sf-0002,Pita Hub,"475 6th St, San Francisco, CA, 94103",SF,casual_restaurant,pitahubcalifornia.com,http://www.pitahubcalifornia.com,robots_blocked,unknown,0
+sf-r004,reserve,sf-0002,The Grubbies #2,"123 2nd St, San Francisco, CA, 94105",SF,casual_restaurant,thegrubbiescorp.com,https://www.thegrubbiescorp.com,ok,en,1
+sf-r005,reserve,sf-0003,Lao Table,"149 2nd St, San Francisco, CA, 94105",SF,casual_restaurant,laotablesf.com,http://laotablesf.com,ok,en,1
+sf-r006,reserve,sf-0004,Gibson,"111 Mason St, San Francisco, CA, 94102",SF,casual_restaurant,gibsonsf.com,https://www.gibsonsf.com,empty_after_render,unknown,0
+sf-r007,reserve,sf-0004,Wings & Things,"375 Pacific Ave, San Francisco, CA, 94111",SF,casual_restaurant,getreef.com,https://www.getreef.com,ok,en,1
+sf-r008,reserve,sf-0048,Morton's The Steakhouse,"400 Post St, San Francisco, CA, 94102",SF,steakhouse_grill,mortons.com,http://www.mortons.com/sanfrancisco/,ok,non_en,1
+sf-r009,reserve,sf-0049,Tad's Steak House,"38 Ellis St, San Francisco, CA, 94102",SF,steakhouse_grill,tadssteaks-sf.com,http://www.tadssteaks-sf.com,ok,en,1
+sf-r010,reserve,sf-0055,The Cordial,"163 Jessie St, San Francisco, CA, 94105",SF,bar_lounge,cordialbar.com,https://www.cordialbar.com,ok,non_en,1
+sf-r011,reserve,sf-0059,Ozumo,"161 Steuart St, San Francisco, CA, 94105",SF,bar_lounge,ozumosanfrancisco.com,https://www.ozumosanfrancisco.com,ok,en,1
+sf-r012,reserve,sf-0060,The Fairmont San Francisco Lobby,"950 Mason Street, San Francisco, CA 94108, United States, San Francisco, CA, 94108",SF,bar_lounge,fairmont-san-francisco.com,https://www.fairmont-san-francisco.com,ok,en,1
+sf-r013,reserve,sf-0064,Metropolitan Club,"640 Sutter St, San Francisco, CA, 94102",SF,bar_lounge,metropolitanclubsf.org,http://www.metropolitanclubsf.org,ok,en,1
+sf-r014,reserve,sf-0066,Crazy Horse Gentlemen's Club,"980 Market St, San Francisco, CA, 94102",SF,bar_lounge,crazyhorse-sf.com,http://www.crazyhorse-sf.com,ok,non_en,1
+sf-r015,reserve,sf-0080,Graystone Hotel,"66 Geary St, San Francisco, CA, 94108",SF,hotel,graystonehotel.com,http://www.graystonehotel.com,ok,en,1
+sf-r016,reserve,sf-0081,The Grant Hotel,"753 Bush St, San Francisco, CA, 94108",SF,hotel,granthotel.net,http://www.granthotel.net,ok,en,1
+sf-r017,reserve,sf-0082,Post Hotel,"589 Post St, San Francisco, CA, 94102",SF,hotel,posthotelsf.com,http://www.posthotelsf.com,bot_blocked,unknown,0
+sf-r018,reserve,sf-0097,Terra Gallery & Event Space,"511 Harrison St, San Francisco, CA, 94105",SF,event_space,terrasf.com,http://www.terrasf.com,ok,en,1
+sf-r019,reserve,sf-0098,FAME Venue,"443 Broadway, San Francisco, CA, 94133",SF,event_space,famevenue.com,http://famevenue.com,ok,en,1
+sf-r020,reserve,sf-0114,Virtual Teakup,"601 Mission Bay Blvd N, San Francisco, CA, 94158",SF,fast_casual_cafe,virtualteakup.com,http://www.virtualteakup.com,ok,en,1
+sf-r021,reserve,sf-0116,David's Delicatessen & Diner,"474 Geary St, San Francisco, CA, 94102",SF,fast_casual_cafe,davidsdelicatessen.com,http://www.davidsdelicatessen.com,robots_blocked,unknown,0
+sf-r022,reserve,sf-0116,Aydea,"799 Bryant St, San Francisco, CA, 94107",SF,fast_casual_cafe,aydeasf.com,https://www.aydeasf.com,robots_blocked,unknown,0
+sf-r023,reserve,sf-0116,Deli,"124 Montgomery St, San Francisco, CA, 94104",SF,fast_casual_cafe,thedelimagazine.com,http://sf.thedelimagazine.com,robots_blocked,unknown,0
+sf-r024,reserve,sf-0116,Cafe Venue Montgomery,"218 Montgomery St, San Francisco, CA, 94104",SF,fast_casual_cafe,cafevenue.com,http://www.cafevenue.com,ok,en,1
+sf-r025,reserve,sf-0122,Poke Delish,"601 Mission Bay Blvd N, San Francisco, CA, 94158",SF,fast_casual_cafe,pokedelish.com,http://www.pokedelish.com,ok,en,1
+hnl-r001,reserve,hnl-0001,La Vie,"383 Kalaimoku St, Honolulu, HI, 96815",Honolulu,casual_restaurant,laviewaikiki.com,https://www.laviewaikiki.com,ok,en,1
+hnl-r002,reserve,hnl-0003,Eating House 1849,"2330 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,eatinghouse1849.com,http://www.eatinghouse1849.com,ok,en,1
+hnl-r003,reserve,hnl-0004,Big Wave Dave Surf & Coffee,"226 Lewers St Ste 154, Honolulu, HI, 96815",Honolulu,casual_restaurant,bigwavedave.com,http://www.bigwavedave.com,ok,en,1
+hnl-r004,reserve,hnl-0007,Momoyama Restaurant,"120 Kaiulani Ave, Honolulu, HI, 96815",Honolulu,casual_restaurant,princess-kaiulani.com,http://princess-kaiulani.com,ok,en,1
+hnl-r005,reserve,hnl-0009,Rice Paper,"1160 Maunakea St, Honolulu, HI, 96817",Honolulu,casual_restaurant,ricepaperhawaii.com,http://www.ricepaperhawaii.com,robots_blocked,unknown,0
+hnl-r006,reserve,hnl-0032,Big Island Steak House,"1 Aloha Tower Dr, Honolulu, HI, 96813",Honolulu,steakhouse_grill,beyondthebeachstores.com,http://www.beyondthebeachstores.com,robots_blocked,unknown,0
+hnl-r007,reserve,hnl-0032,Queen's BBQ,"730 Queen St, Honolulu, HI, 96813",Honolulu,steakhouse_grill,hub.biz,https://queen-s-bar-b-q.hub.biz,ok,en,1
+hnl-r008,reserve,hnl-0040,Waikīkī Brewing Company,"1945 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,bar_lounge,waikikibrewing.com,https://waikikibrewing.com/waikiki,ok,en,1
+hnl-r009,reserve,hnl-0041,EP Bar,"1150 Nuʻuanu Ave, Honolulu, HI, 96817",Honolulu,bar_lounge,epbar.co,http://www.epbar.co,ok,en,1
+hnl-r010,reserve,hnl-0043,Nashville Waikiki,"1 Aloha Tower Dr, Honolulu, HI, 96813",Honolulu,bar_lounge,nashvillewaikiki.com,http://www.nashvillewaikiki.com,ok,non_en,1
+hnl-r011,reserve,hnl-0058,Outrigger Catamaran,"2161 Kalia Rd, Honolulu, HI, 96815",Honolulu,hotel,outriggercatamaranhawaii.com,http://www.outriggercatamaranhawaii.com,robots_blocked,unknown,0
+hnl-r012,reserve,hnl-0058,Waikiki Prince Hotel,"2431 Prince Edward St, Honolulu, HI, 96815",Honolulu,hotel,waikikicentral.com,https://www.waikikicentral.com,ok,en,1
+hnl-r013,reserve,hnl-0059,Waikiki Resort Hotel,"2460 Koa Ave, Honolulu, HI, 96815",Honolulu,hotel,waikikiresort.com,https://www.waikikiresort.com,ok,en,1
+hnl-r014,reserve,hnl-0077,Cafe Grace,"725 Kapiolani Blvd, Honolulu, HI, 96813",Honolulu,fast_casual_cafe,cafegracehi.com,http://www.cafegracehi.com,robots_blocked,unknown,0
+hnl-r015,reserve,hnl-0077,Taco Bell/Pizza Hut,"2250 Kalakaua Ave, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,tacobell.com,http://www.tacobell.com,ok,en,1
+hnl-r016,reserve,hnl-0078,The Tea Farm,"745 Fort Street Mall Ste 325, Honolulu, HI, 96813",Honolulu,fast_casual_cafe,theteafarm.com,http://www.theteafarm.com,ok,non_en,1
+hnl-r017,reserve,hnl-0084,Round Table Pizza,"2005 Kalia Rd, Honolulu, HI, 96815",Honolulu,fast_casual_cafe,roundtablepizza.com,http://www.roundtablepizza.com/rtp/store.asp?store_num=789,http_error,unknown,0
+la-r001,reserve,la-0002,Hot Tokyo,"654 S Main St, Los Angeles, CA, 90014",LA,casual_restaurant,tokyostyle.org,http://www.tokyostyle.org/en/index.html,robots_blocked,unknown,0
+la-r002,reserve,la-0002,Ingo's Tasty Diner,"1213 Wilshire Blvd, Santa Monica, CA, 90403",LA,casual_restaurant,ingostastydiner.com,http://ingostastydiner.com,empty_after_render,unknown,0
+la-r003,reserve,la-0002,Melroseplace La,"8472 Melrose Pl, Los Angeles, CA, 90069",LA,casual_restaurant,melroseplace.la,https://melroseplace.la,empty_after_render,unknown,0
+la-r004,reserve,la-0002,Mixabowl,"818 Wilshire Blvd, Los Angeles, CA, 90017",LA,casual_restaurant,mixabowlusa.com,http://www.mixabowlusa.com,robots_blocked,unknown,0
+la-r005,reserve,la-0002,The Pokè Shack,"7901 Santa Monica Blvd, West Hollywood, CA, 90046",LA,casual_restaurant,thepokeshack.com,http://www.thepokeshack.com,ok,non_en,1
+la-r006,reserve,la-0005,Barton G. The Restaurant Los Angeles,"861 N La Cienega Blvd, West Hollywood, CA, 90069",LA,casual_restaurant,bartong.com,https://www.bartong.com/restaurants/los-angeles/,http_error,unknown,0
+la-r007,reserve,la-0005,Le Grand,"707 S Grand Ave, Los Angeles, CA, 90017",LA,casual_restaurant,legrand-restaurant.com,http://www.legrand-restaurant.com,robots_blocked,unknown,0
+la-r008,reserve,la-0005,Norcino Salumeria at The Market,"395 Santa Monica Pl #M7, Santa Monica, CA, 90401",LA,casual_restaurant,norcinosalumeria.com,http://norcinosalumeria.com,robots_blocked,unknown,0
+la-r009,reserve,la-0005,Peppercorn Kitchen,"621 S Spring St, Los Angeles, CA, 90014",LA,casual_restaurant,peppercornkitchen.com,http://www.peppercornkitchen.com,ok,en,1
+la-r010,reserve,la-0060,Bo Daddy's BBQ,"1415 S Hill St, Los Angeles, CA, 90015",LA,steakhouse_grill,bodaddys.com,https://www.bodaddys.com,ok,non_en,1
+la-r011,reserve,la-0061,H&H Brazilian Steakhouse,"518 W 7th St, Los Angeles, CA, 90014",LA,steakhouse_grill,hhsteakhouse.com,http://www.hhsteakhouse.com,ok,en,1
+la-r012,reserve,la-0070,1 Pico,"1 Pico Blvd, Santa Monica, CA, 90405",LA,bar_lounge,bytheblueseasantamonica.com,http://www.bytheblueseasantamonica.com,robots_blocked,unknown,0
+la-r013,reserve,la-0070,The Slipper Clutch,"351 S Broadway, Los Angeles, CA, 90013",LA,bar_lounge,theslipperclutch.com,http://theslipperclutch.com,ok,en,1
+la-r014,reserve,la-0071,Casa India,"345 S Broadway, Los Angeles, CA 90013, Los Angeles, CA, 90013",LA,bar_lounge,casa-india.org,http://casa-india.org,ok,en,1
+la-r015,reserve,la-0073,White Rabbit Sky Lounge,"8440 Sunset Boulevard, West Hollywood, CA, 90069",LA,bar_lounge,valorianhotel.com,https://www.valorianhotel.com/dine-drinks/white-rabbit,ok,en,1
+la-r016,reserve,la-0074,Cabo Cantina,"1240 3rd Street Promenade, Santa Monica, CA, 90401",LA,bar_lounge,cabocantina.com,http://cabocantina.com,ok,en,1
+la-r017,reserve,la-0099,The Huntington Apartments,"752 S Main St, Los Angeles, CA, 90014",LA,hotel,huntingtonaptsla.com,http://huntingtonaptsla.com,robots_blocked,unknown,0
+la-r018,reserve,la-0099,"Stay City Rentals, LLC","722 S Bixel St Apt A1032, Los Angeles, CA, 90017",LA,hotel,staycityrentals.com,http://www.staycityrentals.com,robots_blocked,unknown,0
+la-r019,reserve,la-0099,Orbit Hotel,"7950 Melrose Ave, Los Angeles, CA, 90046",LA,hotel,orbithotel.com,http://www.orbithotel.com,ok,non_en,1
+la-r020,reserve,la-0114,Chamberlain West Hollywood,"1000 Westmount Dr, West Hollywood, CA, 90069",LA,event_space,chamberlainwesthollywood.com,https://www.chamberlainwesthollywood.com,ok,en,1
+la-r021,reserve,la-0119,Center at Cathedral Plaza,"555 W Temple St, Los Angeles, CA, 90012",LA,event_space,levyrestaurants.com,http://www.levyrestaurants.com,ok,en,1
+la-r022,reserve,la-0130,Ocean Cafe,"100 Wilshire Blvd, Santa Monica, CA, 90401",LA,fast_casual_cafe,theoceancafe.com,http://www.theoceancafe.com,parked_or_closed,en,0
+la-r023,reserve,la-0130,Salt & Straw,"829 E 3rd St, Los Angeles, CA, 90013",LA,fast_casual_cafe,saltandstraw.com,https://saltandstraw.com,ok,en,1
+la-r024,reserve,la-0131,The Donut Man,"317 S Broadway, Los Angeles, CA, 90013",LA,fast_casual_cafe,thedonutmanca.com,http://www.thedonutmanca.com,ok,non_en,1
+la-r025,reserve,la-0134,Slices,"232 E 2nd St, Los Angeles, CA, 90012",LA,fast_casual_cafe,sliceslosangeles.com,https://www.sliceslosangeles.com,robots_blocked,unknown,0
+la-r026,reserve,la-0134,Ciboteca,"606 Broadway Ste 101, Santa Monica, CA, 90401",LA,fast_casual_cafe,ciboteca.com,http://www.ciboteca.com,http_error,unknown,0
+la-r027,reserve,la-0134,Sharetea,"113 Broadway, Santa Monica, CA, 90401",LA,fast_casual_cafe,1992sharetea.com,http://www.1992sharetea.com/sharetealocations/santa-monica-ca,bot_blocked,unknown,0
+la-r028,reserve,la-0134,Prime Pizza,"141 S Central Ave, Los Angeles, CA, 90012",LA,fast_casual_cafe,primepizza.la,http://primepizza.la/littletokyo,bot_blocked,unknown,0

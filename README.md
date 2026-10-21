@@ -12,7 +12,7 @@ CECS 451 (Artificial Intelligence) course project. Built with Next.js 16, Supaba
 4. [Architecture and project structure](#4-architecture-and-project-structure)
 5. [AI algorithms](#5-ai-algorithms)
 6. [Getting started](#6-getting-started)
-7. [Limitations and next steps](#7-limitations-and-next-steps)
+7. [Limitations](#7-limitations)
 
 ## 1. Project description
 
@@ -23,22 +23,22 @@ CECS 451 (Artificial Intelligence) course project. Built with Next.js 16, Supaba
 
 ### Features
 
-| Feature | Description |
-| --- | --- |
-| Search | Filter by office address, headcount, maximum commute, walk or drive, and room style. A plain-English request ("40 people, 10-minute walk, seated") can fill in the form. |
-| Venue discovery | When an area has fewer than three recently checked venues, the app finds new candidates, reads their websites and extracts room capacities. |
-| Ranking | Venues are ranked by expected utility, which combines commute, room fit and the probability that the room really fits. Each result lists its reasons, including "About N% likely to fit your group". |
-| Trust labels | Every capacity and price figure is labelled `confirmed_by_planner`, `verified`, `likely`, `ai_extracted` or `unverified`. |
-| Shortlist and compare | Save candidates, compare rooms, prices and commute times side by side, and choose one. |
-| Event page | A shared page where guests post allergies and dietary needs in real time. The app summarises them into a roster for the venue. |
-| Shared catalog | A planner who confirms a figure with the venue updates it for later searches. Confirmations that contradict strong evidence are held for review. |
+| Feature               | Description                                                                                                                                                                                          |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Search                | Filter by office address, headcount, maximum commute, walk or drive, and room style. A plain-English request ("40 people, 10-minute walk, seated") can fill in the form.                             |
+| Venue discovery       | When an area has fewer than three recently checked venues, the app finds new candidates, reads their websites and extracts room capacities.                                                          |
+| Ranking               | Venues are ranked by expected utility, which combines commute, room fit and the probability that the room really fits. Each result lists its reasons, including "About N% likely to fit your group". |
+| Trust labels          | Every capacity and price figure is labelled `confirmed_by_planner`, `verified`, `likely`, `ai_extracted` or `unverified`.                                                                            |
+| Shortlist and compare | Save candidates, compare rooms, prices and commute times side by side, and choose one.                                                                                                               |
+| Event page            | A shared page where guests post allergies and dietary needs in real time. The app summarises them into a roster for the venue.                                                                       |
+| Shared catalog        | A planner who confirms a figure with the venue updates it for later searches. Confirmations that contradict strong evidence are held for review.                                                     |
 
 The application supports research and coordination only. It does not make bookings or payments.
 
 ### Screenshots
 
-| New York (Times Square) | San Francisco (Salesforce Tower) | Waikiki (Hilton Hawaiian Village) |
-| --- | --- | --- |
+| New York (Times Square)                        | San Francisco (Salesforce Tower)                               | Waikiki (Hilton Hawaiian Village)          |
+| ---------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------ |
 | ![New York results](architecture/new_york.png) | ![San Francisco results](architecture/SanFrancisco_result.png) | ![Waikiki results](architecture/Hawai.png) |
 
 ## 2. Problem
@@ -75,32 +75,32 @@ The editable source is [`architecture/architecture.excalidraw`](architecture/arc
 
 Steps 1 to 10 describe one search; the lower panel shows what happens after it. Box colours indicate the component type: application, AI model, discovery step, external API, or database.
 
-| Step | Description | Source |
-| --- | --- | --- |
-| 1 | Geocode the office address | `src/lib/geo/geocode.ts` |
-| 2 | Cache check: at least three nearby venues checked in the last 30 days skips to step 8 | `src/lib/discovery/ensure-coverage.ts` |
-| 3 | Find candidates in Google Places and OpenStreetMap; merge duplicates within 75 m | `src/lib/discovery/places.ts` |
-| 4 | Order candidates by the discovery prior | `src/lib/discovery/discovery-prior.ts` |
-| 5 | Check robots.txt, fetch the site, render JavaScript-only pages with Firecrawl | `scraper.ts`, `robots.ts`, `render.ts` |
-| 6 | Extract capacities with the regex reader and the LLM reader | `scraper.ts`, `llm-extract.ts` |
-| 7 | Grounding check, trust tier and confidence score; save to Postgres | `grounding.ts`, `trust.ts`, `confidence.ts` |
-| 8 | Commute times from the OpenRouteService matrix, or a labelled estimate | `src/lib/geo/commute.ts` |
-| 9 | Expected-utility ranking | `src/lib/ranking.ts` |
-| 10 | Result cards and map | `src/components/venue-card.tsx` |
+| Step | Description                                                                           | Source                                      |
+| ---- | ------------------------------------------------------------------------------------- | ------------------------------------------- |
+| 1    | Geocode the office address                                                            | `src/lib/geo/geocode.ts`                    |
+| 2    | Cache check: at least three nearby venues checked in the last 30 days skips to step 8 | `src/lib/discovery/ensure-coverage.ts`      |
+| 3    | Find candidates in Google Places and OpenStreetMap; merge duplicates within 75 m      | `src/lib/discovery/places.ts`               |
+| 4    | Order candidates by the discovery prior                                               | `src/lib/discovery/discovery-prior.ts`      |
+| 5    | Check robots.txt, fetch the site, render JavaScript-only pages with Firecrawl         | `scraper.ts`, `robots.ts`, `render.ts`      |
+| 6    | Extract capacities with the regex reader and the LLM reader                           | `scraper.ts`, `llm-extract.ts`              |
+| 7    | Grounding check, trust tier and confidence score; save to Postgres                    | `grounding.ts`, `trust.ts`, `confidence.ts` |
+| 8    | Commute times from the OpenRouteService matrix, or a labelled estimate                | `src/lib/geo/commute.ts`                    |
+| 9    | Expected-utility ranking                                                              | `src/lib/ranking.ts`                        |
+| 10   | Result cards and map                                                                  | `src/components/venue-card.tsx`             |
 
 ### Technology stack
 
-| Layer | Technology |
-| --- | --- |
-| Framework | Next.js 16 (App Router, Server Components, Server Actions), React 19, TypeScript |
-| UI | Tailwind CSS 4, shadcn/ui, Leaflet (2D map), MapLibre GL (3D map) |
-| Database | Supabase: Postgres 17, row-level security, Realtime |
-| Language model | xAI Grok (`XAI_MODEL`, default `grok-4.7`) over HTTPS, JSON-schema structured output |
-| Venue data | Google Places API (New), OpenStreetMap Overpass |
-| Page rendering | Firecrawl v2, used only for JavaScript-rendered pages |
-| Routing and geocoding | OpenRouteService Matrix, Nominatim, Photon |
-| Testing | Vitest, Playwright |
-| Offline training | Python, scikit-learn, DuckDB (Foursquare OS Places), Claude `claude-sonnet-5-5` as the labeling teacher (Message Batches API) |
+| Layer                 | Technology                                                                                                                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Framework             | Next.js 16 (App Router, Server Components, Server Actions), React 19, TypeScript                                              |
+| UI                    | Tailwind CSS 4, shadcn/ui, Leaflet (2D map), MapLibre GL (3D map)                                                             |
+| Database              | Supabase: Postgres 17, row-level security, Realtime                                                                           |
+| Language model        | xAI Grok (`XAI_MODEL`, default `grok-4.7`) over HTTPS, JSON-schema structured output                                          |
+| Venue data            | Google Places API (New), OpenStreetMap Overpass                                                                               |
+| Page rendering        | Firecrawl v2, used only for JavaScript-rendered pages                                                                         |
+| Routing and geocoding | OpenRouteService Matrix, Nominatim, Photon                                                                                    |
+| Testing               | Vitest, Playwright                                                                                                            |
+| Offline training      | Python, scikit-learn, DuckDB (Foursquare OS Places), Claude `claude-sonnet-5-5` as the labeling teacher (Message Batches API) |
 
 ### Project structure
 
@@ -146,15 +146,15 @@ The system combines three language-model tasks with four small, interpretable mo
 
 ### 5.1 Components
 
-| Component | Method | Purpose |
-| --- | --- | --- |
-| Query parsing | LLM, structured output | Convert a plain-English request into search fields |
-| Capacity extraction | Regex and LLM | Read room names and capacities from a venue's site |
-| Grounding | Deterministic check | Reject model answers the page does not support |
-| Capacity confidence | Logistic regression | Probability that a stored capacity is correct |
-| Discovery prior | Logistic regression | Probability that a candidate hosts private events |
-| Ranking | Expected utility | Order venues by the expected value of contacting them |
-| Dietary roster | LLM, structured output | Summarise guests' messages into per-person needs |
+| Component           | Method                 | Purpose                                               |
+| ------------------- | ---------------------- | ----------------------------------------------------- |
+| Query parsing       | LLM, structured output | Convert a plain-English request into search fields    |
+| Capacity extraction | Regex and LLM          | Read room names and capacities from a venue's site    |
+| Grounding           | Deterministic check    | Reject model answers the page does not support        |
+| Capacity confidence | Logistic regression    | Probability that a stored capacity is correct         |
+| Discovery prior     | Logistic regression    | Probability that a candidate hosts private events     |
+| Ranking             | Expected utility       | Order venues by the expected value of contacting them |
+| Dietary roster      | LLM, structured output | Summarise guests' messages into per-person needs      |
 
 All language-model calls use xAI Grok (`XAI_MODEL`, default `grok-4.7`) with a strict JSON schema. Query parsing and the dietary roster run at temperature 0; capacity extraction makes three reads at temperature 0.7 (Section 5.2). Each call has an input limit, a timeout and a non-model fallback, so the application keeps working when the model is unavailable.
 
@@ -178,14 +178,14 @@ Answers that fail either condition are discarded. The approach follows the citat
 
 ### 5.4 Trust tiers
 
-| Evidence | Tier |
-| --- | --- |
-| Confirmed by a planner with the venue | `confirmed_by_planner` |
-| Regex (private-dining page) and grounded LLM agree within 20% | `verified` |
-| Both readers found the same room but disagree, or the regex reader alone on the private-dining page | `likely` |
-| Grounded LLM reading only | `ai_extracted` |
-| Regex reading from the homepage only | `unverified` |
-| No figure found; category estimate shown as "Capacity unpublished" | `is_estimate` |
+| Evidence                                                                                            | Tier                   |
+| --------------------------------------------------------------------------------------------------- | ---------------------- |
+| Confirmed by a planner with the venue                                                               | `confirmed_by_planner` |
+| Regex (private-dining page) and grounded LLM agree within 20%                                       | `verified`             |
+| Both readers found the same room but disagree, or the regex reader alone on the private-dining page | `likely`               |
+| Grounded LLM reading only                                                                           | `ai_extracted`         |
+| Regex reading from the homepage only                                                                | `unverified`           |
+| No figure found; category estimate shown as "Capacity unpublished"                                  | `is_estimate`          |
 
 ### 5.5 Capacity confidence
 
@@ -243,13 +243,13 @@ Venues with `pFit < 0.2` are excluded, as are rooms that are too small with conf
 
 The training pipeline (`scripts/data/`, `ml/`, described in [`eval/README.md`](eval/README.md)) reports, on held-out gold venues and separately on LA (a city never trained on):
 
-| Metric | Measures |
-| --- | --- |
-| Room precision, recall, F1 and invented-number rate | Extraction quality: v0 regex maximum, regex candidates, one LLM read, and the shipped three-read grounded extraction |
-| Log loss, Brier score, ROC AUC, ECE (equal-width and equal-mass) | Confidence model against the v0 tier weights, an evidence lookup table and a constant |
-| AUC and yield@10/25 | Discovery prior against the v0 prior and random order |
-| Cohen's kappa | Agreement between two reviewers |
-| NDCG@5, gain 2^rel − 1 | Ranking quality against human judgments (`scripts/eval-ranking.ts`) |
+| Metric                                                           | Measures                                                                                                             |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Room precision, recall, F1 and invented-number rate              | Extraction quality: v0 regex maximum, regex candidates, one LLM read, and the shipped three-read grounded extraction |
+| Log loss, Brier score, ROC AUC, ECE (equal-width and equal-mass) | Confidence model against the v0 tier weights, an evidence lookup table and a constant                                |
+| AUC and yield@10/25                                              | Discovery prior against the v0 prior and random order                                                                |
+| Cohen's kappa                                                    | Agreement between two reviewers                                                                                      |
+| NDCG@5, gain 2^rel − 1                                           | Ranking quality against human judgments (`scripts/eval-ranking.ts`)                                                  |
 
 Metric implementations are cross-checked against scikit-learn, and the TypeScript model scoring is checked against scikit-learn's `predict_proba` to 1e-6. `npm run data:dryrun` runs the whole pipeline offline on synthetic data.
 
@@ -272,15 +272,15 @@ cp .env.example .env.local
 
 ### Environment variables
 
-| Variable | Required | Behaviour when unset |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | |
-| `GOOGLE_PLACES_API_KEY` | No | Discovery uses OpenStreetMap only; venues have no photos |
-| `XAI_API_KEY` | No | No LLM reader, query parsing or dietary roster; figures stay `likely` |
-| `FIRECRAWL_API_KEY` | No | JavaScript-rendered pages are marked for a phone call |
-| `ORS_API_KEY` | No | Commute times are straight-line estimates, labelled as such |
+| Variable                        | Required | Behaviour when unset                                                  |
+| ------------------------------- | -------- | --------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Yes      |                                                                       |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      |                                                                       |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Yes      |                                                                       |
+| `GOOGLE_PLACES_API_KEY`         | No       | Discovery uses OpenStreetMap only; venues have no photos              |
+| `XAI_API_KEY`                   | No       | No LLM reader, query parsing or dietary roster; figures stay `likely` |
+| `FIRECRAWL_API_KEY`             | No       | JavaScript-rendered pages are marked for a phone call                 |
+| `ORS_API_KEY`                   | No       | Commute times are straight-line estimates, labelled as such           |
 
 `.env.local` is excluded from version control.
 
@@ -306,22 +306,22 @@ npm run build && npm run start       # production build
 
 ### Reference scenarios
 
-| Scenario | Address |
-| --- | --- |
-| 50 people, under 20 minutes | `Times Square, New York, NY` |
-| 30 people, under 15 minutes | `415 Mission St, San Francisco, CA 94105` |
-| 200 people, reception style, under 15 minutes walking | `Hilton Hawaiian Village, Honolulu, HI` |
+| Scenario                                              | Address                                   |
+| ----------------------------------------------------- | ----------------------------------------- |
+| 50 people, under 20 minutes                           | `Times Square, New York, NY`              |
+| 30 people, under 15 minutes                           | `415 Mission St, San Francisco, CA 94105` |
+| 200 people, reception style, under 15 minutes walking | `Hilton Hawaiian Village, Honolulu, HI`   |
 
 ### Commands
 
-| Command | Description |
-| --- | --- |
-| `npm test` | Unit and integration tests |
-| `npm run lint` | ESLint |
-| `npm run test:scenarios` | Run the three reference searches |
-| `npm run photos:backfill` | Add Google photos to venues without one |
-| `npm run eval:ranking` | NDCG@5 for each ranking method |
-| `npm run data:dryrun` | Run the whole training pipeline offline on synthetic data |
+| Command                      | Description                                                  |
+| ---------------------------- | ------------------------------------------------------------ |
+| `npm test`                   | Unit and integration tests                                   |
+| `npm run lint`               | ESLint                                                       |
+| `npm run test:scenarios`     | Run the three reference searches                             |
+| `npm run photos:backfill`    | Add Google photos to venues without one                      |
+| `npm run eval:ranking`       | NDCG@5 for each ranking method                               |
+| `npm run data:dryrun`        | Run the whole training pipeline offline on synthetic data    |
 | `python3 -m pytest ml/tests` | Python tests (requires `pip install -r ml/requirements.txt`) |
 
 The training pipeline's steps are listed in [`eval/README.md`](eval/README.md).
@@ -330,48 +330,32 @@ The scripts in `scripts/verify-*.ts` and `scripts/loadtest-density.ts` call the 
 
 ### Troubleshooting
 
-| Symptom | Resolution |
-| --- | --- |
-| `Failed to write rooms … is 0011_ai_core.sql applied?` | Run `npx supabase db push` to apply the missing migration |
-| Venue cards show "No photo found" | Set `GOOGLE_PLACES_API_KEY`, run `npm run photos:backfill` and restart the server |
-| Port 3000 is in use | `npm run dev -- -p 3001` |
-| Plain-English search reports that the model did not respond | Check `XAI_API_KEY`; the standard search form works without it |
+| Symptom                                                     | Resolution                                                                        |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `Failed to write rooms … is 0011_ai_core.sql applied?`      | Run `npx supabase db push` to apply the missing migration                         |
+| Venue cards show "No photo found"                           | Set `GOOGLE_PLACES_API_KEY`, run `npm run photos:backfill` and restart the server |
+| Port 3000 is in use                                         | `npm run dev -- -p 3001`                                                          |
+| Plain-English search reports that the model did not respond | Check `XAI_API_KEY`; the standard search form works without it                    |
 
-## 7. Limitations and next steps
+## 7. Limitations
 
-### Limitations
+Ranking uses the capacity printed on the venue's own site, the trust label on that figure, and the commute. The boundaries below are the ones the product is built to keep.
 
-- **Untrained models.** The training pipeline is built and tested end to end on synthetic data, but has not yet run on real venues. Until it does, the app uses the v0 tier weights, the hand-set discovery prior and the hand-set base rates, and hides "% likely to fit".
-- **No accuracy figures yet.** They come from the pipeline's first real run (`eval/results/summary.md`).
-- **Strict grounding.** Exact quote matching rejects correct answers that paraphrase the page, which lowers recall.
-- **First-search latency.** In an area with no cached venues, verifying figures with the model can make the first search slower: about 15 s instead of 6 s in simulation. Later searches use the 30-day cache.
-- **Authentication.** Workspaces are shared through a team code, which is not suitable for production use.
-- **Interface gaps.**
-  - Map markers and the compare page do not yet handle estimated capacities consistently.
-  - Some capacity ranges display in reverse order.
-
-### Next steps
-
-| Priority | Task |
-| --- | --- |
-| High | Run the training pipeline on real venues (network access to xAI, Firecrawl, Hugging Face and venue sites) |
-| High | Review the 130 gold venues (four reviewers) and pass the teacher quality gate |
-| High | Ship the trained models and report extraction F1, calibration and NDCG@5 against the baselines |
-| Medium | Reduce first-search latency by capping verification reads or raising model concurrency |
-| Medium | Accept paraphrased evidence through an entailment check behind the exact match |
-| Low | Separate event links from workspace codes and add authentication |
-| Low | Handle estimated capacities consistently on the map and the compare page |
-| Low | Deploy to Vercel with the production Supabase project |
+- **Evidence has to be on the page.** A capacity is kept when its supporting sentence appears in the saved text and contains the number. A paraphrase of that sentence is left for the planner to confirm. Every figure that reaches the ranking is one the venue published.
+- **The first search in a new area does the reading.** With fewer than three venues checked in the last 30 days, the app fetches pages before it ranks. Searches after that use the cache. In simulation that first pass is about 15 seconds, and a cached search is about 6 seconds.
+- **Some sites are left for a phone call.** When a site blocks automated reading, or the only capacity is in a PDF or an image, the venue is marked for the planner to confirm.
+- **A team shares one workspace.** Access is a team code. That code opens the shared catalog and the event page for the people planning together.
+- **Estimates on the map and the compare page.** The result card labels an unpublished capacity as an estimate. The map marker and the compare view still present that case less clearly, and a printed range can show its two ends swapped. Both views read the same saved capacity.
 
 ## References
 
-- Gao et al., *Enabling Large Language Models to Generate Text with Citations* (ALCE), EMNLP 2023
-- Guo et al., *On Calibration of Modern Neural Networks*, ICML 2017
-- Wang et al., *Self-Consistency Improves Chain of Thought Reasoning in Language Models*, 2022
-- Niculescu-Mizil and Caruana, *Predicting Good Probabilities with Supervised Learning*, ICML 2005
-- Russell and Norvig, *Artificial Intelligence: A Modern Approach*, 4th ed., ch. 16
-- Järvelin and Kekäläinen, *Cumulated Gain-Based Evaluation of IR Techniques*, ACM TOIS 2002
-- Cohen, *A Coefficient of Agreement for Nominal Scales*, 1960
-- RFC 9309, *Robots Exclusion Protocol*
+- Gao et al., _Enabling Large Language Models to Generate Text with Citations_ (ALCE), EMNLP 2023
+- Guo et al., _On Calibration of Modern Neural Networks_, ICML 2017
+- Wang et al., _Self-Consistency Improves Chain of Thought Reasoning in Language Models_, 2022
+- Niculescu-Mizil and Caruana, _Predicting Good Probabilities with Supervised Learning_, ICML 2005
+- Russell and Norvig, _Artificial Intelligence: A Modern Approach_, 4th ed., ch. 16
+- Järvelin and Kekäläinen, _Cumulated Gain-Based Evaluation of IR Techniques_, ACM TOIS 2002
+- Cohen, _A Coefficient of Agreement for Nominal Scales_, 1960
+- RFC 9309, _Robots Exclusion Protocol_
 
 The full reference list and design notes are in [`NOTES-ai-core.md`](NOTES-ai-core.md).

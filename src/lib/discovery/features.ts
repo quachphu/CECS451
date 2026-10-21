@@ -178,6 +178,57 @@ export function encodeConfidenceFeatures(
 
 // ----------------------------------------------------------------- discovery
 
+export const CANDIDATE_FEATURE_ORDER = [
+  "llm_votes",
+  "regex_hit",
+  "in_grounded_quote",
+  "room_word_near",
+  "capacity_verb_near",
+  "reservation_phrase_near",
+  "whole_venue_phrase_near",
+  "looks_like_junk",
+  "on_private_page",
+  "value_rank",
+  "log_value",
+  "n_candidates_on_page",
+] as const;
+
+export type CandidateFeatureInput = {
+  llmVotes: number;
+  regexHit: boolean;
+  inGroundedQuote: boolean;
+  roomWordNear: boolean;
+  capacityVerbNear: boolean;
+  reservationPhraseNear: boolean;
+  wholeVenuePhraseNear: boolean;
+  looksLikeJunk: boolean;
+  onPrivatePage: boolean;
+  valueRank: number;
+  logValue: number;
+  nCandidates: number;
+};
+
+/** The numeric row the candidate model sees. Same function for training and serving. */
+export function encodeCandidateFeatures(
+  f: CandidateFeatureInput,
+): Record<(typeof CANDIDATE_FEATURE_ORDER)[number], number> {
+  const bit = (v: boolean) => (v ? 1 : 0);
+  return {
+    llm_votes: f.llmVotes,
+    regex_hit: bit(f.regexHit),
+    in_grounded_quote: bit(f.inGroundedQuote),
+    room_word_near: bit(f.roomWordNear),
+    capacity_verb_near: bit(f.capacityVerbNear),
+    reservation_phrase_near: bit(f.reservationPhraseNear),
+    whole_venue_phrase_near: bit(f.wholeVenuePhraseNear),
+    looks_like_junk: bit(f.looksLikeJunk),
+    on_private_page: bit(f.onPrivatePage),
+    value_rank: f.valueRank,
+    log_value: f.logValue,
+    n_candidates_on_page: f.nCandidates,
+  };
+}
+
 export const DISCOVERY_NAME_KEYWORDS = [
   "steakhouse",
   "grill",

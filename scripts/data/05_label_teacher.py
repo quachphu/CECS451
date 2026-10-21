@@ -18,6 +18,14 @@ reserved against the cap with the output length the pilot measured (1.5x its
 collected and charged at its real cost before the next one is reserved, so a
 run can overshoot the cap by at most one batch's estimation error.
 Writes eval/teacher_labels.jsonl. Per-venue results are cached in eval/.cache/teacher/.
+
+A second teacher uses the same prompt and a separate cache, so it cannot
+overwrite the first teacher's labels:
+
+    TEACHER_MODEL=claude-opus-5-5 \\
+    TEACHER_CACHE_SUBDIR=teacher_opus \\
+    TEACHER_LABELS_NAME=teacher_labels_opus.jsonl \\
+    python3 scripts/data/05_label_teacher.py --estimate
 """
 
 from __future__ import annotations
@@ -52,10 +60,27 @@ from ml.teacher import (  # noqa: E402
 )
 
 PROMPT_VERSION = os.environ.get("TEACHER_PROMPT_VERSION", "teacher_v1")
+CACHE_SUBDIR = os.environ.get("TEACHER_CACHE_SUBDIR", "teacher")
+LABELS_NAME = os.environ.get("TEACHER_LABELS_NAME", "teacher_labels.jsonl")
 PILOT_SIZE = 20
 MAX_TOKENS = 16_000
 MIN_OUTPUT_ALLOWANCE = 2_000
 BATCH_SIZE = int(os.environ.get("TEACHER_BATCH_SIZE", 100))
+
+
+def cache_dir() -> Path:
+    return eval_dir(".cache", CACHE_SUBDIR)
+
+
+def usage_files() -> list[Path]:
+    """Output lengths for the reserve. An empty second-teacher cache uses the first teacher's."""
+    def listed(subdir: str) -> list[Path]:
+        return [f for f in eval_dir(".cache", subdir).glob("*.json") if f.name != "batches.json"]
+
+    own = listed(CACHE_SUBDIR)
+    if own or CACHE_SUBDIR == "teacher":
+        return own
+    return listed("teacher")
 
 
 def output_allowance() -> int:
@@ -66,7 +91,7 @@ def output_allowance() -> int:
     if override:
         return int(override)
     outputs = sorted(
-        read_json(f)["usage"].get("output_tokens") or 0 for f in eval_dir(".cache", "teacher").glob("*.json") if f.name != "batches.json"
+        read_json(f)["usage"].get("output_tokens") or 0 for f in usage_files()
     )
     if not outputs:
         return MAX_TOKENS  # no pilot yet: assume the worst
@@ -85,7 +110,11 @@ def client():
 
 
 def cache_path(venue_id: str) -> Path:
-    return eval_dir(".cache", "teacher", f"{venue_id}.json")
+    return cache_dir() / f"{venue_id}.json"
+
+
+def batches_file() -> Path:
+    return cache_dir() / "batches.json"
 
 
 def in_dataset() -> list[dict]:
@@ -185,16 +214,16 @@ def submit_batch(api, venues: list[dict], model: str, effort: str, budget: Budge
         return None
     budget.reserve(worst)
     batch = api.messages.batches.create(requests=requests)
-    state = read_json(eval_dir(".cache", "teacher", "batches.json")) if eval_dir(".cache", "teacher", "batches.json").exists() else []
-    state.append({"batch_id": batch.id, "venue_ids": [v["venue_id"] for v in venues], "submitted_at": now_iso(), "collected": False})
-    write_json(eval_dir(".cache", "teacher", "batches.json"), state)
+    state = read_json(batches_file()) if batches_file().exists() else []
+    state.append({"batch_id": batch.id, "venue_ids": [v["venue_id"] for v in venues], "submitted_at": now_iso(), "collected": False, "model": model})
+    write_json(batches_file(), state)
     print(f"Submitted batch {batch.id} with {len(requests)} venues.")
     return batch.id
 
 
 def collect_batches(api, venues_by_id: dict, model: str, effort: str, budget: Budget, wait: bool) -> list[str]:
     """Polls submitted batches; saves results; returns venue ids that need a direct retry."""
-    state_file = eval_dir(".cache", "teacher", "batches.json")
+    state_file = batches_file()
     state = read_json(state_file) if state_file.exists() else []
     retry: list[str] = []
     for entry in state:
@@ -243,7 +272,7 @@ def assemble(venues: list[dict], manifest: RunManifest) -> None:
             manifest.count("rooms", len(cached["label"]["rooms"]))
             if cached.get("failure"):
                 manifest.count("validation_failed")
-    out = eval_dir("teacher_labels.jsonl")
+    out = eval_dir(LABELS_NAME)
     write_jsonl(out, labels)
     manifest.counts["venues_labeled_or_unclear"] = len(labels)
     manifest.counts["venues_pending"] = len(venues) - len(labels)
@@ -256,6 +285,47 @@ def retry_and_report(api, by_id: dict, model: str, effort: str, budget: Budget, 
         print(f"retry {vid}: {'ok' if not failure else failure}")
 
 
+def estimate_cost(venues: list[dict], model: str, budget: Budget) -> dict:
+    """Prices a batch run from the first teacher's token counts and from the output allowance.
+
+    Does not call the API. Refuses when the expected cost would pass the cap.
+    """
+    allowance = output_allowance()
+    expected = 0.0
+    worst = 0.0
+    priced = 0
+    for v in venues:
+        snap = read_json(eval_dir("snapshots", f"{v['venue_id']}.json"))
+        worst += worst_case_cost(model, build_teacher_input(v, snap), allowance, batch=True)
+        cached = eval_dir(".cache", "teacher", f"{v['venue_id']}.json")
+        if cached.exists():
+            expected += token_cost(model, read_json(cached).get("usage") or {}, batch=True)
+            priced += 1
+    remaining = budget.cap - budget.spent
+    report = {
+        "model": model,
+        "venues": len(venues),
+        "priced_from_first_teacher": priced,
+        "output_allowance_tokens": allowance,
+        "expected_batch_usd": round(expected, 2),
+        "worst_case_reserve_usd": round(worst, 2),
+        "spent_usd": round(budget.spent, 2),
+        "cap_usd": budget.cap,
+        "remaining_usd": round(remaining, 2),
+    }
+    print(
+        f"Estimate for {model}, batch API, {len(venues)} venues: "
+        f"expected ${expected:.2f} from {priced} saved token counts; "
+        f"worst-case reserve ${worst:.2f} at {allowance} output tokens. "
+        f"Spent ${budget.spent:.2f} of ${budget.cap:.2f}."
+    )
+    if priced and budget.spent + expected > budget.cap:
+        raise SystemExit("Expected cost would pass the Anthropic cap. Not submitting.")
+    if budget.spent + worst > budget.cap:
+        raise SystemExit("Worst-case reserve would pass the Anthropic cap. Not submitting.")
+    return report
+
+
 def main() -> None:
     load_env_local()
     parser = argparse.ArgumentParser()
@@ -263,6 +333,7 @@ def main() -> None:
     mode.add_argument("--pilot", action="store_true")
     mode.add_argument("--batch", action="store_true")
     mode.add_argument("--collect", action="store_true")
+    mode.add_argument("--estimate", action="store_true")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--no-wait", action="store_true", help="submit or check once, without waiting for the batch")
     args = parser.parse_args()
@@ -275,6 +346,11 @@ def main() -> None:
     manifest.inputs.append(eval_dir("venue_index.csv"))
 
     venues = in_dataset()
+    if args.estimate:
+        estimate_cost(venues, model, budget)
+        return
+    if args.batch and CACHE_SUBDIR != "teacher":
+        estimate_cost(venues, model, budget)
     by_id = {v["venue_id"]: v for v in venues}
     todo = [v for v in venues if not cache_path(v["venue_id"]).exists()]
     if args.limit is not None:
@@ -289,7 +365,7 @@ def main() -> None:
                     failure = label_direct(api, v, model, effort, budget, attempts=2)
                 print(f"{v['venue_id']}: {'ok' if not failure else failure}")
         else:
-            state_file = eval_dir(".cache", "teacher", "batches.json")
+            state_file = batches_file()
             # Finish anything already submitted first, so its real cost is on the ledger.
             retry_and_report(api, by_id, model, effort, budget, wait=not args.no_wait)
             if args.batch:
@@ -311,7 +387,7 @@ def main() -> None:
         assemble(venues, manifest)
         manifest.spend["anthropic_usd_total"] = round(budget.spent, 4)
         manifest.write(status)
-    print(f"Anthropic spend so far: ${budget.spent:.2f} of ${budget.cap}. Labels: {eval_dir('teacher_labels.jsonl')}")
+    print(f"Anthropic spend so far: ${budget.spent:.2f} of ${budget.cap}. Labels: {eval_dir(LABELS_NAME)}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,104 @@
+{
+  "note": "Room-level, per stated figure; correct = within 10% of the matched gold figure. v0 category estimates are left out of v0_regex_max (it guessed a number when none was on the page).",
+  "v0_estimates_left_out": 0,
+  "test_gold": {
+    "v0_regex_max": {
+      "venues": 0,
+      "predicted": 0,
+      "gold_figures": 0,
+      "matched": 0,
+      "correct": 0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "accuracy_within_10pct": null,
+      "invented_rate": null
+    },
+    "regex_candidates": {
+      "venues": 0,
+      "predicted": 0,
+      "gold_figures": 0,
+      "matched": 0,
+      "correct": 0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "accuracy_within_10pct": null,
+      "invented_rate": null
+    },
+    "grok_single_read": {
+      "venues": 0,
+      "predicted": 0,
+      "gold_figures": 0,
+      "matched": 0,
+      "correct": 0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "accuracy_within_10pct": null,
+      "invented_rate": null
+    },
+    "grok_grounded_sc": {
+      "venues": 0,
+      "predicted": 0,
+      "gold_figures": 0,
+      "matched": 0,
+      "correct": 0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "accuracy_within_10pct": null,
+      "invented_rate": null
+    }
+  },
+  "test_la_gold": {
+    "v0_regex_max": {
+      "venues": 0,
+      "predicted": 0,
+      "gold_figures": 0,
+      "matched": 0,
+      "correct": 0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "accuracy_within_10pct": null,
+      "invented_rate": null
+    },
+    "regex_candidates": {
+      "venues": 0,
+      "predicted": 0,
+      "gold_figures": 0,
+      "matched": 0,
+      "correct": 0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "accuracy_within_10pct": null,
+      "invented_rate": null
+    },
+    "grok_single_read": {
+      "venues": 0,
+      "predicted": 0,
+      "gold_figures": 0,
+      "matched": 0,
+      "correct": 0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "accuracy_within_10pct": null,
+      "invented_rate": null
+    },
+    "grok_grounded_sc": {
+      "venues": 0,
+      "predicted": 0,
+      "gold_figures": 0,
+      "matched": 0,
+      "correct": 0,
+      "precision": null,
+      "recall": null,
+      "f1": null,
+      "accuracy_within_10pct": null,
+      "invented_rate": null
+    }
+  }
+}

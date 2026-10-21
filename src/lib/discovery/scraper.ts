@@ -205,6 +205,103 @@ export function extractCapacityCandidates(text: string): CapacityCandidate[] {
   return candidates;
 }
 
+const NEAR_CHARS = 60;
+const BROAD_NUMBER_SOURCE = String.raw`\b(\d{1,4})\b`;
+const NEAR_WORD =
+  /\b(rooms?|halls?|lounges?|terraces?|suites?|banquets?|patios?|spaces?|mezzanines?|guests?|people|persons?|pax|seats?|accommodat\w*|holds?|capacity)\b/i;
+const CAPACITY_VERB_NEAR = /\b(seats?|accommodat(?:es|ing)|holds?|up\s*to|capacity)\b/i;
+const RESERVATION_PHRASE_NEAR = /\b(?:table\s+for|party\s+of|book\s+for)\b/i;
+const WHOLE_VENUE_PHRASE_NEAR = /dining room seats|restaurant holds|total seating/i;
+const PHONE_SPAN_SOURCE = String.raw`(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}`;
+
+/** One number the candidate model might choose, before same-value numbers are merged. */
+export type NumberHit = {
+  value: number;
+  context: string;
+  onPrivatePage: boolean;
+  regexHit: boolean;
+  roomWordNear: boolean;
+  capacityVerbNear: boolean;
+  reservationPhraseNear: boolean;
+  wholeVenuePhraseNear: boolean;
+  looksLikeJunk: boolean;
+};
+
+function nearWindow(text: string, start: number, end: number): string {
+  return text.slice(Math.max(0, start - NEAR_CHARS), Math.min(text.length, end + NEAR_CHARS));
+}
+
+function looksLikeJunk(text: string, start: number, end: number, value: number, context: string): boolean {
+  if ((text[start - 1] ?? "") === "$") return true;
+  const after = text.slice(end, end + 6);
+  if (/^\s*(?:am|pm)\b/i.test(after) || /^\s*:\d{2}/.test(after)) return true;
+  const localStart = Math.max(0, start - 24);
+  const local = text.slice(localStart, Math.min(text.length, end + 24));
+  for (const match of local.matchAll(new RegExp(PHONE_SPAN_SOURCE, "g"))) {
+    const from = localStart + (match.index ?? 0);
+    const to = from + match[0].length;
+    if (start < to && end > from) return true;
+  }
+  return value >= 1900 && value <= 2035 && !CAPACITY_VERB_NEAR.test(context);
+}
+
+/**
+ * Every number the capacity model might select on these pages.
+ * The current capacity regex is kept and marked. Other integers from 1 to 2000
+ * are kept only when a room, guest, or capacity word sits within 60 characters.
+ */
+export function extractPageNumberCandidates(
+  pages: Array<{ text: string; privateDining: boolean }>,
+): NumberHit[] {
+  const hits: NumberHit[] = [];
+  for (const page of pages) {
+    const text = page.text;
+    const regexValues = extractCapacityCandidates(text).map((c) => c.value);
+    for (const match of text.matchAll(new RegExp(BROAD_NUMBER_SOURCE, "g"))) {
+      const value = parseInt(match[1] ?? "", 10);
+      if (Number.isNaN(value) || value < 1 || value > 2000) continue;
+      const start = match.index ?? 0;
+      const end = start + match[0].length;
+      const context = nearWindow(text, start, end);
+      const regexHit = regexValues.some((v) => Math.abs(v - value) <= 0.03 * Math.max(v, value));
+      const roomWordNear = NEAR_WORD.test(context);
+      if (!regexHit && !roomWordNear) continue;
+      hits.push({
+        value,
+        context,
+        onPrivatePage: page.privateDining,
+        regexHit,
+        roomWordNear,
+        capacityVerbNear: CAPACITY_VERB_NEAR.test(context),
+        reservationPhraseNear: RESERVATION_PHRASE_NEAR.test(context),
+        wholeVenuePhraseNear: WHOLE_VENUE_PHRASE_NEAR.test(context),
+        looksLikeJunk: looksLikeJunk(text, start, end, value, context),
+      });
+    }
+  }
+  return hits;
+}
+
+/** True when two capacities are within `tolerance` of the larger one. */
+export function withinRelative(a: number, b: number, tolerance: number): boolean {
+  return Math.abs(a - b) <= tolerance * Math.max(Math.abs(a), Math.abs(b));
+}
+
+/**
+ * Groups hits whose values are within 3% of the cluster's first value.
+ * Hits must be sorted by value. Each cluster keeps every source.
+ */
+export function clusterNumberHits(hits: NumberHit[], tolerance = 0.03): NumberHit[][] {
+  const sorted = [...hits].sort((a, b) => a.value - b.value);
+  const clusters: NumberHit[][] = [];
+  for (const hit of sorted) {
+    const current = clusters.at(-1);
+    if (current && withinRelative(current[0].value, hit.value, tolerance)) current.push(hit);
+    else clusters.push([hit]);
+  }
+  return clusters;
+}
+
 /** Normalizes matched dietary phrases into a stable, de-duplicated list. */
 export function extractDietaryNotes(text: string): string | null {
   const found = new Set<string>();

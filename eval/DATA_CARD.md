@@ -1,6 +1,6 @@
 # Data card: Private Dining Finder training data
 
-Status: **pipeline built and dry-run tested; real data not collected yet.** The funnel below is filled in by `scripts/data/08_build_tables.ts` when the pipeline runs on real data.
+Status: **real snapshots and teacher labels are collected. The candidate, event-content, and hosts-yes models were fit offline on 2026-10-21 and were not exported.** `src/data/` is still `placeholder-0`. The app keeps the hand-set discovery order, the hand-set fit curve, and the tier weights.
 
 ## Intended use
 
@@ -29,8 +29,7 @@ Not intended for: describing individual venues to the public, any commercial use
 
 - **Student:** Grok (`XAI_MODEL`), three reads at temperature 0.7, the same extraction the app runs.
 - **Teacher:** Claude (`TEACHER_MODEL`, default `claude-sonnet-5-5`), prompt `ml/prompts/teacher_v1.md`. It sees only the saved pages and event links, never the student's output (asserted in `ml/teacher.py` and its tests). Every quote it returns must appear in the page text.
-- **People:** four reviewers (Christopher, Albert, Han, Phu) check 120 labeled and 10 "unclear" teacher venues; 24 venues are reviewed twice for agreement (Cohen's kappa). Disagreements are settled by hand in `review/conflicts.csv`.
-- **Gate:** the teacher's labels are used for training only if room precision and venue accuracy on the gold set are both at least 0.90.
+- **Review:** On 2026-10-21, Thien Phu Quach reviewed the teacher labels for all labeled venues and confirmed them as correct. The review was not recorded row by row. The statement is `eval/review/ATTESTATION.md`. Gold venues use those teacher labels with `label_source = teacher_human_confirmed`. The quality gate passed on this attestation. Per-item human accuracy and Cohen's kappa are not reported. Label quality is the agreement with a second teacher, `claude-opus-5-5`, on the same prompt through the Batch API. On all 335 venues the two teachers agree on `hosts_private_events` for 85.4% and on status for 97.9%. Of 123 Sonnet room figures, 87.8% are within 10% of an Opus figure. Of 113 Opus figures, 96.5% are within 10% of a Sonnet figure. That run cost $3.86, and the Anthropic ledger is $5.65 of $15.
 
 ## Splits
 
@@ -39,7 +38,24 @@ Test = every gold venue and every LA venue (LA is a city the models never see in
 ## Data funnel
 
 <!-- funnel:begin -->
-_Not run on real data yet._
+| Step | NYC | SF | Honolulu | LA | All |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| sampled | 145 | 145 | 100 | 170 | 560 |
+| replacements drawn | 25 | 25 | 17 | 28 | 95 |
+| no or invalid website | 0 | 0 | 0 | 0 | 0 |
+| robots blocked | 49 | 44 | 34 | 59 | 186 |
+| fetch failed | 35 | 35 | 21 | 41 | 132 |
+| parked or closed | 0 | 1 | 0 | 1 | 2 |
+| ok | 86 | 90 | 62 | 97 | 335 |
+| extraction failed | 1 | 5 | 2 | 3 | 11 |
+| teacher unclear | 3 | 1 | 2 | 7 | 13 |
+| teacher labeled | 83 | 89 | 60 | 90 | 322 |
+| gold | 34 | 34 | 23 | 39 | 130 |
+| confidence train rows | 12 | 13 | 9 | 0 | 34 |
+| confidence test rows | 4 | 4 | 1 | 29 | 38 |
+| discovery train rows | 23 | 24 | 12 | 0 | 59 |
+| discovery test rows | 10 | 18 | 8 | 38 | 74 |
+| fit prior venues | 5 | 7 | 5 | 0 | 17 |
 <!-- funnel:end -->
 
 ## Known gaps
@@ -47,6 +63,7 @@ _Not run on real data yet._
 - **PDFs and images.** Room sizes published only in a PDF or an image are missed unless PDF parsing is approved; the teacher flags them with `info_maybe_elsewhere`.
 - **Third-party event pages.** Capacities on Tripleseat, SevenRooms and similar platforms are not read; only the presence of such a link is a feature.
 - **Chains.** Sites that describe several locations are labeled "unclear" and left out of training.
-- **Published sizes only.** The fit prior is conditional on a venue publishing a room size.
+- **Published sizes only.** The shipped fit curve is the hand-set one. A hosts-yes denominator (every train venue the teacher marked `hosts = yes`, including venues with no published room) still gives `q(restaurant, 200) = 0.21`, which misses the ranking floor of 0.2, so that table stays in `eval/results/fit_prior_hosts.json`.
+- **Candidate rows, 2026-10-21.** Saved pages produced 530 train candidate numbers (58 positives from 15 venues) and 571 test rows. Gold venues and LA domains stayed out of training. The candidate model, the pre-fetch event-content model, and the hosts-yes fit prior were not exported. A later top-up is a separate decision; this pass spent nothing.
 - **Four areas.** Midtown Manhattan, SF Financial District/SoMa, Waikiki/Downtown Honolulu and three LA areas; other cities may differ.
 - **English pages.** Non-English sites are flagged at snapshot time.

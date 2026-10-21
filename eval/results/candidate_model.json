@@ -1,0 +1,303 @@
+{
+  "model": "candidate_confidence",
+  "version": "trained-2026-10-21",
+  "class_weight": null,
+  "C": 1,
+  "C_grid_log_loss": {
+    "0.01": 0.2330670713918001,
+    "0.03": 0.1952481964431686,
+    "0.1": 0.17140256143179172,
+    "0.3": 0.1602790329182143,
+    "1": 0.15849167106836065,
+    "3": 0.1626837904562725,
+    "10": 0.16976739106382982
+  },
+  "train_rows": 530,
+  "train_positives": 58,
+  "train_positive_venues": 15,
+  "oof": {
+    "n": 530,
+    "positives": 58,
+    "log_loss": 0.15651386767154704,
+    "brier": 0.04721108379641913,
+    "auc": 0.9526957919345412,
+    "ece_width": 0.028004679276547526,
+    "ece_mass": 0.042785869369427396,
+    "accuracy": 0.9358490566037736,
+    "ci95": {
+      "log_loss": [
+        0.0778376824848979,
+        0.22738640428716878
+      ],
+      "brier": [
+        0.02125344363517861,
+        0.0700893921911235
+      ],
+      "auc": [
+        0.9151866871096671,
+        0.9882917466488976
+      ],
+      "ece_width": [
+        0.0171254145226193,
+        0.05590994586642996
+      ],
+      "ece_mass": [
+        0.014901598923358366,
+        0.05710300408569372
+      ],
+      "accuracy": [
+        0.9042690975086619,
+        0.9715903620457828
+      ]
+    }
+  },
+  "selection_train": {
+    "all_venues": {
+      "model": 0.24561403508771928,
+      "largest_regex": 0.14035087719298245,
+      "pipeline_winner": 0.15789473684210525,
+      "heuristic": 0.24561403508771928,
+      "venues": 57
+    },
+    "venues_with_a_correct_number": {
+      "model": 0.9333333333333333,
+      "largest_regex": 0.5333333333333333,
+      "pipeline_winner": 0.6,
+      "heuristic": 0.9333333333333333,
+      "venues": 15
+    }
+  },
+  "calibration_vs_tier": {
+    "oof": {
+      "n": 27,
+      "positives": 27,
+      "model_log_loss": 0.0042921199233494365,
+      "tier_log_loss": 0.4308752678557848,
+      "model_brier": 0.0001246732126869222,
+      "tier_brier": 0.15222222222222218,
+      "model_mean": 0.9957718628013604,
+      "tier_mean": 0.7222222222222222
+    },
+    "test_gold": {
+      "n": 22,
+      "positives": 20,
+      "model_log_loss": 0.120617856509529,
+      "tier_log_loss": 0.2780180485017418,
+      "model_brier": 0.04857065995099337,
+      "tier_brier": 0.08272727272727272,
+      "model_mean": 0.9743827065132075,
+      "tier_mean": 0.7636363636363638
+    },
+    "test_la_gold": {
+      "n": 17,
+      "positives": 17,
+      "model_log_loss": 0.0012375605233437299,
+      "tier_log_loss": 0.10536051565782628,
+      "model_brier": 3.539704477117463e-06,
+      "tier_brier": 0.009999999999999995,
+      "model_mean": 0.9987642136124393,
+      "tier_mean": 0.9
+    },
+    "test_la_teacher": {
+      "n": 10,
+      "positives": 10,
+      "model_log_loss": 0.0006763453222647666,
+      "tier_log_loss": 0.764527888858692,
+      "model_brier": 1.0459962814505694e-06,
+      "tier_brier": 0.29799999999999993,
+      "model_mean": 0.9993241784609402,
+      "tier_mean": 0.5399999999999999
+    }
+  },
+  "odds": [
+    "One standard deviation more llm_votes (0.755) multiplies the odds by 14.63.",
+    "regex_hit = 1 multiplies the odds by 2.52.",
+    "in_grounded_quote = 1 multiplies the odds by 0.55.",
+    "room_word_near = 1 multiplies the odds by 1.00.",
+    "capacity_verb_near = 1 multiplies the odds by 6.91.",
+    "reservation_phrase_near = 1 multiplies the odds by 1.00.",
+    "whole_venue_phrase_near = 1 multiplies the odds by 1.00.",
+    "looks_like_junk = 1 multiplies the odds by 0.44.",
+    "on_private_page = 1 multiplies the odds by 5.77.",
+    "One standard deviation more value_rank (9.03) multiplies the odds by 0.65.",
+    "One standard deviation more log_value (1.87) multiplies the odds by 1.96.",
+    "One standard deviation more n_candidates_on_page (12.7) multiplies the odds by 1.22."
+  ],
+  "test": {
+    "test_gold": {
+      "n": 426,
+      "positives": 40,
+      "venues": 50,
+      "model": {
+        "n": 426,
+        "positives": 40,
+        "log_loss": 0.12228040345426505,
+        "brier": 0.0344826836497822,
+        "auc": 0.954080310880829,
+        "ece_width": 0.026202356346539193,
+        "ece_mass": 0.01590647507345612,
+        "accuracy": 0.9507042253521126,
+        "ci95": {
+          "log_loss": [
+            0.04842645686590163,
+            0.23237601817106038
+          ],
+          "brier": [
+            0.011793762191107001,
+            0.06981759374333878
+          ],
+          "auc": [
+            0.8716987664240476,
+            0.9960845769843207
+          ],
+          "ece_width": [
+            0.014428354240684522,
+            0.06185674907274445
+          ],
+          "ece_mass": [
+            0.010243577179985438,
+            0.05494061880309035
+          ],
+          "accuracy": [
+            0.8948849078436235,
+            0.9847608510359297
+          ]
+        }
+      },
+      "selection": {
+        "all_venues": {
+          "model": 0.16,
+          "largest_regex": 0.1,
+          "pipeline_winner": 0.08,
+          "heuristic": 0.18,
+          "venues": 50
+        },
+        "venues_with_a_correct_number": {
+          "model": 0.8,
+          "largest_regex": 0.5,
+          "pipeline_winner": 0.4,
+          "heuristic": 0.9,
+          "venues": 10
+        }
+      }
+    },
+    "test_la_gold": {
+      "n": 102,
+      "positives": 28,
+      "venues": 13,
+      "model": {
+        "n": 102,
+        "positives": 28,
+        "log_loss": 0.2792439425039829,
+        "brier": 0.08517090901173271,
+        "auc": 0.930984555984556,
+        "ece_width": 0.08489435729348224,
+        "ece_mass": 0.061703017462473274,
+        "accuracy": 0.8725490196078431,
+        "ci95": {
+          "log_loss": [
+            0.02476457228105938,
+            0.5865951245065347
+          ],
+          "brier": [
+            0.003971671436314673,
+            0.18520855261058827
+          ],
+          "auc": [
+            0.7415450932848388,
+            1.0
+          ],
+          "ece_width": [
+            0.015738863773720253,
+            0.20948923809535905
+          ],
+          "ece_mass": [
+            0.02078940816881476,
+            0.1916385525438912
+          ],
+          "accuracy": [
+            0.7078258819831853,
+            1.0
+          ]
+        }
+      },
+      "selection": {
+        "all_venues": {
+          "model": 0.15384615384615385,
+          "largest_regex": 0.23076923076923078,
+          "pipeline_winner": 0.07692307692307693,
+          "heuristic": 0.23076923076923078,
+          "venues": 13
+        },
+        "venues_with_a_correct_number": {
+          "model": 0.6666666666666666,
+          "largest_regex": 1.0,
+          "pipeline_winner": 0.3333333333333333,
+          "heuristic": 1.0,
+          "venues": 3
+        }
+      }
+    },
+    "test_la_teacher": {
+      "n": 145,
+      "positives": 10,
+      "venues": 23,
+      "model": {
+        "n": 145,
+        "positives": 10,
+        "log_loss": 0.02814245896889805,
+        "brier": 0.004217035885024576,
+        "auc": 1.0,
+        "ece_width": 0.02469710359292979,
+        "ece_mass": 0.024603886828921555,
+        "accuracy": 0.993103448275862,
+        "ci95": {
+          "log_loss": [
+            0.013577427426310351,
+            0.05041401779354693
+          ],
+          "brier": [
+            0.00047462631975385167,
+            0.01119941862071526
+          ],
+          "auc": [
+            1.0,
+            1.0
+          ],
+          "ece_width": [
+            0.013233616469536422,
+            0.04065564274700299
+          ],
+          "ece_mass": [
+            0.013114096376139497,
+            0.040607518991937194
+          ],
+          "accuracy": [
+            0.9791666666666666,
+            1.0
+          ]
+        }
+      },
+      "selection": {
+        "all_venues": {
+          "model": 0.13043478260869565,
+          "largest_regex": 0.08695652173913043,
+          "pipeline_winner": 0.13043478260869565,
+          "heuristic": 0.13043478260869565,
+          "venues": 23
+        },
+        "venues_with_a_correct_number": {
+          "model": 1.0,
+          "largest_regex": 0.6666666666666666,
+          "pipeline_winner": 1.0,
+          "heuristic": 1.0,
+          "venues": 3
+        }
+      }
+    }
+  },
+  "decision": "Trained on 58 positive candidates from 15 venues. On gold venues that have a correct number, selection does not beat both baselines. On the numbers the pipeline would show, its log loss beats the tier weight. Not exported. The app keeps the tier weights.",
+  "git_sha": "f3f8dc5d52d022ef08b2118ae0af48906e2fe965",
+  "data_sha256": "a1ccc1e3804ba7efd02a1ac71f6fcda80cafb26862de80da0a4d28beccd02adf",
+  "seed": 451
+}

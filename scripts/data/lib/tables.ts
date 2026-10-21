@@ -26,7 +26,7 @@ export type Split = "train" | "test_gold" | "test_la_teacher";
 
 export type VenueLabel = {
   venueId: string;
-  source: "gold" | "teacher";
+  source: "gold" | "teacher" | "teacher_human_confirmed";
   status: "labeled" | "unclear";
   hosts: "yes" | "no" | "unknown";
   rooms: LabelRoom[];

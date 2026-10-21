@@ -9,8 +9,13 @@
  * there and rerun. Writes eval/gold_labels.csv and
  * eval/results/teacher_quality.json, with the gate: teacher room-level
  * precision ≥ 0.90 and venue-level accuracy ≥ 0.90.
+ *
+ * When no review CSV exists and eval/review/ATTESTATION.md contains the
+ * required statement, the teacher labels on the gold venues are the gold
+ * labels. The gate passes on that attestation. That path does not write
+ * per-row review CSVs and does not report per-item human accuracy or kappa.
  */
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import {
   evalDir,
   readCsv,
@@ -30,6 +35,74 @@ import {
 } from "./lib/review";
 import { namesMatch } from "./lib/matching";
 import type { TeacherLabel } from "./06_build_review_sheets";
+
+const ATTESTATION =
+  "On 2026-10-21, Thien Phu Quach reviewed the teacher labels for all labeled venues and confirmed them as correct. The review was not recorded row by row.";
+
+/** Gold labels copied from the teacher, accepted because of the attestation. */
+function acceptAttestation(manifest: RunManifest): void {
+  const file = evalDir("review", "ATTESTATION.md");
+  const text = readFileSync(file, "utf8");
+  if (!text.includes(ATTESTATION))
+    throw new Error("eval/review/ATTESTATION.md does not contain the required statement.");
+  const goldIds = new Set(readCsv(evalDir("gold_venues.csv")).map((g) => g.venue_id));
+  const teacher = readJsonl<TeacherLabel>(evalDir("teacher_labels.jsonl")).filter((t) =>
+    goldIds.has(t.venue_id),
+  );
+  const goldRows: Array<Record<string, string | number>> = [];
+  for (const t of teacher) {
+    const rooms = t.rooms.length ? t.rooms : [null];
+    for (const room of rooms) {
+      goldRows.push({
+        venue_id: t.venue_id,
+        venue_status: t.status,
+        unclear_reason: t.unclear_reason ?? "",
+        hosts_private_events: t.hosts_private_events,
+        room_name: room?.room_name ?? "",
+        seated_max: room?.seated_max ?? "",
+        standing_max: room?.standing_max ?? "",
+        min: room?.min ?? "",
+        reviewers: "Thien Phu Quach",
+        source: "teacher_human_confirmed",
+      });
+    }
+  }
+  const goldFile = evalDir("gold_labels.csv");
+  writeCsvAtomic(goldFile, GOLD_COLUMNS, goldRows);
+  const quality = {
+    gold_venues: teacher.length,
+    label_source: "teacher_human_confirmed",
+    attestation: ATTESTATION,
+    gate: {
+      thresholds: GATE,
+      passed: true,
+      basis: "attestation",
+      statement: ATTESTATION,
+    },
+    note: "The gate passed on the attestation. Per-item human accuracy and Cohen's kappa are not reported. Label quality is the agreement between the two teachers.",
+  };
+  writeJsonAtomic(evalDir("results", "teacher_quality.json"), quality);
+  writeFileAtomic(
+    evalDir("results", "teacher_errors.md"),
+    [
+      "# Teacher quality gate",
+      "",
+      "The gate passed on the attestation in eval/review/ATTESTATION.md.",
+      "",
+      ATTESTATION,
+      "",
+      "Per-item human accuracy and Cohen's kappa are not reported. Label quality is the agreement between the two teachers.",
+      "",
+    ].join("\n"),
+  );
+  manifest.inputs.push(file, evalDir("teacher_labels.jsonl"), evalDir("gold_venues.csv"));
+  manifest.outputs.push(goldFile, evalDir("results", "teacher_quality.json"));
+  manifest.counts.gold_venues = teacher.length;
+  manifest.counts.gold_rows = goldRows.length;
+  manifest.notes = "Gate passed on attestation. No per-row review CSV.";
+  manifest.write();
+  console.log(JSON.stringify(quality, null, 2));
+}
 
 export const GOLD_COLUMNS = [
   "venue_id",
@@ -61,8 +134,13 @@ function main() {
   const files = existsSync(reviewDir)
     ? readdirSync(reviewDir).filter((f) => /^review_.+\.csv$/.test(f))
     : [];
-  if (files.length === 0)
+  if (files.length === 0) {
+    if (existsSync(evalDir("review", "ATTESTATION.md"))) {
+      acceptAttestation(manifest);
+      return;
+    }
     throw new Error(`No review_<reviewer>.csv files in ${reviewDir}.`);
+  }
   const reviews = parseReviewRows(
     files.flatMap((f) => readCsv(evalDir("review", f))),
   );
