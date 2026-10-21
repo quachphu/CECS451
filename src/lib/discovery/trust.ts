@@ -1,9 +1,17 @@
 import type { CandidateVenue } from "@/lib/discovery/places";
-import { scoreRoomConfidence, type ConfidenceFeatures, type ConfidenceSource } from "@/lib/discovery/confidence";
-import { roomConfidenceFeatures } from "@/lib/discovery/features";
+import { scoreCandidateConfidence, trustFromConfidence, type ConfidenceSource } from "@/lib/discovery/confidence";
+import { encodeCandidateFeatures } from "@/lib/discovery/features";
 import { findEvidenceUrl } from "@/lib/discovery/grounding";
-import { buildLlmInput, type LlmExtractedRoom, type LlmExtraction } from "@/lib/discovery/llm-extract";
-import { MIN_PLAUSIBLE_CAPACITY, type CapacityCandidate, type ScrapedSignals } from "@/lib/discovery/scraper";
+import { type LlmExtractedRoom, type LlmExtraction } from "@/lib/discovery/llm-extract";
+import {
+  clusterNumberHits,
+  extractPageNumberCandidates,
+  MIN_PLAUSIBLE_CAPACITY,
+  withinRelative,
+  type CapacityCandidate,
+  type NumberHit,
+  type ScrapedSignals,
+} from "@/lib/discovery/scraper";
 import type { RoomStyle, TrustLevel } from "@/lib/supabase/types";
 
 export type DraftRoom = {
@@ -23,16 +31,39 @@ export type DraftRoom = {
   confidence: number | null;
   /** How the figure was obtained. */
   confidenceSource: ConfidenceSource;
-  /** The features `confidence` was computed from (LLM rooms only); persisted for refitting. */
-  confidenceFeatures: ConfidenceFeatures | null;
+  /** The candidate features `confidence` was computed from; persisted for refitting. */
+  confidenceFeatures: Record<string, number> | null;
 };
+
+/** Model probability and trust label for a number already chosen for display. */
+export function scorePageCapacity(
+  signals: ScrapedSignals,
+  room: LlmExtractedRoom | null,
+  value: number,
+  quote: string | null
+): { confidence: number | null; capacityTrust: TrustLevel; features: Record<string, number> } {
+  const features = featuresForDisplayed(signals, candidatesOf(signals), room, value, quote);
+  const confidence = scoreCandidateConfidence(features);
+  return {
+    confidence,
+    capacityTrust: confidence == null ? "unverified" : trustFromConfidence(confidence),
+    features,
+  };
+}
 
 function scored(
   room: Omit<DraftRoom, "confidence" | "confidenceSource" | "confidenceFeatures">,
   source: ConfidenceSource,
-  features: ConfidenceFeatures | null = null
+  features: Record<string, number> | null = null
 ): DraftRoom {
-  return { ...room, confidence: scoreRoomConfidence(features), confidenceSource: source, confidenceFeatures: features };
+  const confidence = source === "estimate" ? null : scoreCandidateConfidence(features);
+  return {
+    ...room,
+    capacityTrust: confidence == null ? room.capacityTrust : trustFromConfidence(confidence),
+    confidence,
+    confidenceSource: source,
+    confidenceFeatures: features,
+  };
 }
 
 export type VenueDraft = {
@@ -177,6 +208,96 @@ function candidatesOf(signals: ScrapedSignals): CapacityCandidate[] {
   return raw.filter((c) => c.value >= MIN_PLAUSIBLE_CAPACITY);
 }
 
+/** A grounded quote names this integer, and not a longer number that merely contains its digits. */
+function quoteHas(quote: string | null | undefined, value: number): boolean {
+  return Boolean(quote && new RegExp(`(?<!\\d)${value}(?!\\d)`).test(quote));
+}
+
+/** Reads within 10% of `value`. A room with no saved reads counts its own figure as one vote. */
+function votesFor(room: LlmExtractedRoom | null, value: number): number {
+  const reads = (room?.reads ?? []).filter((n): n is number => typeof n === "number");
+  if (reads.length > 0) return reads.filter((n) => withinRelative(n, value, 0.1)).length;
+  return room && withinRelative(room.maxCapacity, value, 0.1) ? 1 : 0;
+}
+
+function regexHits(candidates: CapacityCandidate[], value: number): boolean {
+  return candidates.some((c) => withinRelative(c.value, value, 0.03));
+}
+
+/**
+ * Which number is displayed: llm votes + a grounded quote + a regex hit.
+ * Ties keep the regex figure, the number printed on the page.
+ */
+function pickDisplayed(
+  room: LlmExtractedRoom | null,
+  candidates: CapacityCandidate[],
+  quote: string | null,
+  values: Array<number | null | undefined>
+): number {
+  const unique = [...new Set(values.filter((v): v is number => typeof v === "number" && v > 0))];
+  let best = unique[0] ?? room?.maxCapacity ?? 0;
+  let bestTotal = -1;
+  let bestRegex = false;
+  for (const value of unique) {
+    const regex = regexHits(candidates, value);
+    const total = votesFor(room, value) + (quoteHas(quote, value) ? 1 : 0) + (regex ? 1 : 0);
+    if (total > bestTotal || (total === bestTotal && regex && !bestRegex)) {
+      best = value;
+      bestTotal = total;
+      bestRegex = regex;
+    }
+  }
+  return best;
+}
+
+function pageClusters(signals: ScrapedSignals): { value: number; cluster: NumberHit[] }[] {
+  const pages = signals.pages?.length
+    ? signals.pages.map((p) => ({ text: p.text, privateDining: p.privateDining }))
+    : signals.combinedText
+      ? [{ text: signals.combinedText, privateDining: signals.privateDiningPageFound }]
+      : [];
+  const ranked = clusterNumberHits(extractPageNumberCandidates(pages))
+    .map((cluster) => ({
+      cluster,
+      value: cluster.find((hit) => hit.regexHit)?.value ?? cluster[0].value,
+    }))
+    .sort((a, b) => b.value - a.value);
+  return ranked;
+}
+
+/** Candidate-model features for the number this room displays. */
+function featuresForDisplayed(
+  signals: ScrapedSignals,
+  candidates: CapacityCandidate[],
+  room: LlmExtractedRoom | null,
+  value: number,
+  quote: string | null
+): Record<string, number> {
+  const ranked = pageClusters(signals);
+  const match = ranked.find((item) => withinRelative(item.value, value, 0.03));
+  const flagged = (flag: keyof NumberHit) => Boolean(match?.cluster.some((hit) => hit[flag]));
+  const onPage =
+    match != null
+      ? flagged("onPrivatePage")
+      : candidates.some(
+          (c) => withinRelative(c.value, value, 0.03) && signals.privateDiningPageFound && onPrivateDiningPage(c)
+        );
+  return encodeCandidateFeatures({
+    llmVotes: votesFor(room, value),
+    regexHit: regexHits(candidates, value) || flagged("regexHit"),
+    inGroundedQuote: quoteHas(quote, value),
+    roomWordNear: flagged("roomWordNear"),
+    capacityVerbNear: flagged("capacityVerbNear"),
+    reservationPhraseNear: flagged("reservationPhraseNear"),
+    wholeVenuePhraseNear: flagged("wholeVenuePhraseNear"),
+    looksLikeJunk: flagged("looksLikeJunk"),
+    onPrivatePage: onPage,
+    valueRank: match ? ranked.indexOf(match) + 1 : 1,
+    logValue: Math.log(value),
+    nCandidates: Math.max(ranked.length, 1),
+  });
+}
+
 /**
  * The trust table (NOTES-ai-core.md, Step 2f):
  *  - a regex candidate and a grounded LLM room agree within 20% → verified,
@@ -191,16 +312,6 @@ function roomsFromEvidence(signals: ScrapedSignals, llm: LlmExtraction | null, s
   const candidates = candidatesOf(signals);
   const pages = signals.pages ?? [];
   const llmRooms: LlmExtractedRoom[] = llm?.rooms ?? [];
-  const llmInput = llm?.inputText ?? buildLlmInput(signals.privateDiningText ?? "", signals.combinedText);
-  // The model's features describe its own modal figure; a room showing another figure is not scored.
-  const features = (room: LlmExtractedRoom, shown: number): ConfidenceFeatures | null =>
-    shown === room.maxCapacity
-      ? roomConfidenceFeatures(
-          { capacity: room.maxCapacity, grounded: Boolean(room.evidenceQuote), selfConsistency: room.selfConsistency ?? null },
-          llmInput,
-          signals.privateDiningPageFound
-        )
-      : null;
 
   if (llmRooms.length > 0) {
     return llmRooms.map((room): DraftRoom => {
@@ -219,20 +330,22 @@ function roomsFromEvidence(signals: ScrapedSignals, llm: LlmExtraction | null, s
         )[0];
 
       if (agreeing) {
+        const quote = room.evidenceQuote ?? (agreeing.sentence || null);
+        const displayed = pickDisplayed(room, comparable, quote, [agreeing.value, room.maxCapacity, ...(room.reads ?? [])]);
         return scored(
           {
             roomName: room.roomName,
-            minCapacity: room.minCapacity != null && room.minCapacity <= agreeing.value ? room.minCapacity : undefined,
-            maxCapacity: agreeing.value,
+            minCapacity: room.minCapacity != null && room.minCapacity <= displayed ? room.minCapacity : undefined,
+            maxCapacity: displayed,
             style,
             capacityTrust: "verified",
             notes: agreementNote(agreeing.value, room.maxCapacity),
             isEstimate: false,
-            evidenceQuote: room.evidenceQuote ?? (agreeing.sentence || null),
+            evidenceQuote: quote,
             evidenceUrl: evidenceUrl ?? agreeing.url ?? null,
           },
           "both",
-          features(room, agreeing.value)
+          featuresForDisplayed(signals, comparable, room, displayed, quote)
         );
       }
 
@@ -249,36 +362,41 @@ function roomsFromEvidence(signals: ScrapedSignals, llm: LlmExtraction | null, s
           : undefined);
 
       if (conflicting) {
+        const quote = room.evidenceQuote ?? (conflicting.sentence || null);
+        const displayed = pickDisplayed(room, comparable, quote, [conflicting.value, room.maxCapacity, ...(room.reads ?? [])]);
         return scored(
           {
             roomName: room.roomName,
-            maxCapacity: conflicting.value,
+            maxCapacity: displayed,
             style,
             capacityTrust: "likely",
             notes: disagreementNote(conflicting.value, room.maxCapacity),
             isEstimate: false,
-            evidenceQuote: conflicting.sentence || null,
+            evidenceQuote: quote,
             evidenceUrl: conflicting.url ?? null,
           },
-          "both"
+          "both",
+          featuresForDisplayed(signals, comparable, room, displayed, quote)
         );
       }
 
+      const quote = room.evidenceQuote ?? null;
+      const displayed = pickDisplayed(room, comparable, quote, [room.maxCapacity, ...(room.reads ?? [])]);
       return scored(
         {
           roomName: room.roomName,
           minCapacity: room.minCapacity ?? undefined,
-          maxCapacity: room.maxCapacity,
+          maxCapacity: displayed,
           style,
           capacityTrust: "ai_extracted",
           notes:
             "Read from the venue's own page by AI because the page states capacity in prose rather than a standard format. Confirm before booking.",
           isEstimate: false,
-          evidenceQuote: room.evidenceQuote ?? null,
+          evidenceQuote: quote,
           evidenceUrl,
         },
         "llm",
-        features(room, room.maxCapacity)
+        featuresForDisplayed(signals, comparable, room, displayed, quote)
       );
     });
   }
@@ -304,7 +422,8 @@ function roomsFromEvidence(signals: ScrapedSignals, llm: LlmExtraction | null, s
             evidenceQuote: c.sentence || null,
             evidenceUrl: c.url ?? null,
           },
-          "regex"
+          "regex",
+          featuresForDisplayed(signals, candidates, null, c.value, c.sentence || null)
         )
     );
   }

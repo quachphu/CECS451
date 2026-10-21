@@ -16,6 +16,7 @@ import { v0Rooms } from "../../eval/baselines";
 import type { ExtractionRow } from "./04_extract_student";
 import type { TeacherLabel } from "./06_build_review_sheets";
 import { scoreExtraction } from "./lib/extraction-eval";
+import { matchOneToOne } from "./lib/matching";
 import { evalDir, readCsv, readJsonl, writeJsonAtomic } from "./lib/io";
 import { RunManifest } from "./lib/manifest";
 import type { ExtractedRoom, LabelRoom } from "./lib/matching";
@@ -90,9 +91,15 @@ function main() {
   }
 
   const isLa = (id: string) => index.get(id)?.city === "LA";
+  const invented = perMethod.grok_grounded_sc.flatMap((v) =>
+    matchOneToOne(v.predicted, v.gold, v.totalSeats)
+      .filter((m) => !m.match)
+      .map((m) => ({ venue_id: v.id, room: m.room.roomName, capacity: m.room.capacity }))
+  );
   const result = {
-    note: "Room-level, per stated figure; correct = within 10% of the matched gold figure. v0 category estimates are left out of v0_regex_max (it guessed a number when none was on the page).",
+    note: "Room-level, per stated figure; correct = within 10% of the matched gold figure. v0 category estimates are left out of v0_regex_max (it guessed a number when none was on the page). invented_rate is unmatched predictions divided by predictions. The Phase 1 target is under 2%.",
     v0_estimates_left_out: v0Estimates,
+    grok_grounded_sc_invented: invented,
     test_gold: Object.fromEntries(METHODS.map((m) => [m, scoreExtraction(perMethod[m])])),
     test_la_gold: Object.fromEntries(METHODS.map((m) => [m, scoreExtraction(perMethod[m].filter((v) => isLa(v.id)))])),
   };

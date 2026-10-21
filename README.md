@@ -16,10 +16,9 @@ CECS 451 (Artificial Intelligence) course project. Built with Next.js 16, Supaba
 
 ## 1. Project description
 
-### Videos
+### Demo
 
-- Demo video: to be added
-- Architecture walkthrough: to be added
+[Demo video](https://youtu.be/1DjUHycWY70)
 
 ### Features
 
@@ -27,8 +26,8 @@ CECS 451 (Artificial Intelligence) course project. Built with Next.js 16, Supaba
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Search                | Filter by office address, headcount, maximum commute, walk or drive, and room style. A plain-English request ("40 people, 10-minute walk, seated") can fill in the form.                             |
 | Venue discovery       | When an area has fewer than three recently checked venues, the app finds new candidates, reads their websites and extracts room capacities.                                                          |
-| Ranking               | Venues are ranked by expected utility, which combines commute, room fit and the probability that the room really fits. Each result lists its reasons, including "About N% likely to fit your group". |
-| Trust labels          | Every capacity and price figure is labelled `confirmed_by_planner`, `verified`, `likely`, `ai_extracted` or `unverified`.                                                                            |
+| Ranking               | Venues are ranked by expected utility, which combines commute, room fit and the probability that the room really fits. A room scored by the capacity model lists "About N% likely to fit your group". |
+| Trust labels          | A capacity the model scored shows Verified, “Likely, call to confirm”, or Unverified from its probability. A planner confirmation and a category estimate keep their own labels. Price figures use the trust names. |
 | Shortlist and compare | Save candidates, compare rooms, prices and commute times side by side, and choose one.                                                                                                               |
 | Event page            | A shared page where guests post allergies and dietary needs in real time. The app summarises them into a roster for the venue.                                                                       |
 | Shared catalog        | A planner who confirms a figure with the venue updates it for later searches. Confirmations that contradict strong evidence are held for review.                                                     |
@@ -56,9 +55,9 @@ The main risk is booking a room that cannot hold the group.
 
 The system attaches evidence to each capacity figure and ranks venues by how likely that figure is to be correct.
 
-1. **Discovery.** Candidates come from Google Places and OpenStreetMap. A learned prior decides which candidates receive the limited budget of page renders and model calls.
+1. **Discovery.** Candidates come from Google Places and OpenStreetMap. A hand-set prior decides which candidates receive the limited budget of page renders and model calls.
 2. **Two independent readers.** A pattern matcher and a language model each read the venue's private-dining page. The model must return the exact sentence that supports each capacity.
-3. **Grounding.** A model answer is kept only if its quoted sentence appears on the page and contains the number. Agreement between the two readers makes a figure `verified`.
+3. **Grounding.** A model answer is kept only if its quoted sentence appears on the page and contains the number. The number a room shows is the one with the most votes, a grounded quote, and a regex hit.
 4. **Confidence.** Each room receives a probability that its capacity is correct, computed from the evidence features.
 5. **Ranking.** Expected-utility ranking ensures an estimated capacity cannot outrank a published one simply because the estimate is closer to the headcount.
 6. **Planner feedback.** Figures confirmed by phone are written back to the shared catalog, with a check against likely input errors.
@@ -69,11 +68,9 @@ Only the Supabase keys are required. Each paid service (Google Places, Firecrawl
 
 ### System architecture
 
-![System architecture](architecture/architecture.png)
+![Project architecture](architecture/Private_Dinning_Finder.png)
 
-The editable source is [`architecture/architecture.excalidraw`](architecture/architecture.excalidraw). It opens at [excalidraw.com](https://excalidraw.com) via Open.
-
-Steps 1 to 10 describe one search; the lower panel shows what happens after it. Box colours indicate the component type: application, AI model, discovery step, external API, or database.
+The planner uses the browser pages. Server Actions and the ranking engine run on the Next.js server. The discovery pipeline calls geocoding, commute, venue search, page rendering, and Grok. Supabase stores the catalog and the live event chat. The steps below are what one search does inside that pipeline.
 
 | Step | Description                                                                           | Source                                      |
 | ---- | ------------------------------------------------------------------------------------- | ------------------------------------------- |
@@ -99,14 +96,14 @@ Steps 1 to 10 describe one search; the lower panel shows what happens after it. 
 | Venue data            | Google Places API (New), OpenStreetMap Overpass                                                                               |
 | Page rendering        | Firecrawl v2, used only for JavaScript-rendered pages                                                                         |
 | Routing and geocoding | OpenRouteService Matrix, Nominatim, Photon                                                                                    |
-| Testing               | Vitest, Playwright                                                                                                            |
+| Testing               | Vitest                                                                                                                        |
 | Offline training      | Python, scikit-learn, DuckDB (Foursquare OS Places), Claude `claude-sonnet-5-5` as the labeling teacher (Message Batches API) |
 
 ### Project structure
 
 ```
 CECS451/
-├── architecture/              Architecture diagram (.excalidraw, .png) and screenshots
+├── architecture/              Architecture diagram and screenshots
 ├── eval/                      Training data, review tool, data card, metrics and baselines
 ├── ml/                        Python: teacher labeling helpers, model training, evaluation
 ├── public/                    Static assets (curated venue photos)
@@ -114,8 +111,8 @@ CECS451/
 │   ├── seed.ts                Load the curated venues, then look up their photos
 │   ├── backfill-photos.ts     Add Google photos to venues without one
 │   ├── test-scenarios.ts      Run the three reference searches
-│   ├── data/                  Training pipeline Steps 1-8 (sample, enrich, snapshot,
-│   │                          student, teacher, review, tables) and the offline dry run
+│   ├── data/                  Training pipeline (sample through extraction eval
+│   │                          and the confidence backfill) and the offline dry run
 │   ├── eval-ranking.ts        NDCG@5 for each ranking method
 │   ├── verify-*.ts            Checks against the live external services
 │   └── loadtest-density.ts    Cold-discovery timing in a dense area
@@ -142,7 +139,7 @@ CECS451/
 
 ## 5. AI algorithms
 
-The system combines three language-model tasks with four small, interpretable models. The three learned models are trained offline (`ml/`, see [`NOTES-training.md`](NOTES-training.md)) and exported as JSON to `src/data/`. Until a model file holds a trained model, the app uses the v0 behaviour described under each model.
+The system combines three Grok tasks with three logistic models trained offline (`ml/`, see [`NOTES-training.md`](NOTES-training.md)). Capacity confidence is loaded from `src/data/confidence-model.json`. Discovery order and the fit curve stay on the hand-set rules; those trained files were not loaded.
 
 ### 5.1 Components
 
@@ -176,44 +173,37 @@ A model answer is accepted only when two conditions hold:
 
 Answers that fail either condition are discarded. The approach follows the citation checking in ALCE (Gao et al., 2023), but uses an exact match in place of a second model.
 
-### 5.4 Trust tiers
+### 5.4 Trust labels
 
-| Evidence                                                                                            | Tier                   |
-| --------------------------------------------------------------------------------------------------- | ---------------------- |
-| Confirmed by a planner with the venue                                                               | `confirmed_by_planner` |
-| Regex (private-dining page) and grounded LLM agree within 20%                                       | `verified`             |
-| Both readers found the same room but disagree, or the regex reader alone on the private-dining page | `likely`               |
-| Grounded LLM reading only                                                                           | `ai_extracted`         |
-| Regex reading from the homepage only                                                                | `unverified`           |
-| No figure found; category estimate shown as "Capacity unpublished"                                  | `is_estimate`          |
+A room the confidence model scores shows a label from its probability. The cutoffs are fixed at 0.90 and 0.60.
+
+| Probability | Label shown |
+| --- | --- |
+| 0.90 and above | Verified |
+| 0.60 up to 0.90 | Likely, call to confirm |
+| Below 0.60 | Unverified |
+
+A planner confirmation stays `confirmed_by_planner` (stored at 0.98, above every model score). A category estimate has no number on the page, so it stays an estimate and the card says "Capacity unpublished". The room note still records how the number was read: the two readers agreed within 20%, they disagreed, only the regex matched, or only the grounded model read produced a figure.
 
 ### 5.5 Capacity confidence
 
-A room read by the LLM receives a confidence score, P(the capacity is within 10% of the truth), from a logistic model:
+The number a room displays is chosen by votes plus a grounded quote plus a regex hit. A logistic model then scores that number, P(it is within 10% of the truth):
 
 ```
 confidence = σ(b + Σ wᵢ xᵢ),    σ(z) = 1 / (1 + e^(−z))
 ```
 
-The features `xᵢ`, computed by one function (`src/lib/discovery/features.ts`) for both training and the app, are:
-
-- self-consistency across the three reads;
-- whether the regex reader agrees (within 20%), disagrees, or found no figure;
-- whether the evidence quote passed grounding;
-- the number of distinct capacity figures on the page;
-- whether a private-dining page was found.
-
-The model is trained offline on about 500 venues: the LLM's rooms are labeled by a second model (Claude) that reads the same pages, and people check a gold sample of 130 venues (`NOTES-training.md`). C is chosen by grouped cross-validation on log loss, and calibration is reported as Expected Calibration Error (Guo et al., 2017). The score is computed once, when a venue is saved, and stored with the model version. Rooms read by regex only, estimates, and rooms showing a figure other than the LLM's keep their v0 tier weight (verified 0.9, likely 0.6, ai_extracted 0.45, unverified 0.3). Until a trained model is loaded, every room uses its tier weight and the app does not show "% likely to fit".
+The features `xᵢ` are computed by one function (`src/lib/discovery/features.ts`) for both training and the app: how many reads named the number, whether the regex and a grounded quote did, words near the number, and where it sits among the other numbers on the page. The score is computed once, when the venue is saved, and stored in place of the tier weight. It is capped at 0.979 so a planner-confirmed room (0.98) stays above it. A category estimate, which has no number on the page, keeps the fit-prior path. "% likely to fit" is shown only for a room this model scored. A room with no stored score still uses its tier weight (verified 0.9, likely 0.6, ai_extracted 0.45, unverified 0.3).
 
 ### 5.6 Discovery prior
 
-Each search is limited to 10 Firecrawl renders and 12 LLM reads. Before this budget is spent, every candidate is scored with a second logistic model:
+Each search is limited to 10 Firecrawl renders and 12 LLM reads. Before this budget is spent, every candidate is scored with a hand-set prior:
 
 ```
 P(hosts private events) = σ(b + w · features)
 ```
 
-The trained prior's features are the category bucket (from Google's place types), price level, rating, log review count (each with a missing flag) and keywords in the name. Candidates are processed in descending order of this probability. Until it is trained, a hand-set v0 prior over place type, price level, website and name keywords is used.
+The weights cover place type, price level, whether the venue has a website, and keywords in the name. Candidates are processed in descending order of this score. A learned prior was fit offline and was not loaded, because it does not keep that order.
 
 ### 5.7 Expected-utility ranking
 
@@ -226,7 +216,7 @@ U     = 0.5 · commute score + 0.35 · capacity fit + 0.15 · style match
 score = pFit · U − (1 − pFit) · λ          λ = 0.25
 ```
 
-`q` is the base rate at which a venue of the given category has a space for `h` guests. The trained fit prior is a table per category bucket and headcount, shrunk toward the overall rate (α = 5), made non-increasing in `h` and interpolated linearly; until it is trained, a hand-set logistic curve in `h` is used. `λ` is the cost of contacting a venue that turns out not to fit.
+`q` is the base rate at which a venue of the given category has a space for `h` guests. The app uses a hand-set logistic curve in `h`. A learned table was fit offline and was not loaded: on the hosts-yes denominator, a restaurant at 200 guests is 0.21, above the ranking bound of 0.20. `λ` is the cost of contacting a venue that turns out not to fit.
 
 Venues with `pFit < 0.2` are excluded, as are rooms that are too small with confidence of 0.85 or more. Ties are broken by `pFit`, then commute time, then name. This follows the maximum expected utility principle (Russell and Norvig, ch. 16): an unconfirmed estimate contributes utility only in proportion to the belief that it is correct.
 
@@ -248,7 +238,7 @@ The training pipeline (`scripts/data/`, `ml/`, described in [`eval/README.md`](e
 | Room precision, recall, F1 and invented-number rate              | Extraction quality: v0 regex maximum, regex candidates, one LLM read, and the shipped three-read grounded extraction |
 | Log loss, Brier score, ROC AUC, ECE (equal-width and equal-mass) | Confidence model against the v0 tier weights, an evidence lookup table and a constant                                |
 | AUC and yield@10/25                                              | Discovery prior against the v0 prior and random order                                                                |
-| Cohen's kappa                                                    | Agreement between two reviewers                                                                                      |
+| Teacher–teacher agreement                                        | Label quality on the same prompt. Per-item human accuracy and Cohen's kappa are not reported                        |
 | NDCG@5, gain 2^rel − 1                                           | Ranking quality against human judgments (`scripts/eval-ranking.ts`)                                                  |
 
 Metric implementations are cross-checked against scikit-learn, and the TypeScript model scoring is checked against scikit-learn's `predict_proba` to 1e-6. `npm run data:dryrun` runs the whole pipeline offline on synthetic data.
@@ -278,7 +268,7 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      |                                                                       |
 | `SUPABASE_SERVICE_ROLE_KEY`     | Yes      |                                                                       |
 | `GOOGLE_PLACES_API_KEY`         | No       | Discovery uses OpenStreetMap only; venues have no photos              |
-| `XAI_API_KEY`                   | No       | No LLM reader, query parsing or dietary roster; figures stay `likely` |
+| `XAI_API_KEY`                   | No       | No LLM reader, query parsing, or dietary roster. A number still on the page is scored from the regex path |
 | `FIRECRAWL_API_KEY`             | No       | JavaScript-rendered pages are marked for a phone call                 |
 | `ORS_API_KEY`                   | No       | Commute times are straight-line estimates, labelled as such           |
 

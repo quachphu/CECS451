@@ -296,8 +296,8 @@
       }
     }
   },
-  "decision": "Trained on 58 positive candidates from 15 venues. On gold venues that have a correct number, selection does not beat both baselines. On the numbers the pipeline would show, its log loss beats the tier weight. Not exported. The app keeps the tier weights.",
-  "git_sha": "f3f8dc5d52d022ef08b2118ae0af48906e2fe965",
+  "decision": "Trained on 58 positive candidates from 15 venues. On gold venues that have a correct number, selection does not beat both baselines. On the numbers the pipeline would show, its log loss beats the tier weight. Exported to src/data/confidence-model.json. The displayed number is still chosen by votes, a quote, and a regex hit.",
+  "git_sha": "a9fb09a0dcdeb9cd13920d76261d98d300adf9c2",
   "data_sha256": "a1ccc1e3804ba7efd02a1ac71f6fcda80cafb26862de80da0a4d28beccd02adf",
   "seed": 451
 }

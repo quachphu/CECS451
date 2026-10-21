@@ -1,6 +1,6 @@
 # Data card: Private Dining Finder training data
 
-Status: **real snapshots and teacher labels are collected. The candidate, event-content, and hosts-yes models were fit offline on 2026-10-21 and were not exported.** `src/data/` is still `placeholder-0`. The app keeps the hand-set discovery order, the hand-set fit curve, and the tier weights.
+Status: **real snapshots and teacher labels are collected.** The candidate confidence model was exported to `src/data/confidence-model.json` on 2026-10-21. Discovery order and the fit curve stay hand-set (`placeholder-0`). A displayed room stores the model's probability for its number. A room with no stored score still uses its tier weight.
 
 ## Intended use
 
@@ -64,6 +64,6 @@ Test = every gold venue and every LA venue (LA is a city the models never see in
 - **Third-party event pages.** Capacities on Tripleseat, SevenRooms and similar platforms are not read; only the presence of such a link is a feature.
 - **Chains.** Sites that describe several locations are labeled "unclear" and left out of training.
 - **Published sizes only.** The shipped fit curve is the hand-set one. A hosts-yes denominator (every train venue the teacher marked `hosts = yes`, including venues with no published room) still gives `q(restaurant, 200) = 0.21`, which misses the ranking floor of 0.2, so that table stays in `eval/results/fit_prior_hosts.json`.
-- **Candidate rows, 2026-10-21.** Saved pages produced 530 train candidate numbers (58 positives from 15 venues) and 571 test rows. Gold venues and LA domains stayed out of training. The candidate model, the pre-fetch event-content model, and the hosts-yes fit prior were not exported. A later top-up is a separate decision; this pass spent nothing.
+- **Candidate rows, 2026-10-21.** Saved pages produced 530 train candidate numbers (58 positives from 15 venues) and 571 test rows. Gold venues and LA domains stayed out of training. The candidate model is loaded as capacity confidence. The pre-fetch event-content model and the hosts-yes fit prior were not exported. A later top-up is a separate decision; this pass spent nothing.
 - **Four areas.** Midtown Manhattan, SF Financial District/SoMa, Waikiki/Downtown Honolulu and three LA areas; other cities may differ.
 - **English pages.** Non-English sites are flagged at snapshot time.

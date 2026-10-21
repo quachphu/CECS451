@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createServiceClient } from "@/lib/supabase/server";
 import { TrustBadge } from "@/components/trust-badge";
+import { roomUsesModelScore } from "@/lib/discovery/confidence";
 import { Badge } from "@/components/ui/badge";
 import { costPerPerson, priceSignal } from "@/lib/price-signal";
 import { TRUST_LABELS } from "@/lib/trust-labels";
@@ -84,7 +85,7 @@ export default async function SummaryPage({
                         <>
                           <span>{bestRoom.room_name}</span>
                           <Badge variant="secondary">up to {bestRoom.max_capacity}</Badge>
-                          <TrustBadge level={bestRoom.capacity_trust} subject="Capacity" />
+                          <TrustBadge level={bestRoom.capacity_trust} subject="Capacity" fromModel={roomUsesModelScore(bestRoom)} />
                         </>
                       ) : (
                         <span className="text-muted-foreground">No rooms listed</span>

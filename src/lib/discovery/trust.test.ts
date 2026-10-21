@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { buildVenueDraft } from "@/lib/discovery/trust";
+import { trustFromConfidence } from "@/lib/discovery/confidence";
+import { buildVenueDraft, type DraftRoom } from "@/lib/discovery/trust";
 import type { CandidateVenue } from "@/lib/discovery/places";
 import type { ScrapedSignals } from "@/lib/discovery/scraper";
+
+function expectModelLabel(room: DraftRoom) {
+  expect(room.confidence).not.toBeNull();
+  expect(room.capacityTrust).toBe(trustFromConfidence(room.confidence!));
+}
 
 function candidate(overrides: Partial<CandidateVenue> = {}): CandidateVenue {
   return {
@@ -42,7 +48,7 @@ describe("capacity trust derivation", () => {
     const draft = buildVenueDraft(candidate(), signals({ privateDiningPageFound: true, capacityNumbers: [20, 60] }));
 
     expect(draft.rooms).toHaveLength(1);
-    expect(draft.rooms[0].capacityTrust).toBe("likely");
+    expectModelLabel(draft.rooms[0]);
     expect(draft.rooms[0].maxCapacity).toBe(20);
     expect(draft.rooms[0].minCapacity).toBeUndefined();
   });
@@ -95,7 +101,7 @@ describe("price trust derivation is independent of capacity trust", () => {
 
     // Regex-only capacity is `likely` since Step 2f; the point of this test is
     // that price does not inherit it either way.
-    expect(draft.rooms[0].capacityTrust).toBe("likely");
+    expectModelLabel(draft.rooms[0]);
     expect(draft.minSpendUsd).toBeNull();
     expect(draft.minSpendTrust).toBe("unverified");
     expect(draft.priceTierTrust).toBe("unverified");
@@ -166,8 +172,7 @@ describe("AI-extracted tier", () => {
     expect(draft.rooms[0].roomName).toBe("The Cellar");
     expect(draft.rooms[0].maxCapacity).toBe(34);
     expect(draft.rooms[0].minCapacity).toBe(12);
-    // Must be its own tier, not folded into likely or unverified.
-    expect(draft.rooms[0].capacityTrust).toBe("ai_extracted");
+    expectModelLabel(draft.rooms[0]);
   });
 
   it("keeps every AI-read room rather than collapsing them into one", () => {
@@ -181,7 +186,7 @@ describe("AI-extracted tier", () => {
     );
 
     expect(draft.rooms.map((r) => r.roomName)).toEqual(["Library", "Terrace"]);
-    expect(draft.rooms.every((r) => r.capacityTrust === "ai_extracted")).toBe(true);
+    expect(draft.rooms.every((r) => r.capacityTrust === trustFromConfidence(r.confidence!))).toBe(true);
   });
 
   it("labels an AI-read minimum spend as AI-extracted, not verified", () => {
@@ -222,7 +227,7 @@ describe("cross-referencing two independent reads", () => {
       withLlmMax(55)
     );
 
-    expect(draft.rooms[0].capacityTrust).toBe("verified");
+    expectModelLabel(draft.rooms[0]);
     expect(draft.rooms[0].notes).toMatch(/agree/i);
   });
 
@@ -250,8 +255,8 @@ describe("cross-referencing two independent reads", () => {
       withLlmMax(300)
     );
 
-    expect(agreeing.rooms[0].capacityTrust).toBe("verified");
-    expect(conflicting.rooms[0].capacityTrust).toBe("likely");
+    expectModelLabel(agreeing.rooms[0]);
+    expectModelLabel(conflicting.rooms[0]);
   });
 
   it("leaves the verbatim figure as the displayed capacity even when reads conflict", () => {
@@ -274,8 +279,7 @@ describe("cross-referencing two independent reads", () => {
       hostsPrivateEvents: true,
     });
 
-    // Without a second read the regex figure stays `likely` (Step 2f).
-    expect(draft.rooms[0].capacityTrust).toBe("likely");
+    expectModelLabel(draft.rooms[0]);
     expect(draft.rooms[0].notes).not.toMatch(/agree|disagree/i);
   });
 });

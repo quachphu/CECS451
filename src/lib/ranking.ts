@@ -1,7 +1,7 @@
 import fitPriorJson from "@/data/fit-priors.json";
 import { categoryBucket, type CategoryBucket } from "@/lib/category-bucket";
 import { bucketFromText, REFERENCE_BUCKET } from "@/lib/discovery/category-buckets";
-import { TRAINED_CONFIDENCE_MODEL } from "@/lib/discovery/confidence";
+import { roomUsesModelScore, TRAINED_CONFIDENCE_MODEL } from "@/lib/discovery/confidence";
 import { fitPrior, loadTrainedFitPrior, type FitPriorModel, type LogisticModel } from "@/lib/discovery/model-scoring";
 import { CAPACITY_TRUST_REASONS, PRICE_TRUST_QUALIFIERS } from "@/lib/trust-labels";
 import type { CommuteMode, CommuteResult } from "@/lib/geo/commute";
@@ -105,8 +105,8 @@ export function priorFit(category: string, headcount: number, trained: FitPriorM
 
 /**
  * How much a room's capacity figure is believed: the stored score when the
- * loaded trained model produced it, otherwise the v0 tier weight (rows scored
- * by an older or placeholder model, regex-only figures, estimates).
+ * loaded trained model produced it, otherwise the v0 tier weight (estimates,
+ * planner confirmations stored without this model, and rooms saved earlier).
  */
 export function capacityBelief(
   room: Pick<VenueRoomRow, "capacity_confidence" | "capacity_trust" | "confidence_features">,
@@ -202,6 +202,21 @@ function buildReasons(
 }
 
 /**
+ * True when this room's stored probability came from the loaded confidence
+ * model. Planner confirmations and category estimates are not model scores,
+ * so they do not get a "% likely to fit" line.
+ */
+function scoredByConfidenceModel(room: VenueRoomRow, model: LogisticModel | null): boolean {
+  if (model !== TRAINED_CONFIDENCE_MODEL) {
+    if (!model || room.capacity_confidence == null) return false;
+    const features = room.confidence_features;
+    if (!features || features.modelVersion !== model.version) return false;
+    return features.source !== "planner" && features.source !== "estimate";
+  }
+  return roomUsesModelScore(room);
+}
+
+/**
  * Filters venues to ones within the commute cutoff that plausibly fit, then
  * ranks them by expected utility (maximum expected utility, Russell & Norvig
  * ch. 16 [P7]):
@@ -225,8 +240,6 @@ export function rankVenues(
   options: { confidenceModel?: LogisticModel | null; showFitProbability?: boolean } = {}
 ): RankedVenue[] {
   const model = options.confidenceModel === undefined ? TRAINED_CONFIDENCE_MODEL : options.confidenceModel;
-  // "% likely to fit" is shown only when a trained confidence model is loaded.
-  const showFitProbability = options.showFitProbability ?? model != null;
   const belief = (room: VenueRoomRow) => capacityBelief(room, model);
   const ranked: RankedVenue[] = [];
 
@@ -267,7 +280,16 @@ export function rankVenues(
       commuteEstimated: commute.estimated,
       score,
       pFit,
-      reasons: buildReasons(venue, bestRoom, fits, pFit, commuteMinutes, criteria, commute.estimated, showFitProbability),
+      reasons: buildReasons(
+        venue,
+        bestRoom,
+        fits,
+        pFit,
+        commuteMinutes,
+        criteria,
+        commute.estimated,
+        options.showFitProbability ?? scoredByConfidenceModel(bestRoom, model)
+      ),
     });
   }
 

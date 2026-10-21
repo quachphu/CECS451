@@ -138,7 +138,12 @@ async function LivePreview() {
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
                   {card.commuteMinutes} min · Fits {card.capacity}
                 </span>
-                <TrustBadge level={card.capacityTrust} subject="Capacity" className="text-xs" />
+                <TrustBadge
+                  level={card.capacityTrust}
+                  subject="Capacity"
+                  className="text-xs"
+                  fromModel={card.capacityFromModel}
+                />
               </div>
               <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
@@ -162,6 +167,7 @@ async function LivePreview() {
               commuteMinutes: card.commuteMinutes,
               capacity: card.capacity,
               trustLevel: card.capacityTrust,
+              fromModel: card.capacityFromModel,
             }))}
           />
         </div>

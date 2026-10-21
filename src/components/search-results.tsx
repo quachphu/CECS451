@@ -1,6 +1,7 @@
 import { createServiceClient } from "@/lib/supabase/server";
 import { VenueCard } from "@/components/venue-card";
 import { MapPanel } from "@/components/map-panel";
+import { roomUsesModelScore } from "@/lib/discovery/confidence";
 import type { SearchStages } from "@/lib/search-stages";
 import type { CommuteMode } from "@/lib/geo/commute";
 
@@ -78,6 +79,7 @@ export async function SearchResults({
                 commuteMinutes: r.commuteMinutes,
                 capacity: r.bestRoom.max_capacity,
                 trustLevel: r.bestRoom.capacity_trust,
+                fromModel: roomUsesModelScore(r.bestRoom),
               }))}
             />
           </div>

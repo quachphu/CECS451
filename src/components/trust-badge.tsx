@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import type { TrustLevel } from "@/lib/supabase/types";
-import { TRUST_LABELS } from "@/lib/trust-labels";
+import { modelCapacityLabel, TRUST_LABELS } from "@/lib/trust-labels";
 import { cn } from "@/lib/utils";
 
 const STYLES: Record<TrustLevel, string> = {
@@ -18,20 +18,24 @@ export function TrustBadge({
   level,
   subject,
   className,
+  fromModel = false,
 }: {
   level: TrustLevel;
   /** What this label refers to (e.g. "Capacity", "Price"). Visual pairing
    *  conveys this sighted-only, so it's announced to screen readers here. */
   subject?: string;
   className?: string;
+  /** This room's tier was chosen from the confidence model's probability. */
+  fromModel?: boolean;
 }) {
+  const text = fromModel ? modelCapacityLabel(level) : LABELS[level];
   return (
     <Badge
       variant="outline"
       className={cn(STYLES[level], className)}
-      aria-label={subject ? `${subject}: ${LABELS[level]}` : undefined}
+      aria-label={subject ? `${subject}: ${text}` : undefined}
     >
-      {LABELS[level]}
+      {text}
     </Badge>
   );
 }

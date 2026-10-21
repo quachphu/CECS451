@@ -1,0 +1,201 @@
+{
+  "rescored_rooms": 92,
+  "could_not_rescore": {
+    "snapshot robots_blocked": 186,
+    "snapshot empty_after_render": 51,
+    "category estimate, no number on the page": 294,
+    "snapshot http_error": 23,
+    "snapshot bot_blocked": 58,
+    "snapshot parked_or_closed": 2
+  },
+  "seed_venues": 14,
+  "seed_number_rooms_treated_as_planner_confirmed": 23,
+  "seed_estimate_rooms_left_as_estimates": 2,
+  "gold_displayed_numbers": [
+    {
+      "venue_id": "nyc-0100",
+      "room": "The Suite",
+      "capacity": 1850,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "nyc-0100",
+      "room": "The Studio",
+      "capacity": 1500,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "sf-0062",
+      "room": "The Big Private Dinning Room",
+      "capacity": 32,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "sf-0117",
+      "room": "Full buyout",
+      "capacity": 52,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "hnl-0015",
+      "room": "Private rooms",
+      "capacity": 75,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "Vibiana Main Hall",
+      "capacity": 550,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "Vibiana Main Hall",
+      "capacity": 800,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "Restaurant & Lounge",
+      "capacity": 110,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "Restaurant & Lounge",
+      "capacity": 200,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "The Garden",
+      "capacity": 108,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "The Garden",
+      "capacity": 200,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "West Room",
+      "capacity": 80,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "West Room",
+      "capacity": 125,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "East Room",
+      "capacity": 26,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "East Room",
+      "capacity": 50,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "The Nest",
+      "capacity": 36,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "The Nest",
+      "capacity": 50,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "Cardinal's Quarters",
+      "capacity": 45,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "Cardinal's Quarters",
+      "capacity": 75,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "Bishop's Perch",
+      "capacity": 16,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "Bishop's Perch",
+      "capacity": 30,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "Full buyout",
+      "capacity": 1400,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "la-0113",
+      "room": "Full buyout",
+      "capacity": 1500,
+      "probability": 0.979,
+      "label": "verified"
+    },
+    {
+      "venue_id": "sf-r019",
+      "room": "Full buyout",
+      "capacity": 300,
+      "probability": 0.75,
+      "label": "likely"
+    },
+    {
+      "venue_id": "sf-r019",
+      "room": "Full buyout",
+      "capacity": 200,
+      "probability": 0.712,
+      "label": "likely"
+    }
+  ],
+  "gold_label_counts": {
+    "verified": 23,
+    "likely": 2
+  },
+  "database": {
+    "seed_rooms_set_planner": 0,
+    "auto_rooms_updated": 0,
+    "auto_rooms_left": 0,
+    "skipped": ""
+  }
+}

@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { TrustBadge } from "@/components/trust-badge";
+import { roomUsesModelScore } from "@/lib/discovery/confidence";
 import { VenuePhoto } from "@/components/venue-photo";
 import { addToShortlistAction } from "@/app/actions";
 import { cn } from "@/lib/utils";
@@ -95,7 +96,7 @@ export function VenueCard({
                 </>
               )}
             </Badge>
-            <TrustBadge level={bestRoom.capacity_trust} subject="Capacity" />
+            <TrustBadge level={bestRoom.capacity_trust} subject="Capacity" fromModel={roomUsesModelScore(bestRoom)} />
           </span>
           <span className="inline-flex items-center gap-1">
             <Badge variant="secondary">{price.label}</Badge>

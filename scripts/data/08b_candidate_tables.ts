@@ -107,7 +107,8 @@ function main() {
       google.get(venue.venue_id),
       snap.external_event_links.length > 0,
     );
-    const { has_external_event_link: _drop, ...preFetch } = features;
+    const { has_external_event_link: leakedLabel, ...preFetch } = features;
+    void leakedLabel;
     discoveryRows.push({
       venue_id: venue.venue_id,
       domain: venue.domain,

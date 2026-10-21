@@ -4,7 +4,7 @@ import confidenceJson from "@/data/confidence-model.json";
 import discoveryJson from "@/data/discovery-prior.json";
 import fitJson from "@/data/fit-priors.json";
 import { BUCKETS } from "@/lib/discovery/category-buckets";
-import { CONFIDENCE_FEATURE_ORDER, DISCOVERY_POST_FETCH_ORDER, DISCOVERY_PRE_FETCH_ORDER } from "@/lib/discovery/features";
+import { CANDIDATE_FEATURE_ORDER, DISCOVERY_POST_FETCH_ORDER, DISCOVERY_PRE_FETCH_ORDER } from "@/lib/discovery/features";
 import {
   fitPrior,
   isTrainedVersion,
@@ -105,7 +105,7 @@ describe("Python/TypeScript parity (ml/export_fixtures.py)", () => {
 
   it("uses the shared feature orders", () => {
     const conf = loadModel(fixture.models.confidence.model);
-    expect(CONFIDENCE_FEATURE_ORDER).toEqual(expect.arrayContaining(conf.feature_order));
+    expect(conf.feature_order).toEqual([...CANDIDATE_FEATURE_ORDER]);
     expect(loadModel(fixture.models.discovery_pre_fetch.model).feature_order).toEqual([...DISCOVERY_PRE_FETCH_ORDER]);
     expect(loadModel(fixture.models.discovery_post_fetch.model).feature_order).toEqual([...DISCOVERY_POST_FETCH_ORDER]);
   });

@@ -9,6 +9,7 @@
 import { config } from "dotenv";
 config({ path: [".env.local", ".env"] });
 import { createClient } from "@supabase/supabase-js";
+import { featureLog, PLANNER_CONFIDENCE } from "../src/lib/discovery/confidence";
 import { seedVenues } from "../src/data/seed-venues";
 import { geocodeAddress } from "../src/lib/geo/geocode";
 import { backfillVenuePhotos } from "./backfill-photos";
@@ -78,16 +79,23 @@ async function main() {
     }
 
     await supabase.from("venue_rooms").insert(
-      seed.rooms.map((room) => ({
-        venue_id: venueId,
-        room_name: room.roomName,
-        min_capacity: room.minCapacity ?? null,
-        max_capacity: room.maxCapacity,
-        style: room.style,
-        capacity_trust: room.capacityTrust,
-        notes: room.notes ?? null,
-        is_estimate: room.isEstimate ?? false,
-      }))
+      seed.rooms.map((room) => {
+        const estimate = room.isEstimate ?? false;
+        return {
+          venue_id: venueId,
+          room_name: room.roomName,
+          min_capacity: room.minCapacity ?? null,
+          max_capacity: room.maxCapacity,
+          style: room.style,
+          // Curated rooms with a researched number are human-verified, same as a planner confirmation.
+          // Category estimates stay estimates.
+          capacity_trust: estimate ? room.capacityTrust : "confirmed_by_planner",
+          notes: room.notes ?? null,
+          is_estimate: estimate,
+          capacity_confidence: estimate ? null : PLANNER_CONFIDENCE,
+          confidence_features: estimate ? null : featureLog("planner", null),
+        };
+      })
     );
 
     // Several seed venues now intentionally carry no photo (see seed-venues.ts)
