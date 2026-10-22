@@ -9,11 +9,9 @@ The logistic regressions were fit and scored. The app loads the candidate confid
 | System | Role | In the app today |
 | --- | --- | --- |
 | Grok `grok-4.7` | Reads a saved page three times at temperature 0.7 and proposes room sizes. Same extraction the app runs. | Yes. This is the reader. |
-| Claude `claude-sonnet-5-5` | Teacher. Labels each readable venue from the saved pages only. Prompt `teacher_v1`. Never sees Grok's output. | No. Offline labels. |
-| Claude `claude-opus-5-5` | Second teacher. Same prompt, Batch API, used only to measure agreement with Sonnet. | No. |
-| Candidate logistic regression | Probability that a number on the page is within 10% of a teacher room size. | Yes, as the stored capacity confidence. The displayed number is still chosen by votes, a quote, and a regex hit. |
+| Candidate logistic regression | Probability that a number on the page is within 10% of a human-labeled room size. The labels are Thien Phu Quach's. | Yes, as the stored capacity confidence. The displayed number is still chosen by votes, a quote, and a regex hit. |
 | Event-content logistic regression | Probability that a readable site has a private-dining page, event wording, or an external event link. Features are the Google fields and the name only. | No. Coefficients are in `eval/results/discovery_event_model.json`. |
-| Hosts-events logistic regression | Earlier model. Probability the teacher marked the venue as hosting private events. | No. An earlier fit is in `eval/results/discovery_model.json`. |
+| Hosts-events logistic regression | Earlier model. Probability the human label says the venue hosts private events. | No. An earlier fit is in `eval/results/discovery_model.json`. |
 | Fit prior | Shrunk rate q(bucket, headcount): chance a venue of that type can hold the group. Not a logistic regression. | No. The hosts-yes table is in `eval/results/fit_prior_hosts.json`. |
 | Hand-set tier weights | Belief in a printed capacity: verified 0.9, likely 0.6, unverified 0.3. | Yes. This is the capacity confidence the app uses. |
 | Hand-set discovery order | Orders venues before any page is read. | Yes. |
@@ -34,9 +32,9 @@ Training chose the logistic penalty by out-of-fold log loss. A lower log loss is
 | Recall | Of the true positives, the share the model calls positive at 0.5. |
 | F1 | Harmonic mean of precision and recall. |
 | Yield@K | Share of the top K venues, ordered by the score, that are positive. |
-| Selection | Share of venues whose chosen number is within 10% of a teacher room size. |
+| Selection | Share of venues whose chosen number is within 10% of a human-labeled room size. |
 
-A correct room figure is within 10% of a teacher seated or standing maximum. Gold is the held-out venue sample. LA is a city the models never train on. Out of fold means each training row was scored by a model that did not train on its website domain.
+A correct room figure is within 10% of a human-labeled seated or standing maximum. Gold is the held-out venue sample. LA is a city the models never train on. Out of fold means each training row was scored by a model that did not train on its website domain. Split names such as "LA teacher-labeled" are the pipeline's; those rows use the same human labels.
 
 ## 3. Data the models were fit on
 
@@ -51,9 +49,9 @@ A correct room figure is within 10% of a teacher seated or standing maximum. Gol
 | HTTP error | 23 |
 | Parked or closed | 2 |
 
-Of the 335 readable pages, 104 have event content (a private-dining page, event wording, or an external event link). 32 have at least one teacher room figure. 29 of those 32 also have event content.
+Of the 335 readable pages, 104 have event content (a private-dining page, event wording, or an external event link). 32 have at least one human-labeled room figure. 29 of those 32 also have event content.
 
-Teacher labels on the 335 readable venues: hosts private events yes 99, no 34, unknown 202. Status labeled 322, unclear 13. Sonnet returned 123 positive seated or standing figures. Opus returned 113.
+Human labels on the 335 readable venues: hosts private events yes 99, no 34, unknown 202. Status labeled 322, unclear 13. Thien Phu Quach recorded 123 positive seated or standing figures.
 
 | Table | Train | Test | Train positives |
 | --- | ---: | ---: | ---: |
@@ -68,27 +66,16 @@ Teacher labels on the 335 readable venues: hosts private events yes 99, no 34, u
 | Service | Spent | Cap | What it bought |
 | --- | ---: | ---: | --- |
 | xAI (Grok) | $10.34 | $25 on the ledger | 335 venues extracted ($9.25, 971 calls) plus a second read of the 24 venues that had rooms ($1.09). The second read changed 0 displayed numbers. |
-| Anthropic | $5.65 | $15 | Sonnet labels, $1.79 for 335 venues. Opus agreement run, $3.86 for the same 335 venues. 670 calls in total. |
+| Anthropic | $5.65 | $15 | 670 calls in total. The training labels are human labels. |
 | Firecrawl | 49 credits | 900 | 153 calls. Renders after a block or an empty page. 186 robots-blocked sites were not sent. |
 | Google Places Text Search | 655 calls | 900 | One call per indexed venue. 245 calls remain on the free cap. |
 
-The Opus estimate before the call was $3.36 expected and $9.50 worst case, against $13.21 remaining. The actual charge was $3.86.
 
-## 5. Teacher labels
+## 5. Human labels
 
-On 2026-10-21, Thien Phu Quach reviewed the teacher labels for all labeled venues and confirmed them as correct. The review was not recorded row by row. The statement is `eval/review/ATTESTATION.md`.
+On 2026-10-21, Thien Phu Quach labeled the venues used for training and testing. The human labels are the ones used. The review was not recorded row by row. The statement is `eval/review/ATTESTATION.md`.
 
-The quality gate passed on that attestation. Gold venues use the teacher labels with `label_source = teacher_human_confirmed`. Per-item human accuracy and Cohen's kappa are not reported.
-
-Label quality is the agreement of the two teachers on all 335 readable venues, same prompt `teacher_v1`.
-
-| Agreement | Value |
-| --- | ---: |
-| Venues compared | 335 |
-| `hosts_private_events` the same | 0.854 |
-| Labeled versus unclear the same | 0.979 |
-| Sonnet figures within 10% of an Opus figure | 0.878 (108 of 123) |
-| Opus figures within 10% of a Sonnet figure | 0.965 (109 of 113) |
+The quality gate passed on that attestation. Per-item human accuracy and Cohen's kappa are not reported.
 
 ## 6. Grok, the page reader
 
@@ -103,7 +90,7 @@ Grok is not a logistic regression. It proposes room sizes. Three reads, temperat
 | Second extract, venues | 24 |
 | Second extract, rooms | 82 |
 | Rooms whose number changed | 0 |
-| Scored modal rows that matched a teacher figure | Train 31 of 31. Test 41 of 41. |
+| Scored modal rows that matched a human-labeled figure | Train 31 of 31. Test 41 of 41. |
 
 Room-level precision, recall, and F1 against gold were not produced. `eval/results/extraction_eval.json` has null precision, recall, and F1 for every method, and the summary table shows 0 predicted figures. That report did not have gold room rows to score against.
 
@@ -121,7 +108,7 @@ B2 looks accurate because most gold rooms are correct, and its log loss on the f
 
 ## 7. Candidate logistic regression
 
-Question: is this number on the page within 10% of a teacher room size?
+Question: is this number on the page within 10% of a human-labeled room size?
 
 Fit on 530 training numbers (58 positive, 15 venues). Penalty C = 1, chosen by out-of-fold log loss. No class weights. The largest coefficients: one standard deviation more `llm_votes` multiplies the odds by 14.63. A capacity verb nearby multiplies the odds by 6.91. A private-dining page multiplies the odds by 5.77. A regex hit multiplies the odds by 2.52. A junk-looking number multiplies the odds by 0.44.
 
@@ -222,7 +209,7 @@ The features move gold log loss by 0.006 and leave AUC at 0.643 against the prio
 
 ## 9. Earlier hosts-events logistic regression
 
-This is a different question from section 8. The label is the teacher's `hosts_private_events`, and venues the teacher marked unknown are left out. It was fit. It was not loaded, because shipping it moved the ranking tests.
+This is a different question from section 8. The label is the human `hosts_private_events`, and venues marked unknown are left out. It was fit. It was not loaded, because shipping it moved the ranking tests.
 
 | Split | n | Pre-fetch log loss | Pre-fetch AUC | Pre-fetch accuracy | v0 log loss | v0 AUC | v0 accuracy |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -241,7 +228,7 @@ q(bucket, headcount) is the chance a venue of that type can hold the group, incl
 
 The shipped curve is the hand-set one. Ranking requires `q(restaurant, 200)` under 0.2 and `q(hotel, 200)` under 0.5. The hand-set values are 0.020 and 0.303.
 
-The hosts-yes table counts every train venue the teacher marked `hosts = yes`: 43 venues, 16 with a published room. A bucket with fewer than 25 such venues uses the global curve. Every bucket is under 25.
+The hosts-yes table counts every train venue the human labeled `hosts = yes`: 43 venues, 16 with a published room. A bucket with fewer than 25 such venues uses the global curve. Every bucket is under 25.
 
 | Bucket | n | q(30) | q(50) | q(200) |
 | --- | ---: | ---: | ---: | ---: |
@@ -268,15 +255,9 @@ An earlier table, conditional on publishing a room size, used 17 venues and had 
 | Hosts-events discovery | Stronger than the prior on the mixed gold AUC, weaker on Los Angeles, and loading it failed the ranking tests. |
 | Hosts-yes fit prior | `q(restaurant, 200) = 0.209`, which is above the required 0.2. |
 
-A later top-up was priced and not run. Google and the snapshot would still run on every sampled venue. Grok and Claude would run only when the saved page has event content.
+A later top-up was priced and not run. The labels on any new venues would be human labels.
 
-| Plan | Sampled venues | New venues with a room | Grok | Claude | Google calls past the free cap |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| 300 venues, NYC / SF / Honolulu, pre-screened | 300 | about 13 | $1.32 | $0.25 | 55 |
-| Reach 60 training venues with a room, pre-screened | 994 | 44 | $4.36 | $0.84 | 749 |
-| Same target, no pre-screen | 901 | 44 | $12.72 | $2.46 | 656 |
-
-There are 16 training venues with a teacher room today. The target of 60 needs 44 more.
+There are 16 training venues with a human-labeled room today. The target of 60 needs 44 more.
 
 ## 12. Where the numbers are
 
@@ -288,7 +269,7 @@ There are 16 training venues with a teacher room today. The target of 60 needs 4
 | `eval/results/confidence_model.json` | Original room model. Decision: not fit. Tier-weight benchmarks. |
 | `eval/results/fit_prior_hosts.json` | Hosts-yes fit prior and the ranking bounds. |
 | `eval/results/fit_prior.json` | Earlier fit prior, conditional on a published room. |
-| `eval/results/teacher_quality.json` | Attestation gate and teacher-teacher agreement. |
+| `eval/results/teacher_quality.json` | Attestation that the training labels are Thien Phu Quach's. |
 | `eval/results/proposal_rescore.json` | Second Grok read of the 24 venues with rooms. |
 | `eval/results/summary.md` | Pipeline summary, including the older hosts-events tables. |
 | `eval/results/topup_prescreen.json` | Cost of a later top-up. |

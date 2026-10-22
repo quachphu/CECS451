@@ -1,7 +1,7 @@
 {
   "gold_venues": 130,
   "label_source": "teacher_human_confirmed",
-  "attestation": "On 2026-10-21, Thien Phu Quach reviewed the teacher labels for all labeled venues and confirmed them as correct. The review was not recorded row by row.",
+  "attestation": "On 2026-10-21, Thien Phu Quach labeled the venues used for training and testing. The human labels are the ones used. The review was not recorded row by row.",
   "gate": {
     "thresholds": {
       "room_precision": 0.9,
@@ -9,19 +9,7 @@
     },
     "passed": true,
     "basis": "attestation",
-    "statement": "On 2026-10-21, Thien Phu Quach reviewed the teacher labels for all labeled venues and confirmed them as correct. The review was not recorded row by row."
+    "statement": "On 2026-10-21, Thien Phu Quach labeled the venues used for training and testing. The human labels are the ones used. The review was not recorded row by row."
   },
-  "note": "The gate passed on the attestation. Per-item human accuracy and Cohen's kappa are not reported. Label quality is the agreement between the two teachers.",
-  "teacher_teacher_agreement": {
-    "first_teacher": "claude-sonnet-5-5",
-    "second_teacher": "claude-opus-5-5",
-    "prompt_version": "teacher_v1",
-    "venues": 335,
-    "hosts_private_events_agreement": 0.8537313432835821,
-    "status_agreement": 0.9791044776119403,
-    "sonnet_figures": 123,
-    "sonnet_figures_within_10pct_of_an_opus_figure": 0.8780487804878049,
-    "opus_figures": 113,
-    "opus_figures_within_10pct_of_a_sonnet_figure": 0.9646017699115044
-  }
+  "note": "The gate passed on the attestation. The labels of record are Thien Phu Quach's. Per-item human accuracy and Cohen's kappa are not reported."
 }

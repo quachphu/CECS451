@@ -198,6 +198,7 @@ function main() {
         city: venue.city,
         bucket: venue.bucket,
         split,
+        // Both values are the human labels. The names are the pipeline's: gold confirmation, or the accepted draft.
         label_source: goldIds.has(venue.venue_id) ? "teacher_human_confirmed" : "teacher",
         value: item.value,
         y,

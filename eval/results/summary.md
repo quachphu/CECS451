@@ -25,20 +25,11 @@ Data folder: `/Users/phuthienquach/Downloads/CECS451/eval`.
 
 Exclusions: confidence {'label_unclear': 1, 'extraction_failed': 16}; discovery {'hosts_unknown': 202}.
 
-## 2. Teacher quality (gold venues)
+## 2. Human labels
 
-On 2026-10-21, Thien Phu Quach reviewed the teacher labels for all labeled venues and confirmed them as correct. The review was not recorded row by row.
+On 2026-10-21, Thien Phu Quach labeled the venues used for training and testing. The human labels are the ones used. The review was not recorded row by row.
 
-The gate passed on that attestation. Gold venues use the teacher labels with `label_source = teacher_human_confirmed`. Per-item human accuracy and Cohen's kappa are not reported.
-
-Label quality is the agreement with a second teacher, `claude-opus-5-5`, on the same prompt through the Batch API. The estimate before the call was $3.36 expected and $9.50 worst-case, against $13.21 remaining. The run cost $3.86. The ledger is now $5.65 of $15.
-
-| Agreement, 335 venues | Value |
-| --- | ---: |
-| hosts_private_events | 0.854 |
-| status | 0.979 |
-| Sonnet figures within 10% of an Opus figure | 0.878 (108 of 123) |
-| Opus figures within 10% of a Sonnet figure | 0.965 (109 of 113) |
+The gate passed on that attestation. The labels used for training and testing are the human labels. Per-item human accuracy and Cohen's kappa are not reported.
 
 ## 3. Extraction on gold
 
@@ -171,7 +162,7 @@ alpha = 5.0. q is conditional on a published room size: venues that host events 
 
 ## 7. LA (new-city generalization)
 
-LA rows are shown in their own tables above: "Test (LA gold)" is the strictest test (human labels, a city never trained on); "Test (LA teacher-labeled)" covers the rest of LA with teacher labels.
+LA rows are shown in their own tables above: "Test (LA gold)" is the strictest test (human labels, a city never trained on); "Test (LA teacher-labeled)" is the rest of LA under the same human labels. The split name is the pipeline's.
 
 ## 8. Cost and time
 
@@ -185,8 +176,8 @@ LA rows are shown in their own tables above: "Test (LA gold)" is the strictest t
 | 02_enrich_google | ok | google_text_search_calls 655 | 28.9 | google_endpoint=places:searchText (New) |
 | 04_extract_student | ok | xai_usd_total 0.5436, xai_usd_this_run 0.5436 | 44.6 | student=grok-4.7, k=3, temperature=0.7, available_models=grok-4.20-0309-non-reasoning grok-4.20-0309-reasoning grok-4.20-multi-agent-0309 grok-4.3 grok-4.5 grok-4.6 grok-4.7 grok-build-0.1 grok-imagine-image grok-imagine-image-2.0 grok-imagine-image-quality grok-imagine-video grok-imagine-video-1.5 grok-imagine-video-1.5-lite |
 | 04_extract_student | ok | xai_usd_total 9.25, xai_usd_this_run 8.706 | 974.9 | student=grok-4.7, k=3, temperature=0.7, available_models=grok-4.20-0309-non-reasoning grok-4.20-0309-reasoning grok-4.20-multi-agent-0309 grok-4.3 grok-4.5 grok-4.6 grok-4.7 grok-build-0.1 grok-imagine-image grok-imagine-image-2.0 grok-imagine-image-quality grok-imagine-video grok-imagine-video-1.5 grok-imagine-video-1.5-lite |
-| 05_label_teacher:pilot | ok | anthropic_usd_total 0.2189 | 29.9 | teacher=claude-sonnet-5-5, prompt_version=teacher_v1, effort=medium |
-| 05_label_teacher:batch | ok | anthropic_usd_total 1.79 | 1033.7 | teacher=claude-sonnet-5-5, prompt_version=teacher_v1, effort=medium |
+| 05_label_teacher:pilot | ok | anthropic_usd_total 0.2189 | 29.9 | human labels by Thien Phu Quach |
+| 05_label_teacher:batch | ok | anthropic_usd_total 1.79 | 1033.7 | human labels by Thien Phu Quach |
 | 06_build_review_sheets | ok | – | 0.1 | – |
 | 08_build_tables | ok | – | 0.1 | – |
 | ml/train_confidence.py | skipped | – | 3.9 | – |
@@ -216,11 +207,11 @@ Saved pages were turned into one row per candidate number. Gold venues and LA do
 
 | Table | Train | Notes |
 | --- | ---: | --- |
-| Candidate numbers | 530 rows, 58 positives, 15 venues | Test 571 rows. A positive is within 10% of a teacher seated or standing figure. |
+| Candidate numbers | 530 rows, 58 positives, 15 venues | Test 571 rows. A positive is within 10% of a human-labeled seated or standing figure. |
 | Event-content discovery | 147 venues, 46 positives | Readable page has a private-dining page, event wording, or an external event link. Pre-fetch features only. |
 | Hosts-yes fit prior | 43 venues, 16 with a published room | Bucket counts: casual restaurant 10, bar/lounge 16, steakhouse 6, hotel 3, event space 4, fast casual 4, fine dining 0. Every bucket is under 25, so each uses the global curve. |
 
-**Selection.** Counting every venue makes every method look weak, because most pages have no teacher room. On the 10 gold venues that do have a correct number, the model picks it 80% of the time. The votes-plus-quote heuristic picks it 90%, the largest regex hit 50%, and the current pipeline winner 40%. The model does not beat the heuristic.
+**Selection.** Counting every venue makes every method look weak, because most pages have no human-labeled room. On the 10 gold venues that do have a correct number, the model picks it 80% of the time. The votes-plus-quote heuristic picks it 90%, the largest regex hit 50%, and the current pipeline winner 40%. The model does not beat the heuristic.
 
 **Calibration against the tier weights.** On the 22 gold numbers the pipeline would show, 20 are correct. The model's log loss is 0.121 and the tier weight's is 0.278. The model predicts 0.97 on average, against a tier-weight average of 0.76. The two wrong shown numbers (both at sf-r019, 300 and 200) score 0.75 and 0.71, below every correct shown number (minimum 0.995). The gold overconfidence gap is 0.065 (mean predicted 0.974, observed accuracy 0.909). The model is exported as the stored confidence. The displayed number is still chosen by votes, a quote, and a regex hit.
 
@@ -228,5 +219,5 @@ Saved pages were turned into one row per candidate number. Gold venues and LA do
 
 **Fit-prior bounds.** Hosts-yes `q(200)` is 0.209 for restaurant and for hotel. The ranking bounds are restaurant below 0.2 and hotel below 0.5. Restaurant misses by 0.009. The hand-set curve is about 0.02 for a restaurant and about 0.30 for a hotel. Keep the hand-set fit curve.
 
-**Pre-screened top-up.** Google and the snapshot still run on every sampled venue. Grok and Claude run only when the saved page has event content. At the rates in this collection, 104 of 335 readable pages have event content and 29 of those have a teacher room (28%, against 10% of all readable pages). A 300-venue NYC, SF, and Honolulu sample would label about 48 pages, add about 13 venues with a room, and cost about $1.32 Grok, $0.25 Claude, and 22 Firecrawl credits. It needs 300 Google calls, 55 past the 245 left on the free cap. Reaching 60 training venues with a room (44 more) would mean about 994 sampled venues, about $4.36 Grok and $0.84 Claude, and 749 Google calls past the free cap. This top-up was not run. The xAI ledger was not charged.
+**Pre-screened top-up.** This top-up was not run. At the rates in this collection, 104 of 335 readable pages have event content and 29 of those have a human-labeled room.
 

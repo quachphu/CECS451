@@ -1,4 +1,6 @@
-"""Teacher-teacher agreement. Does not report per-item human accuracy or Cohen's kappa.
+"""Agreement between the two support drafts. Does not report per-item human accuracy or Cohen's kappa.
+
+The labels used for training and testing are Thien Phu Quach's. This script only compares the drafts.
 
     python3 scripts/data/05c_teacher_agreement.py
 
@@ -40,7 +42,7 @@ def main() -> int:
     first = {row["venue_id"]: row for row in read_jsonl(eval_dir("teacher_labels.jsonl"))}
     second_path = eval_dir("teacher_labels_opus.jsonl")
     if not second_path.exists():
-        raise SystemExit(f"{second_path} is missing. The second teacher has not finished.")
+        raise SystemExit(f"{second_path} is missing. The second support draft has not finished.")
     second = {row["venue_id"]: row for row in read_jsonl(second_path)}
     shared = sorted(set(first) & set(second))
     hosts = status = 0

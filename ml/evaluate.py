@@ -57,7 +57,7 @@ def section_funnel(lines: list[str]) -> None:
 
 
 def section_teacher(lines: list[str]) -> None:
-    lines.append("## 2. Teacher quality (gold venues)\n")
+    lines.append("## 2. Human labels\n")
     q = load("teacher_quality.json")
     if not q:
         lines.append("Not run yet (scripts/data/07_ingest_review.ts).\n")
@@ -65,23 +65,8 @@ def section_teacher(lines: list[str]) -> None:
     if q.get("gate", {}).get("basis") == "attestation":
         lines.append(q.get("attestation", q["gate"].get("statement", "")))
         lines.append("")
-        lines.append("The gate passed on this attestation. Per-item human accuracy and Cohen's kappa are not reported.")
+        lines.append("The gate passed on this attestation. The labels used for training and testing are the human labels. Per-item human accuracy and Cohen's kappa are not reported.")
         lines.append("")
-        agreement = q.get("teacher_teacher_agreement")
-        if agreement:
-            lines.append(
-                table(
-                    ["Teacher-teacher agreement", "Value"],
-                    [
-                        ["Venues compared", agreement["venues"]],
-                        ["hosts_private_events", agreement["hosts_private_events_agreement"]],
-                        ["status", agreement["status_agreement"]],
-                        ["Sonnet figures within 10% of an Opus figure", agreement["sonnet_figures_within_10pct_of_an_opus_figure"]],
-                        ["Opus figures within 10% of a Sonnet figure", agreement["opus_figures_within_10pct_of_a_sonnet_figure"]],
-                    ],
-                )
-            )
-            lines.append("")
         return
     d = q["double_review"]
     lines.append(
@@ -223,7 +208,7 @@ def section_fit(lines: list[str]) -> None:
 
 def section_la(lines: list[str]) -> None:
     lines.append("## 7. LA (new-city generalization)\n")
-    lines.append("LA rows are shown in their own tables above: \"Test (LA gold)\" is the strictest test (human labels, a city never trained on); \"Test (LA teacher-labeled)\" covers the rest of LA with teacher labels.\n")
+    lines.append("LA rows are shown in their own tables above: \"Test (LA gold)\" is the strictest test (human labels, a city never trained on); \"Test (LA teacher-labeled)\" is the rest of LA under the same human labels. The split name is the pipeline's.\n")
 
 
 def section_cost(lines: list[str]) -> None:

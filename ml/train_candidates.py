@@ -62,7 +62,7 @@ def pick_accuracy(frame, scores, positives_only: bool = False) -> float | None:
     """Share of venues whose highest-scoring candidate is a correct room figure.
 
     positives_only keeps venues that have at least one correct number, so a page
-    with no teacher room does not count as a miss.
+    with no human-labeled room does not count as a miss.
     """
     if len(frame) == 0:
         return None
@@ -235,7 +235,7 @@ def main() -> int:
         shipped = {
             "model": "confidence",
             "version": report["version"],
-            "description": "P(a displayed candidate number is within 10% of a teacher room size). Serving caps this probability at 0.979, just below a planner confirmation of 0.98.",
+            "description": "P(a displayed candidate number is within 10% of a human-labeled room size). Serving caps this probability at 0.979, just below a planner confirmation of 0.98.",
             **exported,
         }
         write_json(model_dir() / "confidence-model.json", shipped)

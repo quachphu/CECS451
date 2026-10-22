@@ -3,7 +3,7 @@
     .venv/bin/python ml/estimate_prescreen.py
 
 No network. Google and the snapshot still run on every sampled venue, because
-that is how event content is known. Extraction and the teacher then run only
+that is how event content is known. Extraction and the support draft then run only
 on the readable pages that have a private-dining page, event wording, or an
 external event link.
 """

@@ -104,7 +104,7 @@ def main() -> int:
             test_check[str(h)] = {"brier_bucket": float(np.mean((q - obs) ** 2)), "brier_global": float(np.mean((qg - obs) ** 2))}
 
     note = (
-        "q uses every train venue the teacher marked hosts=yes. Venues with no published room stay in the denominator. A bucket with fewer than 25 venues uses the global curve."
+        "q uses every train venue the human labeled hosts=yes. Venues with no published room stay in the denominator. A bucket with fewer than 25 venues uses the global curve."
         if hosts_yes
         else "q is conditional on a published room size: venues that host events but publish no number are not counted."
     )

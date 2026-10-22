@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import vectors from "@/lib/discovery/__fixtures__/grounding-vectors.json";
 import { containsNumber, isGrounded, normalizeForGrounding } from "@/lib/discovery/grounding";
 
-// The same vectors run in ml/tests/test_grounding.py, so the teacher-label
+// The same vectors run in ml/tests/test_grounding.py, so the support-draft
 // validation (Python) and the app's grounding check (TypeScript) agree.
 describe("grounding vectors shared with Python", () => {
   it.each(vectors.normalize as Array<[string, string]>)("normalizes %j", (input, expected) => {

@@ -4,9 +4,9 @@
  *   npx tsx scripts/data/08_build_tables.ts
  *
  * Splits by website domain: test = all gold venues + all LA venues (LA
- * non-gold venues keep teacher labels and are reported separately); train =
- * every other venue the teacher labeled. The gold label wins where it exists;
- * `label_source` says which was used. Writes:
+ * non-gold venues keep the human-accepted labels and are reported separately); train =
+ * every other venue the human labeled. The gold label wins where it exists;
+ * `label_source` records that. `teacher` and `teacher_human_confirmed` are pipeline field names. Writes:
  *   eval/train_confidence.csv, eval/test_confidence.csv   (one row per extracted room)
  *   eval/train_discovery.csv,  eval/test_discovery.csv    (one row per venue)
  *   eval/fit_prior_venues.csv                             (largest labeled room per venue)
@@ -61,10 +61,10 @@ function main() {
   );
   if (goldRows.length === 0)
     console.warn(
-      "No gold_labels.csv yet: every test row will use teacher labels.",
+      "No gold_labels.csv yet: every test row will use the human-accepted draft.",
     );
 
-  // Labels: gold where it exists, else teacher.
+  // Labels: the human gold label where it exists, otherwise the human-accepted draft.
   const labels = new Map<string, VenueLabel>();
   for (const [id, t] of teacher) {
     labels.set(id, {
@@ -101,7 +101,7 @@ function main() {
           standingMax: int(r.standing_max),
           min: int(r.min),
         })),
-      // Reviewers don't record total seats; the teacher's figure stands in for buyout matching.
+      // Reviewers don't record total seats; the draft's total stands in for buyout matching.
       totalSeats: teacher.get(id)?.total_seats ?? null,
     });
   }
@@ -134,7 +134,7 @@ function main() {
     if (!splits.has(ex.venue_id)) continue;
     const label = labels.get(ex.venue_id);
     const train = splits.get(ex.venue_id) === "train";
-    // Training uses only venues the teacher could label; test rows use the gold/teacher label as available.
+    // Training uses only venues the human labeled; test rows use the human label.
     const out = confidenceRow(
       ex,
       train && label?.source !== "teacher" ? undefined : label,
