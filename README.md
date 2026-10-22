@@ -12,7 +12,7 @@ CECS 451 (Artificial Intelligence) course project. Built with Next.js 16, Supaba
 4. [Architecture and project structure](#4-architecture-and-project-structure)
 5. [AI algorithms](#5-ai-algorithms)
 6. [Getting started](#6-getting-started)
-7. [Limitations](#7-limitations)
+7. [Known limitations](#7-known-limitations)
 
 ## 1. Project description
 
@@ -22,15 +22,15 @@ CECS 451 (Artificial Intelligence) course project. Built with Next.js 16, Supaba
 
 ### Features
 
-| Feature               | Description                                                                                                                                                                                          |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Search                | Filter by office address, headcount, maximum commute, walk or drive, and room style. A plain-English request ("40 people, 10-minute walk, seated") can fill in the form.                             |
-| Venue discovery       | When an area has fewer than three recently checked venues, the app finds new candidates, reads their websites and extracts room capacities.                                                          |
-| Ranking               | Venues are ranked by expected utility, which combines commute, room fit and the probability that the room really fits. A room scored by the capacity model lists "About N% likely to fit your group". |
+| Feature               | Description                                                                                                                                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Search                | Filter by office address, headcount, maximum commute, walk or drive, and room style. A plain-English request ("40 people, 10-minute walk, seated") can fill in the form.                                            |
+| Venue discovery       | When an area has fewer than three recently checked venues, the app finds new candidates, reads their websites and extracts room capacities.                                                                         |
+| Ranking               | Venues are ranked by expected utility, which combines commute, room fit and the probability that the room really fits. A room scored by the capacity model lists "About N% likely to fit your group".               |
 | Trust labels          | A capacity the model scored shows Verified, “Likely, call to confirm”, or Unverified from its probability. A planner confirmation and a category estimate keep their own labels. Price figures use the trust names. |
-| Shortlist and compare | Save candidates, compare rooms, prices and commute times side by side, and choose one.                                                                                                               |
-| Event page            | A shared page where guests post allergies and dietary needs in real time. The app summarises them into a roster for the venue.                                                                       |
-| Shared catalog        | A planner who confirms a figure with the venue updates it for later searches. Confirmations that contradict strong evidence are held for review.                                                     |
+| Shortlist and compare | Save candidates, compare rooms, prices and commute times side by side, and choose one.                                                                                                                              |
+| Event page            | A shared page where guests post allergies and dietary needs in real time. The app summarises them into a roster for the venue.                                                                                      |
+| Shared catalog        | A planner who confirms a figure with the venue updates it for later searches. Confirmations that contradict strong evidence are held for review.                                                                    |
 
 The application supports research and coordination only. It does not make bookings or payments.
 
@@ -87,17 +87,17 @@ The planner uses the browser pages. Server Actions and the ranking engine run on
 
 ### Technology stack
 
-| Layer                 | Technology                                                                                                                    |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Framework             | Next.js 16 (App Router, Server Components, Server Actions), React 19, TypeScript                                              |
-| UI                    | Tailwind CSS 4, shadcn/ui, Leaflet (2D map), MapLibre GL (3D map)                                                             |
-| Database              | Supabase: Postgres 17, row-level security, Realtime                                                                           |
-| Language model        | xAI Grok (`XAI_MODEL`, default `grok-4.7`) over HTTPS, JSON-schema structured output                                          |
-| Venue data            | Google Places API (New), OpenStreetMap Overpass                                                                               |
-| Page rendering        | Firecrawl v2, used only for JavaScript-rendered pages                                                                         |
-| Routing and geocoding | OpenRouteService Matrix, Nominatim, Photon                                                                                    |
-| Testing               | Vitest                                                                                                                        |
-| Offline training      | Python, scikit-learn, DuckDB (Foursquare OS Places), Claude `claude-sonnet-5-5` as the labeling teacher (Message Batches API) |
+| Layer                 | Technology                                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Framework             | Next.js 16 (App Router, Server Components, Server Actions), React 19, TypeScript                                  |
+| UI                    | Tailwind CSS 4, shadcn/ui, Leaflet (2D map), MapLibre GL (3D map)                                                 |
+| Database              | Supabase: Postgres 17, row-level security, Realtime                                                               |
+| Language model        | xAI Grok (`XAI_MODEL`, default `grok-4.7`) over HTTPS, JSON-schema structured output                              |
+| Venue data            | Google Places API (New), OpenStreetMap Overpass                                                                   |
+| Page rendering        | Firecrawl v2, used only for JavaScript-rendered pages                                                             |
+| Routing and geocoding | OpenRouteService Matrix, Nominatim, Photon                                                                        |
+| Testing               | Vitest                                                                                                            |
+| Offline training      | Python, scikit-learn, DuckDB (Foursquare OS Places). Training and test labels are human labels by Thien Phu Quach |
 
 ### Project structure
 
@@ -105,7 +105,7 @@ The planner uses the browser pages. Server Actions and the ranking engine run on
 CECS451/
 ├── architecture/              Architecture diagram and screenshots
 ├── eval/                      Training data, review tool, data card, metrics and baselines
-├── ml/                        Python: teacher labeling helpers, model training, evaluation
+├── ml/                        Python: model training and evaluation
 ├── public/                    Static assets (curated venue photos)
 ├── scripts/
 │   ├── seed.ts                Load the curated venues, then look up their photos
@@ -133,13 +133,11 @@ CECS451/
 │       ├── corroboration.ts   Review rule for planner confirmations
 │       └── supabase/          Database clients and types
 ├── supabase/migrations/       Database schema, 0001 to 0011
-├── NOTES-ai-core.md           Design decisions, verification and references
-└── NOTES-training.md          Training pipeline: procedure, budgets, decisions, status
 ```
 
 ## 5. AI algorithms
 
-The system combines three Grok tasks with three logistic models trained offline (`ml/`, see [`NOTES-training.md`](NOTES-training.md)). Capacity confidence is loaded from `src/data/confidence-model.json`. Discovery order and the fit curve stay on the hand-set rules; those trained files were not loaded.
+The system combines three Grok tasks with three logistic models trained offline (`ml/`, steps in [`eval/README.md`](eval/README.md)). The room sizes and hosts labels used for that training were labeled by Thien Phu Quach. Capacity confidence is loaded from `src/data/confidence-model.json`. Discovery order and the fit curve stay on the hand-set rules; those trained files were not loaded.
 
 ### 5.1 Components
 
@@ -177,11 +175,11 @@ Answers that fail either condition are discarded. The approach follows the citat
 
 A room the confidence model scores shows a label from its probability. The cutoffs are fixed at 0.90 and 0.60.
 
-| Probability | Label shown |
-| --- | --- |
-| 0.90 and above | Verified |
+| Probability     | Label shown             |
+| --------------- | ----------------------- |
+| 0.90 and above  | Verified                |
 | 0.60 up to 0.90 | Likely, call to confirm |
-| Below 0.60 | Unverified |
+| Below 0.60      | Unverified              |
 
 A planner confirmation stays `confirmed_by_planner` (stored at 0.98, above every model score). A category estimate has no number on the page, so it stays an estimate and the card says "Capacity unpublished". The room note still records how the number was read: the two readers agreed within 20%, they disagreed, only the regex matched, or only the grounded model read produced a figure.
 
@@ -233,23 +231,25 @@ Venues with `pFit < 0.2` are excluded, as are rooms that are too small with conf
 
 The training pipeline (`scripts/data/`, `ml/`, described in [`eval/README.md`](eval/README.md)) reports, on held-out gold venues and separately on LA (a city never trained on):
 
-| Metric                                                           | Measures                                                                                                             |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Room precision, recall, F1 and invented-number rate              | Extraction quality: v0 regex maximum, regex candidates, one LLM read, and the shipped three-read grounded extraction |
-| Log loss, Brier score, ROC AUC, ECE (equal-width and equal-mass) | Confidence model against the v0 tier weights, an evidence lookup table and a constant                                |
-| AUC and yield@10/25                                              | Discovery prior against the v0 prior and random order                                                                |
-| Teacher–teacher agreement                                        | Label quality on the same prompt. Per-item human accuracy and Cohen's kappa are not reported                        |
-| NDCG@5, gain 2^rel − 1                                           | Ranking quality against human judgments (`scripts/eval-ranking.ts`)                                                  |
+| Metric                                                           | Measures                                                                                                                               |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Room precision, recall, F1 and invented-number rate              | Extraction quality: v0 regex maximum, regex candidates, one LLM read, and the shipped three-read grounded extraction                   |
+| Log loss, Brier score, ROC AUC, ECE (equal-width and equal-mass) | Confidence model against the v0 tier weights, an evidence lookup table and a constant                                                  |
+| AUC and yield@10/25                                              | Discovery prior against the v0 prior and random order                                                                                  |
+| Human labels                                                     | Room sizes and hosts labels for training and testing, labeled by Thien Phu Quach. Per-item accuracy and Cohen's kappa are not reported |
+| NDCG@5, gain 2^rel − 1                                           | Ranking quality against human judgments (`scripts/eval-ranking.ts`)                                                                    |
 
 Metric implementations are cross-checked against scikit-learn, and the TypeScript model scoring is checked against scikit-learn's `predict_proba` to 1e-6. `npm run data:dryrun` runs the whole pipeline offline on synthetic data.
 
 ## 6. Getting started
 
+These steps run the app on your machine. Python and the files in `ml/` are only for the offline training pipeline. Leave the optional API keys blank for the first run. The curated venues cover the three reference searches.
+
 ### Prerequisites
 
-- Node.js 20 or later
-- A Supabase project, or Docker to run Supabase locally
-- Optional API keys: Google Places, xAI, Firecrawl, OpenRouteService
+- Node.js 20.9 or later
+- Docker Desktop, running, for the local database
+- A network connection. The first database start downloads images, and `npm run seed` geocodes addresses
 
 ### Installation
 
@@ -258,34 +258,51 @@ git clone https://github.com/quachphu/CECS451.git
 cd CECS451
 npm install
 cp .env.example .env.local
+npx supabase start
 ```
+
+The first `npx supabase start` can take several minutes. It applies every file in `supabase/migrations/`. When it finishes, copy three values from that output into `.env.local`:
+
+| Line in the start output        | Variable in `.env.local`        |
+| ------------------------------- | ------------------------------- |
+| Project URL, or API URL         | `NEXT_PUBLIC_SUPABASE_URL`      |
+| Publishable key, or anon key    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
+| Secret key, or service_role key | `SUPABASE_SERVICE_ROLE_KEY`     |
+
+The local API URL is `http://127.0.0.1:54321`. Studio is at `http://127.0.0.1:54323`. Then load the curated venues and start the app:
+
+```bash
+npm run seed
+npm run dev
+```
+
+Open `http://localhost:3000`, choose **Create workspace**, and search one of the reference addresses below. `npm run seed` is safe to run again. `npx supabase stop` shuts the local database down. `npx supabase db reset` reapplies the migrations and then you run `npm run seed` again.
 
 ### Environment variables
 
-| Variable                        | Required | Behaviour when unset                                                  |
-| ------------------------------- | -------- | --------------------------------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Yes      |                                                                       |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      |                                                                       |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Yes      |                                                                       |
-| `GOOGLE_PLACES_API_KEY`         | No       | Discovery uses OpenStreetMap only; venues have no photos              |
+| Variable                        | Required | Behaviour when unset                                                                                      |
+| ------------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Yes      | The app will not start                                                                                    |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes      | The app will not start                                                                                    |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Yes      | The app will not start, and `npm run seed` exits with an error                                            |
+| `GOOGLE_PLACES_API_KEY`         | No       | Discovery uses OpenStreetMap only; venues have no photos                                                  |
 | `XAI_API_KEY`                   | No       | No LLM reader, query parsing, or dietary roster. A number still on the page is scored from the regex path |
-| `FIRECRAWL_API_KEY`             | No       | JavaScript-rendered pages are marked for a phone call                 |
-| `ORS_API_KEY`                   | No       | Commute times are straight-line estimates, labelled as such           |
+| `FIRECRAWL_API_KEY`             | No       | JavaScript-rendered pages are marked for a phone call                                                     |
+| `ORS_API_KEY`                   | No       | Commute times are straight-line estimates, labelled as such                                               |
 
-`.env.local` is excluded from version control.
+`.env.local` is excluded from version control. Copy `.env.example` rather than inventing names. A hosted Supabase project may show `sb_publishable_...` and `sb_secret_...` keys. Those go in the anon and service-role variables above.
 
-### Database
+### Hosted database
 
-Apply the migrations in `supabase/migrations/` and load the curated venues:
+Use this only if you already have a Supabase project. Put that project's URL and keys in `.env.local` (Project Settings, then API), then:
 
 ```bash
 npx supabase login
 npx supabase link --project-ref <project-ref>
 npx supabase db push
 npm run seed
+npm run dev
 ```
-
-To use a local Supabase instance instead, run `npx supabase start`, copy the printed URL and keys into `.env.local`, then run `npm run seed`. `npx supabase db reset` reapplies all migrations.
 
 ### Running
 
@@ -320,22 +337,23 @@ The scripts in `scripts/verify-*.ts` and `scripts/loadtest-density.ts` call the 
 
 ### Troubleshooting
 
-| Symptom                                                     | Resolution                                                                        |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| `Failed to write rooms … is 0011_ai_core.sql applied?`      | Run `npx supabase db push` to apply the missing migration                         |
-| Venue cards show "No photo found"                           | Set `GOOGLE_PLACES_API_KEY`, run `npm run photos:backfill` and restart the server |
-| Port 3000 is in use                                         | `npm run dev -- -p 3001`                                                          |
-| Plain-English search reports that the model did not respond | Check `XAI_API_KEY`; the standard search form works without it                    |
+| Symptom                                                      | Resolution                                                                                              |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `supabase start` cannot reach Docker                         | Start Docker Desktop and run `npx supabase start` again                                                 |
+| `Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY` | Copy the three values from `npx supabase start` into `.env.local`, then run `npm run seed` again        |
+| `Failed to write rooms … is 0011_ai_core.sql applied?`       | Run `npx supabase db reset` locally, or `npx supabase db push` on a hosted project, then `npm run seed` |
+| Venue cards show "No photo found"                            | Set `GOOGLE_PLACES_API_KEY`, run `npm run photos:backfill` and restart the server                       |
+| Port 3000 is in use                                          | `npm run dev -- -p 3001`                                                                                |
+| Plain-English search reports that the model did not respond  | Check `XAI_API_KEY`; the standard search form works without it                                          |
 
-## 7. Limitations
+## 7. Known limitations
 
-Ranking uses the capacity printed on the venue's own site, the trust label on that figure, and the commute. The boundaries below are the ones the product is built to keep.
-
-- **Evidence has to be on the page.** A capacity is kept when its supporting sentence appears in the saved text and contains the number. A paraphrase of that sentence is left for the planner to confirm. Every figure that reaches the ranking is one the venue published.
-- **The first search in a new area does the reading.** With fewer than three venues checked in the last 30 days, the app fetches pages before it ranks. Searches after that use the cache. In simulation that first pass is about 15 seconds, and a cached search is about 6 seconds.
-- **Some sites are left for a phone call.** When a site blocks automated reading, or the only capacity is in a PDF or an image, the venue is marked for the planner to confirm.
-- **A team shares one workspace.** Access is a team code. That code opens the shared catalog and the event page for the people planning together.
-- **Estimates on the map and the compare page.** The result card labels an unpublished capacity as an estimate. The map marker and the compare view still present that case less clearly, and a printed range can show its two ends swapped. Both views read the same saved capacity.
+- **Small training base.** The 58 correct numbers used for training come from only 15 venues. Los Angeles calibration error is higher (0.085).
+- **Not every venue appears.** Each search reads a limited number of websites to keep it fast and affordable.
+- **USA only.** We built and tested the app only in four U.S. cities: New York, San Francisco, Honolulu, and Los Angeles. Other countries will not work.
+- **Some sites are left for a phone call.** When a site blocks automated reading,
+  or the only capacity is in a PDF or an image, the venue is marked for the planner
+  to confirm.
 
 ## References
 
@@ -347,5 +365,3 @@ Ranking uses the capacity printed on the venue's own site, the trust label on th
 - Järvelin and Kekäläinen, _Cumulated Gain-Based Evaluation of IR Techniques_, ACM TOIS 2002
 - Cohen, _A Coefficient of Agreement for Nominal Scales_, 1960
 - RFC 9309, _Robots Exclusion Protocol_
-
-The full reference list and design notes are in [`NOTES-ai-core.md`](NOTES-ai-core.md).

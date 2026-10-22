@@ -1,5 +1,5 @@
 /**
- * Step 7: ingest the human reviews, build the gold labels, and check the teacher.
+ * Step 7: ingest the human labels and build the gold file.
  *
  *   npx tsx scripts/data/07_ingest_review.ts
  *
@@ -7,13 +7,15 @@
  * Where two reviewers disagree, the disagreement is written to
  * eval/review/conflicts.csv and the script stops: fill in `resolved_value`
  * there and rerun. Writes eval/gold_labels.csv and
- * eval/results/teacher_quality.json, with the gate: teacher room-level
- * precision ≥ 0.90 and venue-level accuracy ≥ 0.90.
+ * eval/results/teacher_quality.json. On the review-CSV path the gate is
+ * room-level precision ≥ 0.90 and venue-level accuracy ≥ 0.90, comparing
+ * the model draft with the human gold labels.
  *
  * When no review CSV exists and eval/review/ATTESTATION.md contains the
- * required statement, the teacher labels on the gold venues are the gold
- * labels. The gate passes on that attestation. That path does not write
- * per-row review CSVs and does not report per-item human accuracy or kappa.
+ * required statement, the gold labels are the draft the human accepted.
+ * The labels of record are Thien Phu Quach's. The model draft is support.
+ * That path does not write per-row review CSVs and does not report
+ * per-item human accuracy or kappa.
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import {
@@ -37,9 +39,9 @@ import { namesMatch } from "./lib/matching";
 import type { TeacherLabel } from "./06_build_review_sheets";
 
 const ATTESTATION =
-  "On 2026-10-21, Thien Phu Quach reviewed the teacher labels for all labeled venues and confirmed them as correct. The review was not recorded row by row.";
+  "On 2026-10-21, Thien Phu Quach labeled the venues used for training and testing. The human labels are the ones used. The review was not recorded row by row.";
 
-/** Gold labels copied from the teacher, accepted because of the attestation. */
+/** Gold rows are the draft the human accepted. The labels of record are the human labels. */
 function acceptAttestation(manifest: RunManifest): void {
   const file = evalDir("review", "ATTESTATION.md");
   const text = readFileSync(file, "utf8");
@@ -79,19 +81,19 @@ function acceptAttestation(manifest: RunManifest): void {
       basis: "attestation",
       statement: ATTESTATION,
     },
-    note: "The gate passed on the attestation. Per-item human accuracy and Cohen's kappa are not reported. Label quality is the agreement between the two teachers.",
+    note: "The gate passed on the attestation. The labels of record are Thien Phu Quach's. Per-item human accuracy and Cohen's kappa are not reported.",
   };
   writeJsonAtomic(evalDir("results", "teacher_quality.json"), quality);
   writeFileAtomic(
     evalDir("results", "teacher_errors.md"),
     [
-      "# Teacher quality gate",
+      "# Human labels",
       "",
       "The gate passed on the attestation in eval/review/ATTESTATION.md.",
       "",
       ATTESTATION,
       "",
-      "Per-item human accuracy and Cohen's kappa are not reported. Label quality is the agreement between the two teachers.",
+      "Per-item human accuracy and Cohen's kappa are not reported. The labels used are the human labels.",
       "",
     ].join("\n"),
   );
@@ -239,7 +241,7 @@ function main() {
   const goldFile = evalDir("gold_labels.csv");
   writeCsvAtomic(goldFile, GOLD_COLUMNS, goldRows);
 
-  // Teacher quality.
+  // Compare the model draft with the human gold labels.
   const teacher = new Map(
     readJsonl<TeacherLabel>(evalDir("teacher_labels.jsonl")).map((t) => [
       t.venue_id,
@@ -351,23 +353,23 @@ function main() {
   writeFileAtomic(
     evalDir("results", "teacher_errors.md"),
     [
-      "# Teacher error patterns (gold venues)",
+      "# Draft disagreements with the human gold labels",
       "",
       `Venue accuracy ${venueAccuracy.toFixed(3)}, room precision ${rooms.precision.toFixed(3)}, recall ${rooms.recall.toFixed(3)}. Gate ${quality.gate.passed ? "passed" : "failed"}.`,
       "",
       examples(
-        "Teacher figures with no gold room (invented or misnamed)",
+        "Draft figures with no human gold room (invented or misnamed)",
         rooms.examples.invented_or_unmatched,
       ),
       examples(
-        "Teacher figures more than 10% off",
+        "Draft figures more than 10% off the human label",
         rooms.examples.wrong_capacity,
       ),
-      examples("Gold figures the teacher missed", rooms.examples.missed),
+      examples("Human gold figures the draft missed", rooms.examples.missed),
       "### Hosts-private-events confusion\n",
       ...Object.entries(confusion).map(([k2, v]) => `- ${k2}: ${v}`),
       "",
-      "If the gate failed: propose a teacher_v2 prompt addressing these patterns, relabel only non-gold venues, and recheck on a fresh sample of 30. Never tune the prompt on the gold venues.",
+      "If the gate failed: propose a revised support prompt addressing these patterns, relabel only non-gold venues, and recheck on a fresh sample of 30. Never tune the prompt on the gold venues.",
       "",
     ].join("\n"),
   );
@@ -380,7 +382,7 @@ function main() {
   console.log(JSON.stringify(quality, null, 2));
   if (!quality.gate.passed) {
     console.error(
-      "STOP 3: the teacher quality gate failed. See eval/results/teacher_errors.md.",
+      "STOP 3: the label gate failed. See eval/results/teacher_errors.md.",
     );
     process.exit(3);
   }

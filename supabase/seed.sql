@@ -1,0 +1,2 @@
+-- Venue rows are loaded by `npm run seed` after the database is up.
+-- This file exists so `npx supabase start` can finish its seed step.

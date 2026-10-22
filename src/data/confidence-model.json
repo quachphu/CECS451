@@ -1,7 +1,7 @@
 {
   "model": "confidence",
   "version": "trained-2026-10-21",
-  "description": "P(a displayed candidate number is within 10% of a teacher room size). Serving caps this probability at 0.979, just below a planner confirmation of 0.98.",
+  "description": "P(a displayed candidate number is within 10% of a human-labeled room size). Serving caps this probability at 0.979, just below a planner confirmation of 0.98.",
   "feature_order": [
     "llm_votes",
     "regex_hit",

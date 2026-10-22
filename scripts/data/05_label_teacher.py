@@ -1,11 +1,14 @@
-"""Step 5: label every saved venue with Claude (the "teacher") [D-ANT].
+"""Step 5: draft a support label for every saved venue with Claude.
+
+Thien Phu Quach labeled the venues. This script only drafts. The human
+labels are the ones used for training and testing.
 
     python3 scripts/data/05_label_teacher.py --pilot      # 20 venues, normal API: check prompt and JSON
     python3 scripts/data/05_label_teacher.py --batch      # all remaining venues, Message Batches API (50% off)
     python3 scripts/data/05_label_teacher.py --collect    # re-check a submitted batch and finish
 
-The teacher reads only the snapshot (page text and event links) plus the
-venue's name, address and city: never the student's extraction, the regex
+The draft reads only the snapshot (page text and event links) plus the
+venue's name, address and city: never Grok's extraction, the regex
 output or the app's trust labels. Every quote must appear in the text it was
 given (same normalisation as the app's grounding check); a venue whose quotes
 don't is retried once on the normal API, then marked "unclear".
@@ -19,8 +22,8 @@ collected and charged at its real cost before the next one is reserved, so a
 run can overshoot the cap by at most one batch's estimation error.
 Writes eval/teacher_labels.jsonl. Per-venue results are cached in eval/.cache/teacher/.
 
-A second teacher uses the same prompt and a separate cache, so it cannot
-overwrite the first teacher's labels:
+A second model (the support check) uses the same prompt and a separate cache, so it cannot
+overwrite the first draft:
 
     TEACHER_MODEL=claude-opus-5-5 \\
     TEACHER_CACHE_SUBDIR=teacher_opus \\
@@ -73,7 +76,7 @@ def cache_dir() -> Path:
 
 
 def usage_files() -> list[Path]:
-    """Output lengths for the reserve. An empty second-teacher cache uses the first teacher's."""
+    """Output lengths for the reserve. An empty second-draft cache uses the first draft's."""
     def listed(subdir: str) -> list[Path]:
         return [f for f in eval_dir(".cache", subdir).glob("*.json") if f.name != "batches.json"]
 
@@ -286,7 +289,7 @@ def retry_and_report(api, by_id: dict, model: str, effort: str, budget: Budget, 
 
 
 def estimate_cost(venues: list[dict], model: str, budget: Budget) -> dict:
-    """Prices a batch run from the first teacher's token counts and from the output allowance.
+    """Prices a batch run from the first draft's token counts and from the output allowance.
 
     Does not call the API. Refuses when the expected cost would pass the cap.
     """

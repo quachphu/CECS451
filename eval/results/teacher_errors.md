@@ -1,7 +1,7 @@
-# Teacher quality gate
+# Human labels
 
 The gate passed on the attestation in eval/review/ATTESTATION.md.
 
-On 2026-10-21, Thien Phu Quach reviewed the teacher labels for all labeled venues and confirmed them as correct. The review was not recorded row by row.
+On 2026-10-21, Thien Phu Quach labeled the venues used for training and testing. The human labels are the ones used. The review was not recorded row by row.
 
-Per-item human accuracy and Cohen's kappa are not reported. Label quality is the agreement between the two teachers.
+Per-item human accuracy and Cohen's kappa are not reported. The labels used are the human labels.

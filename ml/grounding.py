@@ -1,6 +1,6 @@
 """Python port of src/lib/discovery/grounding.ts.
 
-Teacher quotes are validated with exactly the normalisation the app uses for
+Draft quotes are validated with exactly the normalisation the app uses for
 the student's evidence quotes. ml/tests/test_grounding.py runs the shared
 vectors in src/lib/discovery/__fixtures__/grounding-vectors.json, which the
 TypeScript tests run too.

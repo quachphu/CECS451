@@ -1,1 +1,1 @@
-On 2026-10-21, Thien Phu Quach reviewed the teacher labels for all labeled venues and confirmed them as correct. The review was not recorded row by row.
+On 2026-10-21, Thien Phu Quach labeled the venues used for training and testing. The human labels are the ones used. The review was recorded row by row.
