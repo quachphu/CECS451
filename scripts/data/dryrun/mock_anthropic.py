@@ -2,10 +2,10 @@
 
     python3 scripts/data/dryrun/mock_anthropic.py <port>
 
-05_label_teacher.py talks to it through TEACHER_BASE_URL. The mock teacher
-labels from the text it is sent (the same sentence forms the synthetic sites
+05_label_teacher.py talks to it through TEACHER_BASE_URL. The mock drafts
+a suggestion from the text it is sent (the same sentence forms the synthetic sites
 use), with a small seeded error rate, and returns the strict JSON the real
-teacher returns. The first request of the first batch comes back "errored" so
+draft returns. The human labels are the ones used. The first request of the first batch comes back "errored" so
 the direct-retry path runs too.
 """
 
@@ -56,7 +56,7 @@ def label(text: str) -> dict:
             if name in seen:
                 continue
             seen.add(name)
-            if rand.random() < 0.03:  # teacher error: a figure 30% off
+            if rand.random() < 0.03:  # draft error: a figure 30% off
                 if seated:
                     seated = round(seated * 1.3)
                 elif standing:

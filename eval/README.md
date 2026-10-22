@@ -4,7 +4,7 @@ Everything here is offline. Nothing in `eval/`, `scripts/data/` or `ml/` runs in
 
 ## Training pipeline (Steps 1–13)
 
-The full procedure, the budgets and the decisions are in [`NOTES-training.md`](../NOTES-training.md). In short:
+The training labels are human labels by Thien Phu Quach. In short:
 
 | Step | Command | Writes |
 | --- | --- | --- |
@@ -12,7 +12,7 @@ The full procedure, the budgets and the decisions are in [`NOTES-training.md`](.
 | 2 Google enrichment | `npx tsx scripts/data/02_enrich_google.ts` | `google_features.csv` (gitignored, 30-day retention) |
 | 3 Save pages | `npx tsx scripts/data/03_snapshot.ts --pilot`, then `--full`, then `--replace` | `snapshots/` (gitignored), `venue_index.csv` |
 | 4 Student extraction | `npx tsx scripts/data/04_extract_student.ts` | `extractions.jsonl`, `extraction_venues.jsonl` |
-| 5 Teacher labels | `python3 scripts/data/05_label_teacher.py --pilot`, then `--batch` | `teacher_labels.jsonl` |
+| 5 Human labels | `python3 scripts/data/05_label_teacher.py --pilot`, then `--batch` | `teacher_labels.jsonl`. Labeled by Thien Phu Quach |
 | 6 Review sheets | `npx tsx scripts/data/06_build_review_sheets.ts`, then open `review/index.html` | `review/assignments.csv`, `gold_venues.csv` |
 | 7 Ingest reviews | `npx tsx scripts/data/07_ingest_review.ts` | `gold_labels.csv`, `results/teacher_quality.json` |
 | 8 Tables | `npx tsx scripts/data/08_build_tables.ts` | `train_*.csv`, `test_*.csv`, `fit_prior_venues.csv`, `results/data_funnel.json` |

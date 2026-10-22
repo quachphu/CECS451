@@ -4,11 +4,11 @@
  *
  *   npx tsx scripts/data/06_build_review_sheets.ts
  *
- * Gold set: 120 teacher-"labeled" venues stratified by city × bucket, plus 10
- * teacher-"unclear" venues (to check that "unclear" was justified), seed 451.
+ * Gold set: 120 venues the draft marked "labeled", stratified by city × bucket, plus 10
+ * the draft marked "unclear", seed 451. Thien Phu Quach is the labeler.
  * Four reviewers; 24 venues go to two reviewers (6 per rotating pair) to
- * measure agreement. Sheets carry the saved page text and the teacher's label
- * only — never the student's output — and are gitignored (page text).
+ * measure agreement. Sheets carry the saved page text and the model draft
+ * as support only — never Grok's output — and are gitignored (page text).
  */
 import { existsSync } from "node:fs";
 import {

@@ -1,7 +1,7 @@
 /**
- * Review ingest and teacher quality (Step 7): reviewer CSVs → per-venue
+ * Review ingest (Step 7): human review CSVs → per-venue
  * reviews → gold labels, conflicts between double reviewers, and the
- * teacher-quality numbers behind the gate.
+ * comparison of the model draft against those human labels.
  */
 import { cohenKappa } from "../../../eval/metrics";
 import {
@@ -23,7 +23,7 @@ export type VenueReview = {
   unclearReason: string;
   hosts: Hosts;
   rooms: LabelRoom[];
-  /** Teacher rooms the reviewer judged correct / fixed, for the report. */
+  /** Draft rooms the human labeler judged correct or fixed, for the report. */
   decisions: Array<{ roomName: string; decision: string; exists: boolean }>;
   minutes: number;
   done: boolean;

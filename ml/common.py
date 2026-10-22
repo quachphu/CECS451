@@ -507,7 +507,7 @@ def assert_no_leakage(train, test, gold: set[str]) -> None:
 
 
 def test_subsets(test) -> dict:
-    """The named test sets: all gold, LA gold, and LA teacher-labeled."""
+    """The named test sets: all gold, LA gold, and the rest of LA. The split id is test_la_teacher; the labels are the human labels."""
     return {
         "test_gold": test[test["split"] == "test_gold"],
         "test_la_gold": test[(test["split"] == "test_gold") & (test["city"] == "LA")],

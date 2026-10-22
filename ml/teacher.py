@@ -1,6 +1,7 @@
-"""Teacher labeling helpers (Step 5): input, schema, validation and cost.
+"""Support-draft helpers (Step 5): input, schema, validation and cost.
 
-The teacher must never see the student's output. `build_teacher_input` reads
+Claude drafts a suggestion. Thien Phu Quach's labels are the ones used.
+The draft must never see Grok's output. `build_teacher_input` reads
 only the venue's name/address/city and the snapshot's pages and event links;
 it rejects any other source by construction (see test_teacher.py).
 """
@@ -16,7 +17,7 @@ PROMPT_DIR = Path(__file__).resolve().parent / "prompts"
 MAX_INPUT_CHARS = 60_000
 PAGE_ORDER = {"private_dining": 0, "other": 1, "pdf": 2, "homepage": 3}
 
-# Snapshot fields the teacher may read; everything else in a snapshot is ignored.
+# Snapshot fields the draft may read; everything else in a snapshot is ignored.
 SNAPSHOT_FIELDS_USED = ("pages", "external_event_links", "website")
 
 TEACHER_SCHEMA = {
@@ -122,7 +123,7 @@ def request_params(model: str, version: str, teacher_input: str, effort: str, ma
 
 
 def unsupported_quotes(label: dict, teacher_input: str) -> list[str]:
-    """Room quotes not found in the text the teacher was given (same normalisation as grounding)."""
+    """Room quotes not found in the text the draft was given (same normalisation as grounding)."""
     return [r.get("room_name", "") for r in label.get("rooms", []) if not quote_found(r.get("quote"), teacher_input)]
 
 

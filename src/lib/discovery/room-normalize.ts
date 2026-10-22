@@ -1,5 +1,5 @@
 /**
- * Normalization rules shared by the student extraction, teacher-label
+ * Normalization rules shared by the page reader, the support-draft labels,
  * validation, review ingest and the train/test tables, so a room is named and
  * sized the same way wherever it is compared.
  *
